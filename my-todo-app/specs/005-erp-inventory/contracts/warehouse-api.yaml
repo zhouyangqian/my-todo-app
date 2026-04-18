@@ -1,0 +1,703 @@
+openapi: 3.0.3
+info:
+  title: 仓库管理 API
+  description: 仓库、库存、调拨、盘点管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: ERP 服务
+
+tags:
+  - name: warehouse
+    description: 仓库管理
+  - name: inventory
+    description: 库存查询
+  - name: stock-transfer
+    description: 库存调拨
+  - name: stock-check
+    description: 库存盘点
+
+paths:
+  /warehouses:
+    get:
+      tags: [warehouse]
+      summary: 查询仓库列表
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Warehouse'
+
+    post:
+      tags: [warehouse]
+      summary: 创建仓库
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code:
+                  type: string
+                  example: "WH001"
+                name:
+                  type: string
+                  example: "主仓库"
+                address:
+                  type: string
+                contact:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: 创建成功
+
+  /warehouses/{id}:
+    get:
+      tags: [warehouse]
+      summary: 查询仓库详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /inventory:
+    get:
+      tags: [inventory]
+      summary: 查询库存
+      description: 查询商品库存信息，支持按商品、仓库、批次筛选
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: query
+          schema:
+            type: integer
+        - name: warehouseId
+          in: query
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: 商品名称/编码模糊搜索
+          schema:
+            type: string
+        - name: lowStockOnly
+          in: query
+          description: 只查询低库存商品
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Inventory'
+                      total:
+                        type: integer
+
+  /inventory/{productId}/warehouses:
+    get:
+      tags: [inventory]
+      summary: 查询商品在各仓库的库存
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        warehouseId:
+                          type: integer
+                        warehouseName:
+                          type: string
+                        quantity:
+                          type: integer
+                        lockedQuantity:
+                          type: integer
+                        availableQuantity:
+                          type: integer
+
+  /inventory/batches:
+    get:
+      tags: [inventory]
+      summary: 查询商品批次库存
+      description: 查询商品批次信息，按生产日期排序（FIFO）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: warehouseId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InventoryBatch'
+
+  /inventory/transactions:
+    get:
+      tags: [inventory]
+      summary: 查询库存流水
+      description: 查询库存变动记录
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: query
+          schema:
+            type: integer
+        - name: warehouseId
+          in: query
+          schema:
+            type: integer
+        - name: transactionType
+          in: query
+          schema:
+            type: string
+            enum: [PURCHASE_IN, SALES_OUT, TRANSFER_IN, TRANSFER_OUT, CHECK_GAIN, CHECK_LOSS]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/InventoryTransaction'
+                      total:
+                        type: integer
+
+  /inventory/alerts:
+    get:
+      tags: [inventory]
+      summary: 查询库存预警
+      description: 查询低库存、积压、即将过期的商品
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: alertType
+          in: query
+          schema:
+            type: string
+            enum: [LOW_STOCK, OVER_STOCK, EXPIRING]
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: integer
+                        productName:
+                          type: string
+                        warehouseId:
+                          type: integer
+                        warehouseName:
+                          type: string
+                        currentQuantity:
+                          type: integer
+                        minStock:
+                          type: integer
+                        maxStock:
+                          type: integer
+                        alertType:
+                          type: string
+
+  /stock-transfers:
+    get:
+      tags: [stock-transfer]
+      summary: 查询库存调拨单列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, IN_TRANSIT, COMPLETED, CANCELLED]
+        - name: transferDateStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [stock-transfer]
+      summary: 创建库存调拨单
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockTransferCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+
+  /stock-transfers/{id}:
+    get:
+      tags: [stock-transfer]
+      summary: 查询调拨单详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /stock-transfers/{id}/confirm:
+    post:
+      tags: [stock-transfer]
+      summary: 确认调拨（收货仓库确认收货）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirmItems:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      itemId:
+                        type: integer
+                      actualQuantity:
+                        type: integer
+      responses:
+        '200':
+          description: 确认成功
+
+  /stock-checks:
+    get:
+      tags: [stock-check]
+      summary: 查询库存盘点单列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: warehouseId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, CONFIRMED, CANCELLED]
+        - name: checkDateStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [stock-check]
+      summary: 创建库存盘点单
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockCheckCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+
+  /stock-checks/{id}:
+    get:
+      tags: [stock-check]
+      summary: 查询盘点单详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /stock-checks/{id}/execute:
+    post:
+      tags: [stock-check]
+      summary: 执行盘点
+      description: 开始盘点任务，生成盘点明细
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 执行成功
+
+  /stock-checks/{id}/confirm:
+    post:
+      tags: [stock-check]
+      summary: 确认盘点结果
+      description: 确认盘点，根据差异调整库存
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                checkReason:
+                  type: string
+                  description: 盘点原因说明
+      responses:
+        '200':
+          description: 确认成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      gainCount:
+                        type: integer
+                        description: 盘盈商品数
+                      lossCount:
+                        type: integer
+                        description: 盘亏商品数
+                      totalGainAmount:
+                        type: number
+                        format: decimal
+                      totalLossAmount:
+                        type: number
+                        format: decimal
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+        phone:
+          type: string
+        status:
+          type: integer
+          enum: [0, 1]
+
+    Inventory:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        productCode:
+          type: string
+        warehouseId:
+          type: integer
+        warehouseName:
+          type: string
+        quantity:
+          type: integer
+          description: 当前库存
+        lockedQuantity:
+          type: integer
+          description: 锁定库存
+        availableQuantity:
+          type: integer
+          description: 可用库存
+        unitCost:
+          type: number
+          format: decimal
+
+    InventoryBatch:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        warehouseId:
+          type: integer
+        batchNo:
+          type: string
+        productionDate:
+          type: string
+          format: date
+        expiryDate:
+          type: string
+          format: date
+        quantity:
+          type: integer
+        daysUntilExpiry:
+          type: integer
+          description: 距离过期天数
+        isExpiring:
+          type: boolean
+          description: 是否即将过期
+
+    InventoryTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        warehouseId:
+          type: integer
+        warehouseName:
+          type: string
+        batchNo:
+          type: string
+        transactionType:
+          type: string
+          description: PURCHASE_IN/SALES_OUT/TRANSFER_IN/TRANSFER_OUT/CHECK_GAIN/CHECK_LOSS
+        transactionTypeName:
+          type: string
+          description: 流水类型名称
+        quantity:
+          type: integer
+          description: 变动数量（正数为增加，负数为减少）
+        beforeQuantity:
+          type: integer
+          description: 变动前数量
+        afterQuantity:
+          type: integer
+          description: 变动后数量
+        documentType:
+          type: string
+          description: 关联单据类型
+        documentId:
+          type: integer
+          description: 关联单据ID
+        documentNo:
+          type: string
+          description: 关联单据编号
+        remark:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          description: 操作人
+
+    StockTransferCreateRequest:
+      type: object
+      required: [fromWarehouseId, toWarehouseId, transferDate, items]
+      properties:
+        fromWarehouseId:
+          type: integer
+          description: 调出仓库ID
+        toWarehouseId:
+          type: integer
+          description: 调入仓库ID
+        transferDate:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            type: object
+            required: [productId, quantity]
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+              remark:
+                type: string
+        remark:
+          type: string
+
+    StockCheckCreateRequest:
+      type: object
+      required: [warehouseId, checkDate]
+      properties:
+        warehouseId:
+          type: integer
+        checkDate:
+          type: string
+          format: date
+        productIds:
+          type: array
+          description: 指定盘点的商品ID，为空则盘点全部
+          items:
+            type: integer
+        remark:
+          type: string

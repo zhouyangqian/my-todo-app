@@ -1,0 +1,434 @@
+openapi: 3.0.3
+info:
+  title: Tenant Management API
+  description: |
+    租户管理 API，提供租户生命周期管理、资源配额、使用监控等功能。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/tenant
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: tenants
+    description: 租户管理
+  - name: quotas
+    description: 资源配额
+  - name: usage
+    description: 资源使用
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantCode:
+          type: string
+        tenantName:
+          type: string
+        contactName:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        tenantStatus:
+          type: string
+          enum: [PENDING, ACTIVE, SUSPENDED, ARREARS, CLOSED]
+        industry:
+          type: string
+        companySize:
+          type: string
+        registrationDate:
+          type: string
+          format: date-time
+        approvalDate:
+          type: string
+          format: date-time
+        approverId:
+          type: string
+        rejectReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TenantCreateRequest:
+      type: object
+      required:
+        - tenantCode
+        - tenantName
+        - contactName
+        - contactEmail
+      properties:
+        tenantCode:
+          type: string
+        tenantName:
+          type: string
+        contactName:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        industry:
+          type: string
+        companySize:
+          type: string
+
+    TenantApprovalRequest:
+      type: object
+      required:
+        - approved
+      properties:
+        approved:
+          type: boolean
+        rejectReason:
+          type: string
+
+    TenantQuota:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenantId:
+          type: string
+        maxUsers:
+          type: integer
+        maxStorageGb:
+          type: integer
+        maxApiCallsPerDay:
+          type: integer
+        maxConcurrentRequests:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TenantQuotaUpdateRequest:
+      type: object
+      properties:
+        maxUsers:
+          type: integer
+        maxStorageGb:
+          type: integer
+        maxApiCallsPerDay:
+          type: integer
+        maxConcurrentRequests:
+          type: integer
+
+    TenantResourceUsage:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenantId:
+          type: string
+        recordDate:
+          type: string
+          format: date
+        userCount:
+          type: integer
+        storageUsedGb:
+          type: number
+          format: decimal
+        apiCallsCount:
+          type: integer
+        concurrentRequestsAvg:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /tenants:
+    get:
+      tags:
+        - tenants
+      summary: 获取租户列表
+      operationId: listTenants
+      parameters:
+        - name: tenantCode
+          in: query
+          schema:
+            type: string
+        - name: tenantName
+          in: query
+          schema:
+            type: string
+        - name: tenantStatus
+          in: query
+          schema:
+            type: string
+        - name: industry
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回租户列表
+
+    post:
+      tags:
+        - tenants
+      summary: 创建租户
+      operationId: createTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /tenants/pending:
+    get:
+      tags:
+        - tenants
+      summary: 获取待审核租户列表
+      operationId: listPendingTenants
+      responses:
+        '200':
+          description: 成功返回待审核租户列表
+
+  /tenants/{id}:
+    get:
+      tags:
+        - tenants
+      summary: 获取租户详情
+      operationId: getTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回租户详情
+
+    put:
+      tags:
+        - tenants
+      summary: 更新租户信息
+      operationId: updateTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - tenants
+      summary: 删除租户
+      operationId: deleteTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 删除成功
+
+  /tenants/{id}/approve:
+    post:
+      tags:
+        - tenants
+      summary: 审核租户
+      operationId: approveTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantApprovalRequest'
+      responses:
+        '200':
+          description: 审核完成
+
+  /tenants/{id}/status:
+    put:
+      tags:
+        - tenants
+      summary: 更新租户状态
+      operationId: updateTenantStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tenantStatus
+              properties:
+                tenantStatus:
+                  type: string
+                  enum: [ACTIVE, SUSPENDED, ARREARS, CLOSED]
+      responses:
+        '200':
+          description: 状态更新成功
+
+  /tenants/{id}/quota:
+    get:
+      tags:
+        - quotas
+      summary: 获取租户资源配额
+      operationId: getTenantQuota
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回资源配额
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantQuota'
+
+    put:
+      tags:
+        - quotas
+      summary: 更新租户资源配额
+      operationId: updateTenantQuota
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantQuotaUpdateRequest'
+      responses:
+        '200':
+          description: 配额更新成功
+
+  /tenants/{id}/usage:
+    get:
+      tags:
+        - usage
+      summary: 获取租户资源使用记录
+      operationId: getTenantUsage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 成功返回使用记录
+
+  /tenants/{id}/usage/summary:
+    get:
+      tags:
+        - usage
+      summary: 获取租户资源使用汇总
+      operationId: getTenantUsageSummary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 成功返回使用汇总
+
+  /tenants/{id}/usage/realtime:
+    get:
+      tags:
+        - usage
+      summary: 获取租户实时资源使用情况
+      operationId: getTenantRealtimeUsage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回实时使用情况
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userCount:
+                    type: integer
+                  storageUsedGb:
+                    type: number
+                    format: decimal
+                  apiCallsToday:
+                    type: integer
+                  concurrentRequests:
+                    type: integer

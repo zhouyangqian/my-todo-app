@@ -1,0 +1,849 @@
+openapi: 3.0.3
+info:
+  title: 商品与价格管理 API
+  description: 商品分类、商品档案、价格体系、促销管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: ERP 服务
+
+tags:
+  - name: category
+    description: 商品分类
+  - name: product
+    description: 商品管理
+  - name: product-price
+    description: 商品价格
+  - name: product-promotion
+    description: 商品促销
+
+paths:
+  /categories:
+    get:
+      tags: [category]
+      summary: 查询商品分类树
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: includeDisabled
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CategoryTreeNode'
+
+    post:
+      tags: [category]
+      summary: 创建商品分类
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                parentId:
+                  type: integer
+                  description: 上级分类ID，为空则为顶级分类
+                name:
+                  type: string
+                  example: "食品"
+                sortOrder:
+                  type: integer
+                  default: 0
+      responses:
+        '200':
+          description: 创建成功
+
+  /categories/{id}:
+    get:
+      tags: [category]
+      summary: 查询分类详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    put:
+      tags: [category]
+      summary: 更新商品分类
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                parentId:
+                  type: integer
+                sortOrder:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [category]
+      summary: 删除商品分类
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /products:
+    get:
+      tags: [product]
+      summary: 查询商品列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: keyword
+          in: query
+          description: 商品名称/编码模糊搜索
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+                      total:
+                        type: integer
+
+    post:
+      tags: [product]
+      summary: 创建商品
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name, unit]
+              properties:
+                code:
+                  type: string
+                  example: "PROD001"
+                name:
+                  type: string
+                  example: "苹果"
+                categoryId:
+                  type: integer
+                specification:
+                  type: string
+                  example: "红富士 5kg/箱"
+                unit:
+                  type: string
+                  example: "箱"
+                referencePrice:
+                  type: number
+                  format: decimal
+                status:
+                  type: integer
+                  default: 1
+      responses:
+        '200':
+          description: 创建成功
+
+  /products/{id}:
+    get:
+      tags: [product]
+      summary: 查询商品详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    $ref: '#/components/schemas/ProductDetail'
+
+    put:
+      tags: [product]
+      summary: 更新商品
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                categoryId:
+                  type: integer
+                specification:
+                  type: string
+                unit:
+                  type: string
+                referencePrice:
+                  type: number
+                  format: decimal
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [product]
+      summary: 删除商品
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /products/{id}/prices:
+    get:
+      tags: [product-price]
+      summary: 查询商品价格列表
+      description: 查询商品的所有价格记录，包括价格历史
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: priceType
+          in: query
+          schema:
+            type: string
+            enum: [PURCHASE, WHOLESALE, RETAIL]
+        - name: includeHistory
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      current:
+                        type: object
+                        properties:
+                          purchasePrice:
+                            type: number
+                            format: decimal
+                          wholesalePrice:
+                            type: number
+                            format: decimal
+                          retailPrice:
+                            type: number
+                            format: decimal
+                      history:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ProductPrice'
+
+    post:
+      tags: [product-price]
+      summary: 设置商品价格
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prices]
+              properties:
+                prices:
+                  type: array
+                  items:
+                    type: object
+                    required: [priceType, price]
+                    properties:
+                      productId:
+                        type: integer
+                      priceType:
+                        type: string
+                        enum: [PURCHASE, WHOLESALE, RETAIL]
+                      price:
+                        type: number
+                        format: decimal
+                      effectiveDate:
+                        type: string
+                        format: date
+                          description: 生效日期，默认为当天
+      responses:
+        '200':
+          description: 设置成功
+
+  /products/batch/set-prices:
+    post:
+      tags: [product-price]
+      summary: 批量设置商品价格
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productIds, priceType, price]
+              properties:
+                productIds:
+                  type: array
+                  items:
+                    type: integer
+                  description: 商品ID列表
+                priceType:
+                  type: string
+                  enum: [PURCHASE, WHOLESALE, RETAIL]
+                price:
+                  type: number
+                  format: decimal
+                effectiveDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: 设置成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      successCount:
+                        type: integer
+                      failCount:
+                        type: integer
+
+  /products/selector:
+    get:
+      tags: [product]
+      summary: 商品选择器
+      description: 供下拉选择使用的商品简列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        code:
+                          type: string
+                        name:
+                          type: string
+                        specification:
+                          type: string
+                        unit:
+                          type: string
+                        currentPrice:
+                          type: number
+                          format: decimal
+                          description: 当前有效价格
+
+  /promotions:
+    get:
+      tags: [product-promotion]
+      summary: 查询促销列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, EXPIRED]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [product-promotion]
+      summary: 创建促销
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, promotionPrice, startTime, endTime]
+              properties:
+                productId:
+                  type: integer
+                promotionPrice:
+                  type: number
+                  format: decimal
+                startTime:
+                  type: string
+                  format: date-time
+                endTime:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: 创建成功
+
+  /promotions/{id}:
+    get:
+      tags: [product-promotion]
+      summary: 查询促销详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    put:
+      tags: [product-promotion]
+      summary: 更新促销
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                promotionPrice:
+                  type: number
+                  format: decimal
+                startTime:
+                  type: string
+                  format: date-time
+                endTime:
+                  type: string
+                  format: date-time
+                status:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [product-promotion]
+      summary: 删除促销
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /products/{id}/current-price:
+    get:
+      tags: [product-price]
+      summary: 查询商品当前有效价格
+      description: 获取商品在指定日期的有效价格，考虑促销
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: priceType
+          in: query
+          schema:
+            type: string
+            enum: [PURCHASE, WHOLESALE, RETAIL]
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询日期，默认为当天
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      productId:
+                        type: integer
+                      priceType:
+                        type: string
+                      basePrice:
+                        type: number
+                        format: decimal
+                          description: 基础价格
+                      promotionPrice:
+                        type: number
+                        format: decimal
+                          description: 促销价（如有）
+                      finalPrice:
+                        type: number
+                        format: decimal
+                          description: 最终有效价格
+                      hasPromotion:
+                        type: boolean
+                          description: 是否有促销
+                      promotion:
+                        type: object
+                          description: 促销信息（如有）
+                        properties:
+                          id:
+                            type: integer
+                          promotionPrice:
+                            type: number
+                            format: decimal
+                          startTime:
+                            type: string
+                            format: date-time
+                          endTime:
+                            type: string
+                            format: date-time
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CategoryTreeNode:
+      type: object
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        name:
+          type: string
+        sortOrder:
+          type: integer
+        status:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTreeNode'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        specification:
+          type: string
+        unit:
+          type: string
+        referencePrice:
+          type: number
+          format: decimal
+        status:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ProductDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        categoryPath:
+          type: string
+          description: 分类路径，如 "食品/水果/苹果"
+        specification:
+          type: string
+        unit:
+          type: string
+        referencePrice:
+          type: number
+          format: decimal
+        status:
+          type: integer
+        currentPrices:
+          type: object
+          properties:
+            purchasePrice:
+              type: number
+              format: decimal
+            wholesalePrice:
+              type: number
+              format: decimal
+            retailPrice:
+              type: number
+              format: decimal
+        activePromotion:
+          type: object
+          description: 当前有效促销（如有）
+          properties:
+            id:
+              type: integer
+            promotionPrice:
+              type: number
+              format: decimal
+            startTime:
+              type: string
+              format: date-time
+            endTime:
+              type: string
+              format: date-time
+        stockInfo:
+          type: object
+          description: 库存信息
+          properties:
+            totalQuantity:
+              type: integer
+            totalAvailable:
+              type: integer
+            warehouses:
+              type: array
+              items:
+                type: object
+                properties:
+                  warehouseId:
+                    type: integer
+                  warehouseName:
+                    type: string
+                  quantity:
+                    type: integer
+                  availableQuantity:
+                    type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductPrice:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        priceType:
+          type: string
+          enum: [PURCHASE, WHOLESALE, RETAIL]
+        price:
+          type: number
+          format: decimal
+        effectiveDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+
+    ProductPromotion:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        promotionPrice:
+          type: number
+          format: decimal
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time

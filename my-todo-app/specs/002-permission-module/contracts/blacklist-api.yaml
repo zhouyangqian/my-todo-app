@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: 黑名单管理 API
+  description: 用户黑名单的管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: blacklist
+    description: 黑名单管理
+
+paths:
+  /blacklist:
+    get:
+      tags: [blacklist]
+      summary: 查询黑名单列表
+      description: 分页查询黑名单（租户管理员查询本租户，系统管理员查询所有）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+          description: 1=生效中, 0=已移除
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Blacklist'
+                      total:
+                        type: integer
+
+    post:
+      tags: [blacklist]
+      summary: 将用户加入黑名单
+      description: 将指定用户加入黑名单并强制下线
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, reason]
+              properties:
+                userId:
+                  type: integer
+                  example: 123
+                reason:
+                  type: string
+                  example: "违规操作"
+      responses:
+        '200':
+          description: 加入成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Blacklist'
+
+  /blacklist/{id}:
+    delete:
+      tags: [blacklist]
+      summary: 将用户移出黑名单
+      description: 将用户从黑名单移除，用户可以重新登录
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 黑名单记录 ID
+      responses:
+        '200':
+          description: 移除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                    example: "用户已从黑名单移除"
+
+  /blacklist/user/{userId}:
+    get:
+      tags: [blacklist]
+      summary: 查询用户黑名单状态
+      description: 查询指定用户是否在黑名单中
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      isBlacklisted:
+                        type: boolean
+                      blacklist:
+                        $ref: '#/components/schemas/Blacklist'
+                        nullable: true
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Blacklist:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        tenantId:
+          type: integer
+        addedAt:
+          type: string
+          format: date-time
+        removedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reason:
+          type: string
+        operatorId:
+          type: integer
+        operatorType:
+          type: integer
+          enum: [1, 2]
+          description: 1=系统管理员, 2=租户管理员
+        status:
+          type: integer
+          enum: [0, 1]
+          description: 1=生效中, 0=已移除
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

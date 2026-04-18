@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: my-todo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: my_todo
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: my-todo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nacos Service Registry & Config
+  nacos:
+    image: nacos/nacos-server:v2.3.0
+    container_name: my-todo-nacos
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/v1/console/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: my-todo-auth
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DB: my_todo_auth
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: your-256-bit-secret-key-here-must-be-at-least-32-characters-for-security
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+      - redis
+      - nacos
+
+  # API Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: my-todo-gateway
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      NACOS_SERVER: nacos:8848
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: your-256-bit-secret-key-here-must-be-at-least-32-characters-for-security
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nacos
+      - auth-service
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  default:
+    name: my-todo-network

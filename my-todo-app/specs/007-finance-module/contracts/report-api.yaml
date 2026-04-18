@@ -1,0 +1,666 @@
+openapi: 3.0.3
+info:
+  title: 财务模块 - 财务报表API
+  description: 财务报表生成和查询接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/finance
+
+tags:
+  - name: Report
+    description: 财务报表
+
+paths:
+  /reports/balance-sheet:
+    get:
+      tags:
+        - Report
+      summary: 资产负债表
+      description: 生成资产负债表，反映特定日期的财务状况
+      operationId: getBalanceSheet
+      parameters:
+        - name: reportDate
+          in: query
+          required: true
+          description: 报表日期
+          schema:
+            type: string
+            format: date
+        - name: currency
+          in: query
+          description: 币种
+          schema:
+            type: string
+            default: CNY
+        - name: comparePrevious
+          in: query
+          description: 是否对比上期
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceSheetResponse'
+      security:
+        - bearerAuth: []
+
+  /reports/income-statement:
+    get:
+      tags:
+        - Report
+      summary: 利润表
+      description: 生成利润表，反映一定期间的经营成果
+      operationId: getIncomeStatement
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: periodType
+          in: query
+          description: 周期类型
+          schema:
+            type: string
+            enum: [MONTH, QUARTER, YEAR]
+        - name: currency
+          in: query
+          schema:
+            type: string
+            default: CNY
+        - name: comparePrevious
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeStatementResponse'
+      security:
+        - bearerAuth: []
+
+  /reports/cash-flow-statement:
+    get:
+      tags:
+        - Report
+      summary: 现金流量表
+      description: 生成现金流量表，反映现金收支情况
+      operationId: getCashFlowStatement
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: currency
+          in: query
+          schema:
+            type: string
+            default: CNY
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashFlowStatementResponse'
+      security:
+        - bearerAuth: []
+
+  /reports/profit-analysis:
+    get:
+      tags:
+        - Report
+      summary: 毛利分析报表
+      operationId: getProfitAnalysis
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: dimension
+          in: query
+          description: 分析维度
+          schema:
+            type: string
+            enum: [PRODUCT, CATEGORY, CUSTOMER]
+            default: PRODUCT
+        - name: topN
+          in: query
+          description: 取前N条
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfitAnalysisResponse'
+      security:
+        - bearerAuth: []
+
+  /reports/saved:
+    get:
+      tags:
+        - Report
+      summary: 查询已保存的报表
+      operationId: listSavedReports
+      parameters:
+        - name: reportType
+          in: query
+          schema:
+            type: integer
+            enum: [1, 2, 3]
+            description: 1=资产负债表, 2=利润表, 3=现金流量表
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedReportPageResponse'
+      security:
+        - bearerAuth: []
+
+  /reports/saved/{id}:
+    get:
+      tags:
+        - Report
+      summary: 获取已保存报表详情
+      operationId: getSavedReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedReportDetailResponse'
+      security:
+        - bearerAuth: []
+
+  /reports/saved/{id}/lock:
+    post:
+      tags:
+        - Report
+      summary: 锁定报表
+      description: 锁定后报表数据不可修改，作为正式报表存档
+      operationId: lockReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 锁定成功
+        '400':
+          description: 报表已锁定
+      security:
+        - bearerAuth: []
+
+  /reports/saved/{id}/unlock:
+    post:
+      tags:
+        - Report
+      summary: 解锁报表
+      description: 需要特定权限才能解锁已锁定的报表
+      operationId: unlockReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                  description: 解锁原因
+      responses:
+        '200':
+          description: 解锁成功
+        '403':
+          description: 无权限
+      security:
+        - bearerAuth: []
+
+  /reports/export:
+    post:
+      tags:
+        - Report
+      summary: 导出报表
+      operationId: exportReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportExportRequest'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    BalanceSheetResponse:
+      type: object
+      properties:
+        reportDate:
+          type: string
+          format: date
+        currency:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        assets:
+          $ref: '#/components/schemas/BalanceSheetSection'
+        liabilities:
+          $ref: '#/components/schemas/BalanceSheetSection'
+        equity:
+          $ref: '#/components/schemas/BalanceSheetSection'
+        totalAssets:
+          type: number
+        totalLiabilities:
+          type: number
+        totalEquity:
+          type: number
+        debtRatio:
+          type: number
+          description: 资产负债率(%)
+
+    BalanceSheetSection:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              itemName:
+                type: string
+              itemCode:
+                type: string
+              amount:
+                type: number
+              previousAmount:
+                type: number
+              change:
+                type: number
+              changePercent:
+                type: number
+              children:
+                type: array
+                items:
+                  type: object
+        total:
+          type: number
+
+    IncomeStatementResponse:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        periodType:
+          type: string
+        currency:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        revenue:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  itemName:
+                    type: string
+                  amount:
+                    type: number
+                  previousAmount:
+                    type: number
+            total:
+              type: number
+        costs:
+          type: object
+          properties:
+            costOfGoodsSold:
+              type: number
+            grossProfit:
+              type: number
+            grossProfitMargin:
+              type: number
+        expenses:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  itemName:
+                    type: string
+                  amount:
+                    type: number
+            total:
+              type: number
+        operatingProfit:
+          type: number
+        netProfit:
+          type: number
+        netProfitMargin:
+          type: number
+
+    CashFlowStatementResponse:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        currency:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        operating:
+          type: object
+          description: 经营活动现金流
+          properties:
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  itemName:
+                    type: string
+                  inflow:
+                    type: number
+                  outflow:
+                    type: number
+                  netFlow:
+                    type: number
+            netCashFlow:
+              type: number
+        investing:
+          type: object
+          description: 投资活动现金流
+          properties:
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  itemName:
+                    type: string
+                  inflow:
+                    type: number
+                  outflow:
+                    type: number
+                  netFlow:
+                    type: number
+            netCashFlow:
+              type: number
+        financing:
+          type: object
+          description: 筹资活动现金流
+          properties:
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  itemName:
+                    type: string
+                  inflow:
+                    type: number
+                  outflow:
+                    type: number
+                  netFlow:
+                    type: number
+            netCashFlow:
+              type: number
+        totalNetCashFlow:
+          type: number
+        beginningCashBalance:
+          type: number
+        endingCashBalance:
+          type: number
+
+    ProfitAnalysisResponse:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        dimension:
+          type: string
+        totalSalesAmount:
+          type: number
+        totalCost:
+          type: number
+        totalGrossProfit:
+          type: number
+        averageProfitRate:
+          type: number
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              code:
+                type: string
+              name:
+                type: string
+              salesAmount:
+                type: number
+              costAmount:
+                type: number
+              grossProfit:
+                type: number
+              profitRate:
+                type: number
+              quantity:
+                type: number
+              rank:
+                type: integer
+
+    SavedReportPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedReportSummary'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    SavedReportSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        reportType:
+          type: integer
+        reportTypeName:
+          type: string
+        reportName:
+          type: string
+        reportDate:
+          type: string
+          format: date
+        periodType:
+          type: string
+        locked:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    SavedReportDetailResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        reportType:
+          type: integer
+        reportTypeName:
+          type: string
+        reportName:
+          type: string
+        reportDate:
+          type: string
+          format: date
+        periodType:
+          type: string
+        periodStart:
+          type: string
+          format: date
+        periodEnd:
+          type: string
+          format: date
+        currency:
+          type: string
+        locked:
+          type: boolean
+        lockedByName:
+          type: string
+        lockedAt:
+          type: string
+          format: date-time
+        reportData:
+          type: object
+          description: 报表JSON数据
+        version:
+          type: integer
+        createdByName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ReportExportRequest:
+      type: object
+      required:
+        - reportType
+        - format
+      properties:
+        reportType:
+          type: integer
+          enum: [1, 2, 3, 4]
+          description: 1=资产负债表, 2=利润表, 3=现金流量表, 4=毛利分析
+        reportDate:
+          type: string
+          format: date
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        format:
+          type: string
+          enum: [EXCEL, PDF]
+        includeChart:
+          type: boolean
+          default: false
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

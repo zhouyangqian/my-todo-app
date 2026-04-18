@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: 缓存配置管理 API
+  description: GET 请求缓存策略配置接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关管理
+
+tags:
+  - name: cache
+    description: 缓存配置管理
+
+paths:
+  /gateway/cache:
+    get:
+      tags: [cache]
+      summary: 查询缓存配置列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: apiPath
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CacheConfig'
+
+    post:
+      tags: [cache]
+      summary: 创建缓存配置
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [apiPath, ttl]
+              properties:
+                apiPath:
+                  type: string
+                  example: "/api/v1/users"
+                ttl:
+                  type: integer
+                  example: 60
+                maxSize:
+                  type: integer
+                  example: 10000
+                keyGenerator:
+                  type: string
+                  enum: [DEFAULT, PATH_PARAMS, HEADER]
+                tenantIsolated:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: 创建成功
+
+  /gateway/cache/{id}:
+    put:
+      tags: [cache]
+      summary: 更新缓存配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ttl:
+                  type: integer
+                maxSize:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [cache]
+      summary: 删除缓存配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /gateway/cache/clear:
+    post:
+      tags: [cache]
+      summary: 清除缓存
+      description: 清除指定的缓存条目
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pattern]
+              properties:
+                pattern:
+                  type: string
+                  example: "/api/v1/users*"
+                  description: 缓存Key模式
+      responses:
+        '200':
+          description: 清除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      clearedCount:
+                        type: integer
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CacheConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiPath:
+          type: string
+        ttl:
+          type: integer
+          description: 缓存过期时间（秒）
+        maxSize:
+          type: integer
+          description: 最大缓存条目数
+        keyGenerator:
+          type: string
+          enum: [DEFAULT, PATH_PARAMS, HEADER]
+        tenantIsolated:
+          type: boolean
+          description: 是否租户隔离
+        status:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time

@@ -1,0 +1,449 @@
+openapi: 3.0.3
+info:
+  title: 用户管理 API
+  description: 用户 CRUD、批量操作、导入/导出接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: user
+    description: 用户管理
+  - name: batch
+    description: 批量操作
+  - name: import
+    description: 导入/导出
+
+paths:
+  /users:
+    get:
+      tags: [user]
+      summary: 查询用户列表
+      description: 分页查询本租户的用户列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1, 2]
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      total:
+                        type: integer
+
+    post:
+      tags: [user]
+      summary: 创建用户
+      description: 创建新用户（租户管理员权限）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, roleIds]
+              properties:
+                username:
+                  type: string
+                  example: "zhangsan"
+                email:
+                  type: string
+                  format: email
+                  example: "zhangsan@example.com"
+                phone:
+                  type: string
+                  example: "13800138000"
+                roleIds:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2]
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 用户数量已达上限
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "用户数量已达上限（5个），请升级套餐"
+
+  /users/{userId}:
+    get:
+      tags: [user]
+      summary: 查询用户详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+
+    put:
+      tags: [user]
+      summary: 更新用户
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                status:
+                  type: integer
+                roleIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [user]
+      summary: 删除用户（软删除）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /users/batch/disable:
+    post:
+      tags: [batch]
+      summary: 批量禁用用户
+      description: 批量禁用用户（最多100个）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds]
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: integer
+                  maxItems: 100
+      responses:
+        '200':
+          description: 操作完成
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      successCount:
+                        type: integer
+                      failCount:
+                        type: integer
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            userId:
+                              type: integer
+                            error:
+                              type: string
+
+  /users/batch/delete:
+    post:
+      tags: [batch]
+      summary: 批量删除用户
+      description: 批量软删除用户（最多100个）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds]
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: integer
+                  maxItems: 100
+      responses:
+        '200':
+          description: 删除完成
+
+  /users/batch/assign-roles:
+    post:
+      tags: [batch]
+      summary: 批量分配角色
+      description: 为用户批量分配角色（最多100个）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds, roleIds, mode]
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: integer
+                  maxItems: 100
+                roleIds:
+                  type: array
+                  items:
+                    type: integer
+                mode:
+                  type: string
+                  enum: [replace, append]
+                  description: replace=替换原有角色, append=追加到原有角色
+      responses:
+        '200':
+          description: 分配完成
+
+  /users/import/template:
+    get:
+      tags: [import]
+      summary: 下载导入模板
+      description: 下载 Excel 导入模板
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 模板文件
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /users/import:
+    post:
+      tags: [import]
+      summary: 导入用户
+      description: 上传 Excel 文件批量导入用户（最多1000条）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: 导入完成
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      successCount:
+                        type: integer
+                      failCount:
+                        type: integer
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            row:
+                              type: integer
+                            error:
+                              type: string
+
+  /users/export:
+    get:
+      tags: [import]
+      summary: 导出用户
+      description: 导出用户列表为 Excel 文件
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: integer
+        - name: roleId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 导出文件
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        tenantId:
+          type: integer
+        status:
+          type: integer
+          enum: [0, 1, 2]
+          description: 0=禁用, 1=正常, 2=锁定
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: string
+          format: date-time
+
+    UserDetail:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/Role'
+            permissions:
+              type: array
+              items:
+                type: string
+                description: 用户拥有的权限代码列表
+
+    Role:
+      type: object
+      properties:
+        roleId:
+          type: integer
+        roleName:
+          type: string
+        roleCode:
+          type: string
+        description:
+          type: string
+        tenantId:
+          type: integer
+        status:
+          type: integer
+        isSystem:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time

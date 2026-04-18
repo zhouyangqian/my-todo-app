@@ -1,0 +1,455 @@
+openapi: 3.0.3
+info:
+  title: Third Party API Management
+  description: |
+    第三方接口管理 API，用于接入和管理第三方API、密钥管理、调用日志和健康检查。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/third-party
+
+security:
+  - BearerAuth: []
+  - TenantId: []
+
+tags:
+  - name: apis
+    description: 第三方接口管理
+  - name: keys
+    description: API密钥管理
+  - name: logs
+    description: 调用日志
+  - name: health
+    description: 健康检查
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    TenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+
+  schemas:
+    ThirdPartyApi:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiName:
+          type: string
+        apiCode:
+          type: string
+        endpointUrl:
+          type: string
+        authType:
+          type: string
+          enum: [API_KEY, OAUTH2, BASIC, BEARER]
+        timeoutSeconds:
+          type: integer
+        retryCount:
+          type: integer
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+        healthCheckUrl:
+          type: string
+        healthCheckInterval:
+          type: integer
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ApiCreateRequest:
+      type: object
+      required:
+        - apiName
+        - apiCode
+        - endpointUrl
+        - authType
+      properties:
+        apiName:
+          type: string
+        apiCode:
+          type: string
+        endpointUrl:
+          type: string
+        authType:
+          type: string
+          enum: [API_KEY, OAUTH2, BASIC, BEARER]
+        authConfig:
+          type: object
+        timeoutSeconds:
+          type: integer
+        retryCount:
+          type: integer
+        healthCheckUrl:
+          type: string
+        healthCheckInterval:
+          type: integer
+        description:
+          type: string
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiId:
+          type: integer
+        keyName:
+          type: string
+        keyType:
+          type: string
+          enum: [PUBLIC, PRIVATE, SECRET]
+        status:
+          type: string
+          enum: [ACTIVE, EXPIRED, REVOKED]
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ApiKeyCreateRequest:
+      type: object
+      required:
+        - keyName
+        - keyValue
+        - keyType
+      properties:
+        keyName:
+          type: string
+        keyValue:
+          type: string
+          format: password
+        keyType:
+          type: string
+          enum: [PUBLIC, PRIVATE, SECRET]
+        expiresAt:
+          type: string
+          format: date-time
+
+    ApiCallLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiId:
+          type: integer
+        requestId:
+          type: string
+        requestMethod:
+          type: string
+        requestUrl:
+          type: string
+        requestHeaders:
+          type: object
+        responseStatus:
+          type: integer
+        durationMs:
+          type: integer
+        success:
+          type: boolean
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    HealthCheck:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiId:
+          type: integer
+        checkTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [HEALTHY, UNHEALTHY, TIMEOUT]
+        responseTimeMs:
+          type: integer
+        errorMessage:
+          type: string
+
+paths:
+  /apis:
+    get:
+      tags:
+        - apis
+      summary: 获取第三方API列表
+      operationId: listThirdPartyApis
+      parameters:
+        - name: apiName
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回API列表
+
+    post:
+      tags:
+        - apis
+      summary: 创建第三方API
+      operationId: createThirdPartyApi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /apis/{id}:
+    get:
+      tags:
+        - apis
+      summary: 获取第三方API详情
+      operationId: getThirdPartyApi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回API详情
+
+    put:
+      tags:
+        - apis
+      summary: 更新第三方API
+      operationId: updateThirdPartyApi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - apis
+      summary: 删除第三方API
+      operationId: deleteThirdPartyApi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /apis/{id}/keys:
+    get:
+      tags:
+        - keys
+      summary: 获取API密钥列表
+      operationId: listApiKeys
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: API ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回密钥列表
+
+    post:
+      tags:
+        - keys
+      summary: 创建API密钥
+      operationId: createApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /keys/{id}:
+    get:
+      tags:
+        - keys
+      summary: 获取密钥详情
+      operationId: getApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回密钥详情
+
+    put:
+      tags:
+        - keys
+      summary: 更新密钥
+      operationId: updateApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                keyName:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - keys
+      summary: 删除密钥
+      operationId: deleteApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /apis/{id}/logs:
+    get:
+      tags:
+        - logs
+      summary: 获取API调用日志
+      operationId: listApiCallLogs
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: success
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回调用日志
+
+  /apis/{id}/health:
+    get:
+      tags:
+        - health
+      summary: 获取API健康检查记录
+      operationId: listHealthChecks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: 成功返回健康检查记录
+
+  /apis/{id}/health/check:
+    post:
+      tags:
+        - health
+      summary: 手动触发健康检查
+      operationId: triggerHealthCheck
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 健康检查完成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheck'

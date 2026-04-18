@@ -1,0 +1,719 @@
+openapi: 3.0.3
+info:
+  title: Parameter Dictionary Management API
+  description: |
+    参数字典管理 API，用于管理系统参数字典和业务参数字典。
+    所有端点都需要通过 Spring Cloud Gateway 访问，并在请求头中包含租户ID和认证令牌。
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: /api/v1/parameter
+    description: Gateway 路由前缀
+
+security:
+  - BearerAuth: []
+  - TenantId: []
+
+tags:
+  - name: dictionaries
+    description: 参数字典管理
+  - name: items
+    description: 参数项管理
+  - name: categories
+    description: 参数分类管理
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    TenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Validation failed"
+        details:
+          type: array
+          items:
+            type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+
+    DictionaryType:
+      type: string
+      enum: [SYSTEM, BUSINESS]
+      description: 字典类型（系统/业务）
+
+    ItemStatus:
+      type: string
+      enum: [ENABLED, DISABLED]
+      description: 状态（启用/禁用）
+
+    DataType:
+      type: string
+      enum: [STRING, INTEGER, FLOAT, BOOLEAN, DATETIME, JSON_OBJECT, ARRAY, ENUM]
+      description: 数据类型
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: string
+          example: "system_config"
+          pattern: "^[a-zA-Z][a-zA-Z0-9_]{1,49}$"
+        name:
+          type: string
+          example: "系统配置"
+        description:
+          type: string
+          example: "系统级配置参数"
+        sortOrder:
+          type: integer
+          example: 1
+
+    CategoryCreateRequest:
+      type: object
+      required:
+        - code
+        - name
+      properties:
+        code:
+          type: string
+          pattern: "^[a-zA-Z][a-zA-Z0-9_]{1,49}$"
+          example: "system_config"
+        name:
+          type: string
+          example: "系统配置"
+        description:
+          type: string
+          example: "系统级配置参数"
+        sortOrder:
+          type: integer
+          example: 1
+
+    CategoryUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "系统配置"
+        description:
+          type: string
+        sortOrder:
+          type: integer
+
+    Dictionary:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: string
+          example: "cache_config"
+        name:
+          type: string
+          example: "缓存配置"
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/DictionaryType'
+        categoryId:
+          type: integer
+          example: 1
+        category:
+          $ref: '#/components/schemas/Category'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        itemCount:
+          type: integer
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    DictionaryCreateRequest:
+      type: object
+      required:
+        - code
+        - name
+        - type
+      properties:
+        code:
+          type: string
+          pattern: "^[a-zA-Z][a-zA-Z0-9_]{1,49}$"
+          example: "cache_config"
+        name:
+          type: string
+          example: "缓存配置"
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/DictionaryType'
+        categoryId:
+          type: integer
+          example: 1
+
+    DictionaryUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: integer
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+
+    DictionaryQuery:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DictionaryType'
+        categoryId:
+          type: integer
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        page:
+          type: integer
+          default: 1
+        size:
+          type: integer
+          default: 20
+
+    PageResponse_Dictionary_:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dictionary'
+        total:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+
+    ValidationRule:
+      type: object
+      description: 验证规则
+      properties:
+        dataType:
+          $ref: '#/components/schemas/DataType'
+        required:
+          type: boolean
+        minLength:
+          type: integer
+        maxLength:
+          type: integer
+        minValue:
+          type: number
+        maxValue:
+          type: number
+        pattern:
+          type: string
+        enumValues:
+          type: array
+          items:
+            type: string
+
+    ParameterItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        dictionaryId:
+          type: integer
+          example: 1
+        key:
+          type: string
+          example: "timeout"
+        value:
+          type: object
+          example: 30
+        description:
+          type: string
+          example: "连接超时时间（秒）"
+        dataType:
+          $ref: '#/components/schemas/DataType'
+        validationRule:
+          $ref: '#/components/schemas/ValidationRule'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    ItemCreateRequest:
+      type: object
+      required:
+        - key
+        - value
+        - dataType
+      properties:
+        key:
+          type: string
+          pattern: "^[a-zA-Z][a-zA-Z0-9_]{1,49}$"
+          example: "timeout"
+        value:
+          type: object
+          example: 30
+        description:
+          type: string
+          example: "连接超时时间（秒）"
+        dataType:
+          $ref: '#/components/schemas/DataType'
+        validationRule:
+          $ref: '#/components/schemas/ValidationRule'
+        sortOrder:
+          type: integer
+
+    ItemUpdateRequest:
+      type: object
+      properties:
+        value:
+          type: object
+        description:
+          type: string
+        dataType:
+          $ref: '#/components/schemas/DataType'
+        validationRule:
+          $ref: '#/components/schemas/ValidationRule'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        sortOrder:
+          type: integer
+        version:
+          type: integer
+          description: 乐观锁版本号
+
+    PageResponse_Item_:
+      type: object
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParameterItem'
+        total:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+
+paths:
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: 获取参数分类列表
+      description: 获取当前租户下的所有参数分类
+      operationId: listCategories
+      responses:
+        '200':
+          description: 成功返回分类列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - categories
+      summary: 创建参数分类
+      description: 创建新的参数分类
+      operationId: createCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /categories/{id}:
+    get:
+      tags:
+        - categories
+      summary: 获取参数分类详情
+      operationId: getCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回分类详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: 分类不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - categories
+      summary: 更新参数分类
+      operationId: updateCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: 分类不存在
+
+    delete:
+      tags:
+        - categories
+      summary: 删除参数分类
+      description: 逻辑删除，标记为已删除状态
+      operationId: deleteCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+        '400':
+          description: 分类下存在字典，无法删除
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dictionaries:
+    get:
+      tags:
+        - dictionaries
+      summary: 获取参数字典列表
+      description: 支持按类型、分类、状态等条件筛选
+      operationId: listDictionaries
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/DictionaryType'
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ItemStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功返回字典列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse_Dictionary_'
+
+    post:
+      tags:
+        - dictionaries
+      summary: 创建参数字典
+      description: 创建新的参数字典
+      operationId: createDictionary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DictionaryCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dictionary'
+        '400':
+          description: 请求参数错误或编码重复
+
+  /dictionaries/{id}:
+    get:
+      tags:
+        - dictionaries
+      summary: 获取参数字典详情
+      operationId: getDictionary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回字典详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dictionary'
+
+    put:
+      tags:
+        - dictionaries
+      summary: 更新参数字典
+      operationId: updateDictionary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DictionaryUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - dictionaries
+      summary: 删除参数字典
+      description: 逻辑删除，标记为已删除状态
+      operationId: deleteDictionary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /dictionaries/{id}/items:
+    get:
+      tags:
+        - items
+      summary: 获取字典下的参数项列表
+      operationId: listDictionaryItems
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 字典ID
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ItemStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回参数项列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse_Item_'
+
+    post:
+      tags:
+        - items
+      summary: 创建参数项
+      operationId: createItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 字典ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParameterItem'
+
+  /items/{id}:
+    get:
+      tags:
+        - items
+      summary: 获取参数项详情
+      operationId: getItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回参数项详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParameterItem'
+
+    put:
+      tags:
+        - items
+      summary: 更新参数项
+      description: |
+        更新参数项，使用乐观锁检测并发冲突。
+        请求体必须包含当前版本号。
+      operationId: updateItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+        '409':
+          description: 并发冲突，数据已被其他用户修改
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - items
+      summary: 删除参数项
+      operationId: deleteItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功

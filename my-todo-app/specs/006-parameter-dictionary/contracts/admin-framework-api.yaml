@@ -1,0 +1,702 @@
+openapi: 3.0.3
+info:
+  title: Admin Framework API
+  description: |
+    后台管理框架 API，提供统一认证、用户管理、角色管理、菜单管理、审计日志等功能。
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: /api/v1/admin
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: auth
+    description: 认证授权
+  - name: users
+    description: 用户管理
+  - name: roles
+    description: 角色管理
+  - name: menus
+    description: 菜单管理
+  - name: audit
+    description: 审计日志
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        captcha:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          example: "Bearer"
+        expiresIn:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        realName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        avatar:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, LOCKED, DISABLED]
+        userType:
+          type: string
+          enum: [SUPER_ADMIN, ADMIN, USER, DEVELOPER]
+        lastLoginAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    UserCreateRequest:
+      type: object
+      required:
+        - username
+        - password
+        - userType
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        realName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        userType:
+          type: string
+          enum: [SUPER_ADMIN, ADMIN, USER, DEVELOPER]
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        roleCode:
+          type: string
+        roleName:
+          type: string
+        description:
+          type: string
+        sortOrder:
+          type: integer
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+
+    Menu:
+      type: object
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        menuName:
+          type: string
+        menuType:
+          type: string
+          enum: [DIRECTORY, MENU, BUTTON]
+        routePath:
+          type: string
+        component:
+          type: string
+        icon:
+          type: string
+        permission:
+          type: string
+        sortOrder:
+          type: integer
+        visible:
+          type: boolean
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Menu'
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenantId:
+          type: string
+        userId:
+          type: string
+        operation:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: integer
+        beforeValue:
+          type: object
+        afterValue:
+          type: object
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: 用户登录
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: 认证失败
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: 用户登出
+      operationId: logout
+      responses:
+        '204':
+          description: 登出成功
+
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: 刷新令牌
+      operationId: refreshToken
+      responses:
+        '200':
+          description: 刷新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /users:
+    get:
+      tags:
+        - users
+      summary: 获取用户列表
+      operationId: listUsers
+      parameters:
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: userType
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功返回用户列表
+
+    post:
+      tags:
+        - users
+      summary: 创建用户
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /users/{id}:
+    get:
+      tags:
+        - users
+      summary: 获取用户详情
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回用户详情
+
+    put:
+      tags:
+        - users
+      summary: 更新用户
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                realName:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                status:
+                  type: string
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - users
+      summary: 删除用户
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 删除成功
+
+  /users/{id}/roles:
+    get:
+      tags:
+        - users
+      summary: 获取用户角色
+      operationId: getUserRoles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回角色列表
+
+    put:
+      tags:
+        - users
+      summary: 分配用户角色
+      operationId: assignUserRoles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - roleIds
+              properties:
+                roleIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 分配成功
+
+  /roles:
+    get:
+      tags:
+        - roles
+      summary: 获取角色列表
+      operationId: listRoles
+      responses:
+        '200':
+          description: 成功返回角色列表
+
+    post:
+      tags:
+        - roles
+      summary: 创建角色
+      operationId: createRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - roleCode
+                - roleName
+              properties:
+                roleCode:
+                  type: string
+                roleName:
+                  type: string
+                description:
+                  type: string
+                sortOrder:
+                  type: integer
+      responses:
+        '201':
+          description: 创建成功
+
+  /roles/{id}:
+    get:
+      tags:
+        - roles
+      summary: 获取角色详情
+      operationId: getRole
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回角色详情
+
+    put:
+      tags:
+        - roles
+      summary: 更新角色
+      operationId: updateRole
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleName:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - roles
+      summary: 删除角色
+      operationId: deleteRole
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /roles/{id}/menus:
+    get:
+      tags:
+        - roles
+      summary: 获取角色菜单
+      operationId: getRoleMenus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回菜单列表
+
+    put:
+      tags:
+        - roles
+      summary: 分配角色菜单
+      operationId: assignRoleMenus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - menuIds
+              properties:
+                menuIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 分配成功
+
+  /menus/tree:
+    get:
+      tags:
+        - menus
+      summary: 获取菜单树
+      operationId: getMenuTree
+      responses:
+        '200':
+          description: 成功返回菜单树
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Menu'
+
+  /menus:
+    post:
+      tags:
+        - menus
+      summary: 创建菜单
+      operationId: createMenu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - menuName
+                - menuType
+              properties:
+                parentId:
+                  type: integer
+                  default: 0
+                menuName:
+                  type: string
+                menuType:
+                  type: string
+                  enum: [DIRECTORY, MENU, BUTTON]
+                routePath:
+                  type: string
+                component:
+                  type: string
+                icon:
+                  type: string
+                permission:
+                  type: string
+                sortOrder:
+                  type: integer
+                visible:
+                  type: boolean
+      responses:
+        '201':
+          description: 创建成功
+
+  /menus/{id}:
+    get:
+      tags:
+        - menus
+      summary: 获取菜单详情
+      operationId: getMenu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回菜单详情
+
+    put:
+      tags:
+        - menus
+      summary: 更新菜单
+      operationId: updateMenu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                menuName:
+                  type: string
+                routePath:
+                  type: string
+                component:
+                  type: string
+                icon:
+                  type: string
+                permission:
+                  type: string
+                sortOrder:
+                  type: integer
+                visible:
+                  type: boolean
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - menus
+      summary: 删除菜单
+      operationId: deleteMenu
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /audit/logs:
+    get:
+      tags:
+        - audit
+      summary: 获取审计日志
+      operationId: listAuditLogs
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: operation
+          in: query
+          schema:
+            type: string
+        - name: targetType
+          in: query
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回审计日志列表

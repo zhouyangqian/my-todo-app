@@ -1,0 +1,501 @@
+openapi: 3.0.3
+info:
+  title: Error Documentation API
+  description: |
+    错误文档查看 API，提供错误分类、解决方案查询、Elasticsearch日志检索等功能。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/error-doc
+
+security:
+  - BearerAuth: []
+  - TenantId: []
+
+tags:
+  - name: categories
+    description: 错误分类
+  - name: solutions
+    description: 错误解决方案
+  - name: logs
+    description: 错误日志查询
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    TenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+
+  schemas:
+    ErrorCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        categoryCode:
+          type: string
+        categoryName:
+          type: string
+        parentId:
+          type: integer
+        description:
+          type: string
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorSolution:
+      type: object
+      properties:
+        id:
+          type: integer
+        errorCode:
+          type: string
+        errorMessagePattern:
+          type: string
+        categoryId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        solution:
+          type: string
+        relatedService:
+          type: string
+        priority:
+          type: string
+          enum: [HIGH, MEDIUM, LOW]
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED]
+        viewCount:
+          type: integer
+        helpfulCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorSolutionCreateRequest:
+      type: object
+      required:
+        - errorCode
+        - title
+        - solution
+      properties:
+        errorCode:
+          type: string
+        errorMessagePattern:
+          type: string
+        categoryId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        solution:
+          type: string
+        relatedService:
+          type: string
+        priority:
+          type: string
+          enum: [HIGH, MEDIUM, LOW]
+
+    ErrorLogQuery:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        serviceName:
+          type: string
+        errorCode:
+          type: string
+        errorType:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        userId:
+          type: string
+        uri:
+          type: string
+        page:
+          type: integer
+        size:
+          type: integer
+
+    ErrorLog:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        serviceName:
+          type: string
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        errorType:
+          type: string
+        stackTrace:
+          type: string
+        requestId:
+          type: string
+        userId:
+          type: string
+        uri:
+          type: string
+        method:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+
+paths:
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: 获取错误分类列表
+      operationId: listErrorCategories
+      responses:
+        '200':
+          description: 成功返回错误分类列表
+
+    post:
+      tags:
+        - categories
+      summary: 创建错误分类
+      operationId: createErrorCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - categoryCode
+                - categoryName
+              properties:
+                categoryCode:
+                  type: string
+                categoryName:
+                  type: string
+                parentId:
+                  type: integer
+                description:
+                  type: string
+                sortOrder:
+                  type: integer
+      responses:
+        '201':
+          description: 创建成功
+
+  /categories/tree:
+    get:
+      tags:
+        - categories
+      summary: 获取错误分类树
+      operationId: getErrorCategoryTree
+      responses:
+        '200':
+          description: 成功返回分类树
+
+  /categories/{id}:
+    get:
+      tags:
+        - categories
+      summary: 获取错误分类详情
+      operationId: getErrorCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回分类详情
+
+    put:
+      tags:
+        - categories
+      summary: 更新错误分类
+      operationId: updateErrorCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryName:
+                  type: string
+                description:
+                  type: string
+                sortOrder:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - categories
+      summary: 删除错误分类
+      operationId: deleteErrorCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /solutions:
+    get:
+      tags:
+        - solutions
+      summary: 获取错误解决方案列表
+      operationId: listErrorSolutions
+      parameters:
+        - name: errorCode
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: relatedService
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回解决方案列表
+
+    post:
+      tags:
+        - solutions
+      summary: 创建错误解决方案
+      operationId: createErrorSolution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorSolutionCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /solutions/search:
+    post:
+      tags:
+        - solutions
+      summary: 搜索错误解决方案
+      operationId: searchErrorSolutions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: 搜索关键词（错误码、错误信息）
+                categoryId:
+                  type: integer
+                relatedService:
+                  type: string
+      responses:
+        '200':
+          description: 成功返回搜索结果
+
+  /solutions/{id}:
+    get:
+      tags:
+        - solutions
+      summary: 获取错误解决方案详情
+      operationId: getErrorSolution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回解决方案详情
+
+    put:
+      tags:
+        - solutions
+      summary: 更新错误解决方案
+      operationId: updateErrorSolution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorSolutionCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - solutions
+      summary: 删除错误解决方案
+      operationId: deleteErrorSolution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /solutions/{id}/helpful:
+    post:
+      tags:
+        - solutions
+      summary: 标记解决方案为有用
+      operationId: markSolutionHelpful
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 标记成功
+
+  /logs/search:
+    post:
+      tags:
+        - logs
+      summary: 搜索错误日志（Elasticsearch）
+      operationId: searchErrorLogs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorLogQuery'
+      responses:
+        '200':
+          description: 成功返回搜索结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ErrorLog'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  size:
+                    type: integer
+
+  /logs/aggregations:
+    post:
+      tags:
+        - logs
+      summary: 错误日志聚合统计
+      operationId: aggregateErrorLogs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - aggregationType
+              properties:
+                aggregationType:
+                  type: string
+                  enum: [by_error_code, by_service, by_error_type, by_time]
+                startTime:
+                  type: string
+                  format: date-time
+                endTime:
+                  type: string
+                  format: date-time
+                interval:
+                  type: string
+                  description: 时间间隔（如1h, 1d）
+      responses:
+        '200':
+          description: 成功返回聚合结果
+
+  /logs/{requestId}:
+    get:
+      tags:
+        - logs
+      summary: 根据请求ID获取错误日志详情
+      operationId: getErrorLogByRequestId
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回错误日志详情

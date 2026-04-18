@@ -1,0 +1,8 @@
+
+Ž	java:S112®"FDefine and throw a dedicated exception instead of using a generic one.(ô»þßúÿÿÿÿ8„¾°”Ø3J$820143a7-e4f0-4e55-a02c-1708f6184858
+€
+java:S1854Ô"<Remove this useless assignment to local variable "tenantId".(¤èÏÍ8Ï¾°”Ø3J$4af79020-918d-450a-93a6-c8d5189fb7c8
+q
+java:S1481Ô"-Remove this unused "tenantId" local variable.(¤èÏÍ8Ò¾°”Ø3J$9512a876-92d3-4872-9402-3382a7b545e4
+ž
+java:S6809–"UCall transactional methods via an injected dependency instead of directly via 'this'.(©îæÔûÿÿÿÿ8ä¾°”Ø3J$2a5c6880-b24c-481d-8550-5502734675f3

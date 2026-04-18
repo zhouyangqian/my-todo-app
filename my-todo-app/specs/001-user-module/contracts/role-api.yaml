@@ -1,0 +1,234 @@
+openapi: 3.0.3
+info:
+  title: 角色管理 API
+  description: 角色的增删改查及权限分配接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: role
+    description: 角色管理
+
+paths:
+  /roles:
+    get:
+      tags: [role]
+      summary: 查询角色列表
+      description: 分页查询本租户的角色列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Role'
+                      total:
+                        type: integer
+
+    post:
+      tags: [role]
+      summary: 创建角色
+      description: 创建新角色并分配权限
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, code]
+              properties:
+                name:
+                  type: string
+                  example: "销售经理"
+                code:
+                  type: string
+                  example: "sales_manager"
+                description:
+                  type: string
+                  example: "销售部门经理"
+                permissionIds:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2, 3]
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+
+  /roles/{id}:
+    get:
+      tags: [role]
+      summary: 查询角色详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleDetail'
+
+    put:
+      tags: [role]
+      summary: 更新角色
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: integer
+                permissionIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [role]
+      summary: 删除角色
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /roles/{id}/permissions:
+    put:
+      tags: [role]
+      summary: 更新角色权限
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permissionIds]
+              properties:
+                permissionIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        tenantId:
+          type: integer
+        status:
+          type: integer
+        isSystem:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RoleDetail:
+      allOf:
+        - $ref: '#/components/schemas/Role'
+        - type: object
+          properties:
+            permissions:
+              type: array
+              items:
+                $ref: './permission-api.yaml#/components/schemas/Permission'
+            userCount:
+              type: integer
+              description: 拥有此角色的用户数量

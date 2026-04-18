@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: 监控统计 API
+  description: 监控数据查询接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关管理
+
+tags:
+  - name: monitor
+    description: 监控统计
+
+paths:
+  /gateway/metrics/realtime:
+    get:
+      tags: [monitor]
+      summary: 获取实时监控数据
+      description: 获取当前QPS、响应时间、错误率等实时指标
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    $ref: '#/components/schemas/RealtimeMetrics'
+
+  /gateway/metrics/history:
+    get:
+      tags: [monitor]
+      summary: 获取历史监控数据
+      description: 按时间范围查询历史指标数据
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum: [1m, 5m, 15m, 1h, 1d]
+        - name: service
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+
+  /gateway/metrics/api-stats:
+    get:
+      tags: [monitor]
+      summary: 获取API统计
+      description: 按API维度统计调用次数、响应时间、错误率
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /gateway/alerts:
+    get:
+      tags: [monitor]
+      summary: 查询告警规则
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AlertRule'
+
+    post:
+      tags: [monitor]
+      summary: 创建告警规则
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, metric, threshold]
+              properties:
+                name:
+                  type: string
+                metric:
+                  type: string
+                  enum: [ERROR_RATE, RESPONSE_TIME, QPS]
+                threshold:
+                  type: number
+                notifyType:
+                  type: string
+                  enum: [EMAIL, SMS, DINGTALK, WECHAT]
+      responses:
+        '200':
+          description: 创建成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RealtimeMetrics:
+      type: object
+      properties:
+        qps:
+          type: number
+          format: float
+        avgResponseTime:
+          type: integer
+        p95ResponseTime:
+          type: integer
+        p99ResponseTime:
+          type: integer
+        errorRate:
+          type: number
+          format: float
+        activeConnections:
+          type: integer
+
+    AlertRule:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        metric:
+          type: string
+        threshold:
+          type: number
+        notifyType:
+          type: string
+        enabled:
+          type: boolean

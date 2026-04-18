@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: 会话管理 API
+  description: 用户会话管理和强制下线接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: session
+    description: 会话管理
+
+paths:
+  /sessions:
+    get:
+      tags: [session]
+      summary: 查询活跃会话列表
+      description: 查询当前租户的活跃会话
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: userId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Session'
+                      total:
+                        type: integer
+
+  /sessions/{id}/kick:
+    post:
+      tags: [session]
+      summary: 强制下线
+      description: 强制指定会话下线（需要管理员权限）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 会话 ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 下线成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                    example: "用户已强制下线"
+
+  /sessions/user/{userId}/kick:
+    post:
+      tags: [session]
+      summary: 强制用户所有会话下线
+      description: 强制指定用户的所有会话下线
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 下线成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      kickedCount:
+                        type: integer
+                        description: 被下线的会话数量
+
+  /sessions/active:
+    get:
+      tags: [session]
+      summary: 查询当前用户会话
+      description: 查询当前登录用户的活跃会话信息
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: integer
+        tenantId:
+          type: integer
+        loginTime:
+          type: string
+          format: date-time
+        lastActive:
+          type: string
+          format: date-time
+        deviceInfo:
+          type: string
+          example: "Chrome on Windows"
+        ipAddress:
+          type: string
+          example: "192.168.1.100"
+        status:
+          type: integer
+          enum: [0, 1]
+          description: 0=已下线, 1=活跃
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

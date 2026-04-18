@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: Permission & Route Management API
+  description: |
+    权限路由管理 API，提供RBAC权限控制、动态路由配置等功能。
+    注：复用后台管理框架的用户、角色、菜单表。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/permission
+
+security:
+  - BearerAuth: []
+  - TenantId: []
+
+tags:
+  - name: permissions
+    description: 权限管理
+  - name: routes
+    description: 动态路由
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    TenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+
+  schemas:
+    Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+        permissionCode:
+          type: string
+        permissionName:
+          type: string
+        resourceType:
+          type: string
+          enum: [API, MENU, BUTTON]
+        resourcePath:
+          type: string
+        httpMethod:
+          type: string
+          enum: [GET, POST, PUT, DELETE, PATCH]
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PermissionCreateRequest:
+      type: object
+      required:
+        - permissionCode
+        - permissionName
+        - resourceType
+      properties:
+        permissionCode:
+          type: string
+        permissionName:
+          type: string
+        resourceType:
+          type: string
+          enum: [API, MENU, BUTTON]
+        resourcePath:
+          type: string
+        httpMethod:
+          type: string
+          enum: [GET, POST, PUT, DELETE, PATCH]
+        description:
+          type: string
+
+    RouteNode:
+      type: object
+      properties:
+        id:
+          type: integer
+        menuId:
+          type: integer
+        routePath:
+          type: string
+        componentName:
+          type: string
+        redirect:
+          type: string
+        meta:
+          type: object
+          properties:
+            title:
+              type: string
+            icon:
+              type: string
+            hidden:
+              type: boolean
+            noCache:
+              type: boolean
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteNode'
+
+paths:
+  /permissions:
+    get:
+      tags:
+        - permissions
+      summary: 获取权限列表
+      operationId: listPermissions
+      parameters:
+        - name: resourceType
+          in: query
+          schema:
+            type: string
+        - name: permissionCode
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回权限列表
+
+    post:
+      tags:
+        - permissions
+      summary: 创建权限
+      operationId: createPermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /permissions/{id}:
+    get:
+      tags:
+        - permissions
+      summary: 获取权限详情
+      operationId: getPermission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回权限详情
+
+    put:
+      tags:
+        - permissions
+      summary: 更新权限
+      operationId: updatePermission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - permissions
+      summary: 删除权限
+      operationId: deletePermission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /roles/{roleId}/permissions:
+    get:
+      tags:
+        - permissions
+      summary: 获取角色权限
+      operationId: getRolePermissions
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回权限列表
+
+    put:
+      tags:
+        - permissions
+      summary: 分配角色权限
+      operationId: assignRolePermissions
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - permissionIds
+              properties:
+                permissionIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 分配成功
+
+  /users/{userId}/permissions:
+    get:
+      tags:
+        - permissions
+      summary: 获取用户权限（所有角色的权限集合）
+      operationId: getUserPermissions
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回用户权限列表
+
+  /routes/user:
+    get:
+      tags:
+        - routes
+      summary: 获取用户的动态路由
+      description: 根据用户角色返回前端路由配置
+      operationId: getUserRoutes
+      responses:
+        '200':
+          description: 成功返回路由配置
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RouteNode'
+
+  /routes/refresh:
+    post:
+      tags:
+        - routes
+      summary: 刷新路由缓存
+      operationId: refreshRoutes
+      responses:
+        '200':
+          description: 刷新成功
+
+  /check-permission:
+    post:
+      tags:
+        - permissions
+      summary: 检查用户权限
+      operationId: checkPermission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - permission
+              properties:
+                permission:
+                  type: string
+                  description: 权限编码，如 user:create
+      responses:
+        '200':
+          description: 返回权限检查结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hasPermission:
+                    type: boolean

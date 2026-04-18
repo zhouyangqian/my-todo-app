@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: 验证码 API
+  description: 图形验证码生成和验证接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: captcha
+    description: 验证码管理
+
+paths:
+  /captcha:
+    get:
+      tags: [captcha]
+      summary: 生成验证码
+      description: 生成图形验证码 (4位字母数字混合)
+      responses:
+        '200':
+          description: 生成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      captchaId:
+                        type: string
+                        format: uuid
+                        description: 验证码 ID
+                      captchaImage:
+                        type: string
+                        format: base64
+                        description: 验证码图片 (Base64编码)
+                      expiresAt:
+                        type: string
+                        format: date-time
+                        description: 过期时间 (生成后5分钟)
+
+  /captcha/verify:
+    post:
+      tags: [captcha]
+      summary: 验证验证码
+      description: 验证用户输入的验证码是否正确
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [captchaId, captchaCode]
+              properties:
+                captchaId:
+                  type: string
+                  format: uuid
+                  description: 验证码 ID
+                captchaCode:
+                  type: string
+                  example: "a1b2"
+                  description: 验证码 (不区分大小写)
+      responses:
+        '200':
+          description: 验证成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "验证成功"
+        '400':
+          description: 验证失败
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    enum: ["验证码已过期", "验证码错误", "验证码已被使用"]
+
+components:
+  schemas:
+    CaptchaResponse:
+      type: object
+      properties:
+        captchaId:
+          type: string
+          format: uuid
+        captchaImage:
+          type: string
+          format: base64
+        expiresAt:
+          type: string
+          format: date-time
+
+    CaptchaRequest:
+      type: object
+      required: [captchaId, captchaCode]
+      properties:
+        captchaId:
+          type: string
+          format: uuid
+        captchaCode:
+          type: string
+          minLength: 4
+          maxLength: 4

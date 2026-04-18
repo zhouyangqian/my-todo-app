@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: 灰度发布配置 API
+  description: 灰度发布策略配置管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关管理
+
+tags:
+  - name: canary
+    description: 灰度发布配置
+
+paths:
+  /gateway/canary-strategies:
+    get:
+      tags: [canary]
+      summary: 查询灰度策略列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CanaryStrategy'
+
+    post:
+      tags: [canary]
+      summary: 创建灰度策略
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serviceId, targetVersion, trafficPercentage]
+              properties:
+                serviceId:
+                  type: string
+                  example: "user-service"
+                targetVersion:
+                  type: string
+                  example: "v2"
+                trafficPercentage:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                  example: 10
+                matchUserIds:
+                  type: array
+                  items:
+                    type: string
+                  example: ["user-001", "user-002"]
+                matchHeader:
+                  type: string
+                  example: "X-Beta-Test"
+                matchHeaderValue:
+                  type: string
+                  example: "true"
+      responses:
+        '200':
+          description: 创建成功
+
+  /gateway/canary-strategies/{id}:
+    get:
+      tags: [canary]
+      summary: 查询灰度策略详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    $ref: '#/components/schemas/CanaryStrategy'
+
+    put:
+      tags: [canary]
+      summary: 更新灰度策略
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trafficPercentage:
+                  type: integer
+                status:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [canary]
+      summary: 删除灰度策略
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /gateway/canary-strategies/{id}/rollback:
+    post:
+      tags: [canary]
+      summary: 回滚灰度策略
+      description: 立即回滚到旧版本
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 回滚成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                    example: "已回滚到v1版本"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CanaryStrategy:
+      type: object
+      properties:
+        id:
+          type: integer
+        serviceId:
+          type: string
+        targetVersion:
+          type: string
+        trafficPercentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+        matchUserIds:
+          type: array
+          items:
+            type: string
+        matchHeader:
+          type: string
+        matchHeaderValue:
+          type: string
+        status:
+          type: integer
+          enum: [0, 1]
+          description: 0=禁用, 1=启用
+        createdAt:
+          type: string
+          format: date-time

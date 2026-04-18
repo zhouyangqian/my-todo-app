@@ -1,0 +1,752 @@
+openapi: 3.0.3
+info:
+  title: 销售管理 API
+  description: 销售报价、订单、出库、退货管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: ERP 服务
+
+tags:
+  - name: customer
+    description: 客户管理
+  - name: sales-quotation
+    description: 销售报价
+  - name: sales-order
+    description: 销售订单
+  - name: sales-delivery
+    description: 销售出库
+  - name: sales-return
+    description: 销售退货
+
+paths:
+  /customers:
+    get:
+      tags: [customer]
+      summary: 查询客户列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: keyword
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Customer'
+                      total:
+                        type: integer
+
+    post:
+      tags: [customer]
+      summary: 创建客户
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code:
+                  type: string
+                  example: "CUS001"
+                name:
+                  type: string
+                  example: "客户A"
+                type:
+                  type: string
+                  example: "WHOLESALE"
+                contact:
+                  type: string
+                phone:
+                  type: string
+                email:
+                  type: string
+                address:
+                  type: string
+                creditLimit:
+                  type: number
+                  format: decimal
+      responses:
+        '200':
+          description: 创建成功
+
+  /customers/{id}:
+    get:
+      tags: [customer]
+      summary: 查询客户详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    put:
+      tags: [customer]
+      summary: 更新客户
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                contact:
+                  type: string
+                phone:
+                  type: string
+                creditLimit:
+                  type: number
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [customer]
+      summary: 删除客户
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /sales-quotations:
+    get:
+      tags: [sales-quotation]
+      summary: 查询报价单列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, SENT, ACCEPTED, EXPIRED, CONVERTED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [sales-quotation]
+      summary: 创建报价单
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalesQuotationCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+
+  /sales-quotations/{id}:
+    get:
+      tags: [sales-quotation]
+      summary: 查询报价单详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /sales-quotations/{id}/convert:
+    post:
+      tags: [sales-quotation]
+      summary: 报价单转为订单
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 转换成功
+
+  /sales-orders:
+    get:
+      tags: [sales-order]
+      summary: 查询销售订单列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, PARTIAL_DELIVERED, COMPLETED, CANCELLED]
+        - name: orderDateStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: orderDateEnd
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SalesOrder'
+                      total:
+                        type: integer
+
+    post:
+      tags: [sales-order]
+      summary: 创建销售订单
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalesOrderCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+
+  /sales-orders/{id}:
+    get:
+      tags: [sales-order]
+      summary: 查询销售订单详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    put:
+      tags: [sales-order]
+      summary: 更新销售订单
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deliveryDate:
+                  type: string
+                  format: date
+                remark:
+                  type: string
+      responses:
+        '200':
+          description: 更新成功
+
+  /sales-orders/{id}/approve:
+    post:
+      tags: [sales-order]
+      summary: 审批销售订单
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [APPROVE, REJECT]
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: 审批成功
+
+  /sales-orders/{id}/cancel:
+    post:
+      tags: [sales-order]
+      summary: 取消销售订单
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 取消成功
+
+  /sales-orders/{id}/check-inventory:
+    get:
+      tags: [sales-order]
+      summary: 检查订单库存
+      description: 检查订单商品库存是否充足
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 检查成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productId:
+                          type: integer
+                        productName:
+                          type: string
+                        orderQuantity:
+                          type: integer
+                        availableQuantity:
+                          type: integer
+                        isSufficient:
+                          type: boolean
+
+  /sales-deliveries:
+    get:
+      tags: [sales-delivery]
+      summary: 查询销售出库单列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: query
+          schema:
+            type: integer
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+        - name: deliveryDateStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [sales-delivery]
+      summary: 创建销售出库单
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalesDeliveryCreateRequest'
+      responses:
+        '200':
+          description: 创建成功
+
+  /sales-deliveries/{id}:
+    get:
+      tags: [sales-delivery]
+      summary: 查询出库单详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /sales-returns:
+    get:
+      tags: [sales-return]
+      summary: 查询销售退货单列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: orderId
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [sales-return]
+      summary: 创建销售退货单
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customerId, returnDate, items]
+              properties:
+                orderId:
+                  type: integer
+                deliveryId:
+                  type: integer
+                customerId:
+                  type: integer
+                returnDate:
+                  type: string
+                  format: date
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [productId, returnQuantity]
+                    properties:
+                      productId:
+                        type: integer
+                      returnQuantity:
+                        type: integer
+                      returnReason:
+                        type: string
+                returnReason:
+                  type: string
+      responses:
+        '200':
+          description: 创建成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        contact:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        creditLimit:
+          type: number
+          format: decimal
+        currentDebt:
+          type: number
+          format: decimal
+        status:
+          type: integer
+          enum: [0, 1]
+        createdAt:
+          type: string
+          format: date-time
+
+    SalesQuotation:
+      type: object
+      properties:
+        id:
+          type: integer
+        quotationNo:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        quotationDate:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        totalAmount:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [DRAFT, SENT, ACCEPTED, EXPIRED, CONVERTED]
+        createdAt:
+          type: string
+          format: date-time
+
+    SalesQuotationCreateRequest:
+      type: object
+      required: [customerId, quotationDate, items]
+      properties:
+        customerId:
+          type: integer
+        quotationDate:
+          type: string
+          format: date
+        validUntil:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            type: object
+            required: [productId, quantity, unitPrice]
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+              unitPrice:
+                type: number
+                format: decimal
+        remark:
+          type: string
+
+    SalesOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        orderNo:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        orderDate:
+          type: string
+          format: date
+        deliveryDate:
+          type: string
+          format: date
+        totalAmount:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, PARTIAL_DELIVERED, COMPLETED, CANCELLED]
+        isShortage:
+          type: boolean
+        remark:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SalesOrderItem'
+
+    SalesOrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+          format: decimal
+        amount:
+          type: number
+          format: decimal
+        deliveredQuantity:
+          type: integer
+
+    SalesOrderCreateRequest:
+      type: object
+      required: [customerId, orderDate, items]
+      properties:
+        customerId:
+          type: integer
+        orderDate:
+          type: string
+          format: date
+        deliveryDate:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            type: object
+            required: [productId, quantity, unitPrice]
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+              unitPrice:
+                type: number
+                format: decimal
+        remark:
+          type: string
+
+    SalesDeliveryCreateRequest:
+      type: object
+      required: [orderId, deliveryDate, warehouseId, items]
+      properties:
+        orderId:
+          type: integer
+        deliveryDate:
+          type: string
+          format: date
+        warehouseId:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            required: [orderItemId, deliveryQuantity]
+            properties:
+              orderItemId:
+                type: integer
+              deliveryQuantity:
+                type: integer
+              batchId:
+                type: integer
+        remark:
+          type: string

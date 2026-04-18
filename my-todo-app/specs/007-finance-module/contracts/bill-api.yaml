@@ -1,0 +1,567 @@
+openapi: 3.0.3
+info:
+  title: 财务模块 - 账单管理API
+  description: 应收应付账单管理接口
+  version: 1.0.0
+  contact:
+    name: Finance Module Team
+
+servers:
+  - url: /api/v1/finance
+
+tags:
+  - name: Bill
+    description: 账单管理
+
+paths:
+  /bills:
+    get:
+      tags:
+        - Bill
+      summary: 查询账单列表
+      description: 支持多条件筛选和分页查询
+      operationId: listBills
+      parameters:
+        - name: billType
+          in: query
+          description: 账单类型 (1=应收, 2=应付)
+          schema:
+            type: integer
+            enum: [1, 2]
+        - name: status
+          in: query
+          description: 账单状态
+          schema:
+            type: integer
+        - name: partnerType
+          in: query
+          description: 往来方类型
+          schema:
+            type: integer
+        - name: partnerId
+          in: query
+          description: 往来方ID
+          schema:
+            type: integer
+            format: int64
+        - name: startDate
+          in: query
+          description: 账单日期开始
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: 账单日期结束
+          schema:
+            type: string
+            format: date
+        - name: keyword
+          in: query
+          description: 关键词搜索(账单号/往来方名称)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 页码
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          description: 每页数量
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillPageResponse'
+      security:
+        - bearerAuth: []
+
+    post:
+      tags:
+        - Bill
+      summary: 创建账单
+      description: 手动创建应收或应付账单
+      operationId: createBill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillResponse'
+        '400':
+          description: 参数错误
+      security:
+        - bearerAuth: []
+
+  /bills/{id}:
+    get:
+      tags:
+        - Bill
+      summary: 获取账单详情
+      operationId: getBill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillDetailResponse'
+        '404':
+          description: 账单不存在
+      security:
+        - bearerAuth: []
+
+    put:
+      tags:
+        - Bill
+      summary: 更新账单
+      operationId: updateBill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillResponse'
+        '400':
+          description: 参数错误或状态不允许修改
+      security:
+        - bearerAuth: []
+
+  /bills/{id}/approve:
+    post:
+      tags:
+        - Bill
+      summary: 审核账单
+      operationId: approveBill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillApproveRequest'
+      responses:
+        '200':
+          description: 审核成功
+        '400':
+          description: 状态不允许审核
+      security:
+        - bearerAuth: []
+
+  /bills/{id}/cancel:
+    post:
+      tags:
+        - Bill
+      summary: 取消账单
+      operationId: cancelBill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillCancelRequest'
+      responses:
+        '200':
+          description: 取消成功
+        '400':
+          description: 状态不允许取消
+      security:
+        - bearerAuth: []
+
+  /bills/{id}/payments:
+    get:
+      tags:
+        - Bill
+      summary: 获取账单收付款记录
+      operationId: getBillPayments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRecordListResponse'
+      security:
+        - bearerAuth: []
+
+  /bills/{id}/invoices:
+    get:
+      tags:
+        - Bill
+      summary: 获取账单关联发票
+      operationId: getBillInvoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponse'
+      security:
+        - bearerAuth: []
+
+  /bills/summary:
+    get:
+      tags:
+        - Bill
+      summary: 账单汇总统计
+      operationId: getBillSummary
+      parameters:
+        - name: billType
+          in: query
+          description: 账单类型
+          schema:
+            type: integer
+            enum: [1, 2]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillSummaryResponse'
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    BillCreateRequest:
+      type: object
+      required:
+        - billType
+        - partnerType
+        - partnerId
+        - amount
+        - billDate
+      properties:
+        billType:
+          type: integer
+          description: 账单类型 (1=应收, 2=应付)
+          enum: [1, 2]
+        partnerType:
+          type: integer
+          description: 往来方类型 (1=客户, 2=供应商)
+          enum: [1, 2]
+        partnerId:
+          type: integer
+          format: int64
+          description: 往来方ID
+        amount:
+          type: number
+          description: 账单金额
+          minimum: 0.01
+        currency:
+          type: string
+          description: 币种
+          default: CNY
+        billDate:
+          type: string
+          format: date
+          description: 账单日期
+        dueDate:
+          type: string
+          format: date
+          description: 到期日
+        accountId:
+          type: integer
+          format: int64
+          description: 关联账户
+        remark:
+          type: string
+          description: 备注
+          maxLength: 500
+
+    BillUpdateRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+        dueDate:
+          type: string
+          format: date
+        accountId:
+          type: integer
+          format: int64
+        remark:
+          type: string
+          maxLength: 500
+
+    BillApproveRequest:
+      type: object
+      required:
+        - approved
+      properties:
+        approved:
+          type: boolean
+          description: 是否通过
+        reason:
+          type: string
+          description: 审核意见
+
+    BillCancelRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          description: 取消原因
+
+    BillResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        billNo:
+          type: string
+        billType:
+          type: integer
+        status:
+          type: integer
+        amount:
+          type: number
+        paidAmount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    BillDetailResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        billNo:
+          type: string
+        billType:
+          type: integer
+          description: 1=应收, 2=应付
+        direction:
+          type: integer
+          description: 1=正常, -1=红字
+        partnerType:
+          type: integer
+        partnerId:
+          type: integer
+          format: int64
+        partnerName:
+          type: string
+        accountId:
+          type: integer
+          format: int64
+        accountName:
+          type: string
+        amount:
+          type: number
+        paidAmount:
+          type: number
+        unpaidAmount:
+          type: number
+        currency:
+          type: string
+        exchangeRate:
+          type: number
+        baseAmount:
+          type: number
+        billDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: integer
+        statusName:
+          type: string
+        sourceType:
+          type: string
+        sourceId:
+          type: integer
+          format: int64
+        sourceNo:
+          type: string
+        remark:
+          type: string
+        auditStatus:
+          type: integer
+        auditByName:
+          type: string
+        auditAt:
+          type: string
+          format: date-time
+        createdByName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    BillPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillDetailResponse'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    BillSummaryResponse:
+      type: object
+      properties:
+        totalAmount:
+          type: number
+          description: 总金额
+        paidAmount:
+          type: number
+          description: 已收/付金额
+        unpaidAmount:
+          type: number
+          description: 未收/付金额
+        overdueAmount:
+          type: number
+          description: 逾期金额
+        billCount:
+          type: integer
+          description: 账单数量
+        overdueCount:
+          type: integer
+          description: 逾期数量
+
+    PaymentRecordListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/PaymentRecordResponse'
+
+    PaymentRecordResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        paymentNo:
+          type: string
+        paymentType:
+          type: integer
+        amount:
+          type: number
+        paymentMethod:
+          type: integer
+        paymentDate:
+          type: string
+          format: date
+        status:
+          type: integer
+        remark:
+          type: string
+
+    InvoiceListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/InvoiceResponse'
+
+    InvoiceResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        invoiceNo:
+          type: string
+        invoiceType:
+          type: integer
+        invoiceDate:
+          type: string
+          format: date
+        amount:
+          type: number
+        taxAmount:
+          type: number
+        totalAmount:
+          type: number
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

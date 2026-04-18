@@ -1,0 +1,213 @@
+openapi: 3.0.3
+info:
+  title: 权限管理 API
+  description: 权限的增删改查接口，支持动态权限配置
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: permission
+    description: 权限管理
+
+paths:
+  /permissions:
+    get:
+      tags: [permission]
+      summary: 查询权限列表
+      description: 分页查询权限列表，支持按权限代码、名称搜索
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Permission'
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      size:
+                        type: integer
+
+    post:
+      tags: [permission]
+      summary: 创建权限
+      description: 创建新的权限定义（需要系统管理员权限）
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code:
+                  type: string
+                  example: "user:create"
+                name:
+                  type: string
+                  example: "创建用户"
+                description:
+                  type: string
+                  example: "允许创建新用户"
+                parentId:
+                  type: integer
+                  example: null
+      responses:
+        '200':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+
+  /permissions/{id}:
+    get:
+      tags: [permission]
+      summary: 查询权限详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+
+    put:
+      tags: [permission]
+      summary: 更新权限
+      description: 更新权限信息（需要系统管理员权限）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+
+    delete:
+      tags: [permission]
+      summary: 删除权限
+      description: 删除权限定义及相关关联（需要系统管理员权限）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  message:
+                    type: string
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: string
+          example: "user:create"
+        name:
+          type: string
+          example: "创建用户"
+        description:
+          type: string
+          example: "允许创建新用户"
+        parentId:
+          type: integer
+          nullable: true
+          example: null
+        level:
+          type: integer
+          example: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time

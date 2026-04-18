@@ -1,0 +1,175 @@
+openapi: 3.0.3
+info:
+  title: 网关配置管理 API
+  description: 网关路由配置管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: gateway
+    description: 网关配置管理
+
+paths:
+  /gateway/routes:
+    get:
+      tags: [gateway]
+      summary: 查询路由列表
+      description: 分页查询网关路由配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RouteConfig'
+                      total:
+                        type: integer
+
+    post:
+      tags: [gateway]
+      summary: 创建路由
+      description: 创建新的路由配置
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [path, serviceId]
+              properties:
+                path:
+                  type: string
+                  example: "/api/v1/users/**"
+                serviceId:
+                  type: string
+                  example: "user-service"
+                stripPrefix:
+                  type: integer
+                  example: 2
+                timeout:
+                  type: integer
+                  example: 5000
+                retry:
+                  type: integer
+                  example: 3
+      responses:
+        '200':
+          description: 创建成功
+
+  /gateway/routes/{id}:
+    get:
+      tags: [gateway]
+      summary: 查询路由详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    put:
+      tags: [gateway]
+      summary: 更新路由
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                serviceId:
+                  type: string
+                timeout:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [gateway]
+      summary: 删除路由
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RouteConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+        path:
+          type: string
+        serviceId:
+          type: string
+        stripPrefix:
+          type: integer
+        timeout:
+          type: integer
+        retry:
+          type: integer
+        status:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time

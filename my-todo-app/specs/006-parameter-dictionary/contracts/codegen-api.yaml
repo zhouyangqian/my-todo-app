@@ -1,0 +1,533 @@
+openapi: 3.0.3
+info:
+  title: Code Generation API
+  description: |
+    代码生成 API，基于数据库表结构自动生成前后端CRUD代码。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/codegen
+
+security:
+  - BearerAuth: []
+  - TenantId: []
+
+tags:
+  - name: templates
+    description: 代码模板
+  - name: database
+    description: 数据库表查询
+  - name: generation
+    description: 代码生成
+  - name: history
+    description: 生成历史
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    TenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+
+  schemas:
+    CodeTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+        templateName:
+          type: string
+        templateCode:
+          type: string
+        templateType:
+          type: string
+          enum: [CONTROLLER, SERVICE, MAPPER, VUE, MODEL]
+        templateContent:
+          type: string
+        description:
+          type: string
+        filePath:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        version:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CodeTemplateCreateRequest:
+      type: object
+      required:
+        - templateName
+        - templateCode
+        - templateType
+        - templateContent
+      properties:
+        templateName:
+          type: string
+        templateCode:
+          type: string
+        templateType:
+          type: string
+          enum: [CONTROLLER, SERVICE, MAPPER, VUE, MODEL]
+        templateContent:
+          type: string
+        description:
+          type: string
+        filePath:
+          type: string
+
+    DatabaseTable:
+      type: object
+      properties:
+        tableName:
+          type: string
+        tableComment:
+          type: string
+        engine:
+          type: string
+        charset:
+          type: string
+        createTime:
+          type: string
+          format: date-time
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              columnName:
+                type: string
+              columnComment:
+                type: string
+              dataType:
+                type: string
+              length:
+                type: integer
+              nullable:
+                type: boolean
+              primaryKey:
+                type: boolean
+              autoIncrement:
+                type: boolean
+
+    GenConfig:
+      type: object
+      properties:
+        tableName:
+          type: string
+        tableComment:
+          type: string
+        moduleName:
+          type: string
+        packageName:
+          type: string
+        functionName:
+          type: string
+        genType:
+          type: string
+          enum: [CRUD, TREE, MASTER_DETAIL]
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              columnName:
+                type: string
+              columnComment:
+                type: string
+              javaType:
+                type: string
+              javaField:
+                type: string
+              isPk:
+                type: boolean
+              isIncrement:
+                type: boolean
+              isRequired:
+                type: boolean
+              isInsert:
+                type: boolean
+              isEdit:
+                type: boolean
+              isList:
+                type: boolean
+              isQuery:
+                type: boolean
+              queryType:
+                type: string
+                enum: [EQ, NE, GT, LT, GE, LE, LIKE, BETWEEN]
+              htmlType:
+                type: string
+                enum: [input, textarea, select, radio, checkbox, datetime, imageUpload, fileUpload]
+              dictType:
+                type: string
+
+    GenHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        tableName:
+          type: string
+        tableComment:
+          type: string
+        moduleName:
+          type: string
+        packageName:
+          type: string
+        functionName:
+          type: string
+        genType:
+          type: string
+        generatedFiles:
+          type: array
+          items:
+            type: string
+        downloadCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /templates:
+    get:
+      tags:
+        - templates
+      summary: 获取代码模板列表
+      operationId: listCodeTemplates
+      parameters:
+        - name: templateType
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回模板列表
+
+    post:
+      tags:
+        - templates
+      summary: 创建代码模板
+      operationId: createCodeTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeTemplateCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /templates/{id}:
+    get:
+      tags:
+        - templates
+      summary: 获取代码模板详情
+      operationId: getCodeTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回模板详情
+
+    put:
+      tags:
+        - templates
+      summary: 更新代码模板
+      operationId: updateCodeTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeTemplateCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - templates
+      summary: 删除代码模板
+      operationId: deleteCodeTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /database/tables:
+    get:
+      tags:
+        - database
+      summary: 获取数据库表列表
+      operationId: listDatabaseTables
+      parameters:
+        - name: tableName
+          in: query
+          schema:
+            type: string
+        - name: tableComment
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回表列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tableName:
+                      type: string
+                    tableComment:
+                      type: string
+                    createTime:
+                      type: string
+                      format: date-time
+
+  /database/tables/{tableName}:
+    get:
+      tags:
+        - database
+      summary: 获取表结构详情
+      operationId: getTableSchema
+      parameters:
+        - name: tableName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回表结构详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseTable'
+
+  /database/import:
+    post:
+      tags:
+        - database
+      summary: 导入表结构
+      description: 从数据库导入表结构用于代码生成
+      operationId: importTableSchema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tableName
+              properties:
+                tableName:
+                  type: string
+      responses:
+        '200':
+          description: 成功导入表结构
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenConfig'
+
+  /generation/preview:
+    post:
+      tags:
+        - generation
+      summary: 预览生成的代码
+      operationId: previewGeneratedCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenConfig'
+      responses:
+        '200':
+          description: 成功返回预览代码
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  files:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    description: 文件路径 -> 文件内容的映射
+
+  /generation/generate:
+    post:
+      tags:
+        - generation
+      summary: 生成代码
+      operationId: generateCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenConfig'
+      responses:
+        '200':
+          description: 成功生成代码
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  historyId:
+                    type: integer
+                  downloadUrl:
+                    type: string
+                  files:
+                    type: array
+                    items:
+                      type: string
+
+  /generation/download/{historyId}:
+    get:
+      tags:
+        - generation
+      summary: 下载生成的代码
+      operationId: downloadGeneratedCode
+      parameters:
+        - name: historyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 下载代码压缩包
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+
+  /history:
+    get:
+      tags:
+        - history
+      summary: 获取代码生成历史
+      operationId: listGenHistory
+      parameters:
+        - name: tableName
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回生成历史列表
+
+  /history/{id}:
+    get:
+      tags:
+        - history
+      summary: 获取生成历史详情
+      operationId: getGenHistory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回生成历史详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenHistory'
+
+    delete:
+      tags:
+        - history
+      summary: 删除生成历史
+      operationId: deleteGenHistory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /history/{id}/files:
+    get:
+      tags:
+        - history
+      summary: 获取生成的文件列表
+      operationId: getGeneratedFiles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回文件列表
+
+  /history/{id}/regenerate:
+    post:
+      tags:
+        - history
+      summary: 重新生成代码
+      operationId: regenerateCode
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenConfig'
+      responses:
+        '200':
+          description: 成功重新生成代码

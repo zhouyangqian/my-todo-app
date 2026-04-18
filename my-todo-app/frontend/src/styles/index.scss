@@ -1,0 +1,61 @@
+// 全局样式入口
+@use './variables.scss' as *;
+
+// 重置样式
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  font-size: 14px;
+  color: $text-primary;
+  background-color: $bg-color-page;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 滚动条样式
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-color;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-color-base;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: $text-secondary;
+}
+
+// 链接样式
+a {
+  color: $primary-color;
+  text-decoration: none;
+
+  &:hover {
+    color: lighten($primary-color, 10%);
+  }
+}
+
+// NProgress样式覆盖
+#nprogress {
+  .bar {
+    background: $primary-color !important;
+  }
+
+  .peg {
+    box-shadow: 0 0 10px $primary-color, 0 0 5px $primary-color !important;
+  }
+}

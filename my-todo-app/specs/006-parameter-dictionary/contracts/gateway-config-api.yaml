@@ -1,0 +1,463 @@
+openapi: 3.0.3
+info:
+  title: Gateway Configuration API
+  description: |
+    网关配置管理 API，用于管理 Spring Cloud Gateway 的路由、限流和熔断配置。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/gateway
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: routes
+    description: 路由配置
+  - name: rate-limits
+    description: 限流配置
+  - name: circuit-breakers
+    description: 熔断器配置
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+    GatewayRoute:
+      type: object
+      properties:
+        id:
+          type: integer
+        routeId:
+          type: string
+        routeName:
+          type: string
+        uri:
+          type: string
+        predicates:
+          type: object
+        filters:
+          type: object
+        orderNum:
+          type: integer
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RouteCreateRequest:
+      type: object
+      required:
+        - routeId
+        - routeName
+        - uri
+        - predicates
+      properties:
+        routeId:
+          type: string
+        routeName:
+          type: string
+        uri:
+          type: string
+        predicates:
+          type: object
+        filters:
+          type: object
+        orderNum:
+          type: integer
+        description:
+          type: string
+
+    RateLimit:
+      type: object
+      properties:
+        id:
+          type: integer
+        limitName:
+          type: string
+        limitType:
+          type: string
+          enum: [IP, API, SERVICE]
+        targetKey:
+          type: string
+        limitCount:
+          type: integer
+        timeWindowSeconds:
+          type: integer
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+        createdAt:
+          type: string
+          format: date-time
+
+    CircuitBreaker:
+      type: object
+      properties:
+        id:
+          type: integer
+        breakerName:
+          type: string
+        serviceId:
+          type: string
+        failureThreshold:
+          type: integer
+        timeoutSeconds:
+          type: integer
+        halfOpenCalls:
+          type: integer
+        fallbackUri:
+          type: string
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /routes:
+    get:
+      tags:
+        - routes
+      summary: 获取路由列表
+      operationId: listRoutes
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回路由列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayRoute'
+
+    post:
+      tags:
+        - routes
+      summary: 创建路由
+      operationId: createRoute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayRoute'
+
+  /routes/{id}:
+    get:
+      tags:
+        - routes
+      summary: 获取路由详情
+      operationId: getRoute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回路由详情
+
+    put:
+      tags:
+        - routes
+      summary: 更新路由
+      operationId: updateRoute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - routes
+      summary: 删除路由
+      operationId: deleteRoute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /routes/{id}/refresh:
+    post:
+      tags:
+        - routes
+      summary: 刷新路由配置
+      description: 将路由配置应用到网关
+      operationId: refreshRoute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 刷新成功
+
+  /rate-limits:
+    get:
+      tags:
+        - rate-limits
+      summary: 获取限流配置列表
+      operationId: listRateLimits
+      responses:
+        '200':
+          description: 成功返回限流配置列表
+
+    post:
+      tags:
+        - rate-limits
+      summary: 创建限流配置
+      operationId: createRateLimit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - limitName
+                - limitType
+                - targetKey
+                - limitCount
+                - timeWindowSeconds
+              properties:
+                limitName:
+                  type: string
+                limitType:
+                  type: string
+                  enum: [IP, API, SERVICE]
+                targetKey:
+                  type: string
+                limitCount:
+                  type: integer
+                timeWindowSeconds:
+                  type: integer
+      responses:
+        '201':
+          description: 创建成功
+
+  /rate-limits/{id}:
+    get:
+      tags:
+        - rate-limits
+      summary: 获取限流配置详情
+      operationId: getRateLimit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回限流配置详情
+
+    put:
+      tags:
+        - rate-limits
+      summary: 更新限流配置
+      operationId: updateRateLimit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limitCount:
+                  type: integer
+                timeWindowSeconds:
+                  type: integer
+                status:
+                  type: string
+                  enum: [ENABLED, DISABLED]
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - rate-limits
+      summary: 删除限流配置
+      operationId: deleteRateLimit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /circuit-breakers:
+    get:
+      tags:
+        - circuit-breakers
+      summary: 获取熔断器配置列表
+      operationId: listCircuitBreakers
+      responses:
+        '200':
+          description: 成功返回熔断器配置列表
+
+    post:
+      tags:
+        - circuit-breakers
+      summary: 创建熔断器配置
+      operationId: createCircuitBreaker
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - breakerName
+                - serviceId
+                - failureThreshold
+                - timeoutSeconds
+              properties:
+                breakerName:
+                  type: string
+                serviceId:
+                  type: string
+                failureThreshold:
+                  type: integer
+                timeoutSeconds:
+                  type: integer
+                halfOpenCalls:
+                  type: integer
+                fallbackUri:
+                  type: string
+      responses:
+        '201':
+          description: 创建成功
+
+  /circuit-breakers/{id}:
+    get:
+      tags:
+        - circuit-breakers
+      summary: 获取熔断器配置详情
+      operationId: getCircuitBreaker
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回熔断器配置详情
+
+    put:
+      tags:
+        - circuit-breakers
+      summary: 更新熔断器配置
+      operationId: updateCircuitBreaker
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                failureThreshold:
+                  type: integer
+                timeoutSeconds:
+                  type: integer
+                halfOpenCalls:
+                  type: integer
+                fallbackUri:
+                  type: string
+                status:
+                  type: string
+                  enum: [ENABLED, DISABLED]
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - circuit-breakers
+      summary: 删除熔断器配置
+      operationId: deleteCircuitBreaker
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功

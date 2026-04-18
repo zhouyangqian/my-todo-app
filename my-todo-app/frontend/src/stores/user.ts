@@ -1,0 +1,152 @@
+// stores/user.ts - 用户状态管理模块（Pinia Store）
+// 管理用户登录状态、Token、用户信息、权限和角色等全局状态
+
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { login, logout, getUserInfo } from '@/api/auth'
+import router from '@/router'
+
+// 用户基本信息类型
+export interface UserInfo {
+  userId: number          // 用户唯一标识
+  username: string        // 登录用户名
+  email: string           // 邮箱
+  realName: string        // 真实姓名
+  avatar: string          // 头像URL
+  tenantId: number        // 所属租户ID（多租户架构）
+}
+
+/**
+ * 用户状态管理 Store（使用 Composition API 风格）
+ * 管理当前登录用户的所有状态和操作
+ */
+export const useUserStore = defineStore('user', () => {
+  // ===== 状态定义 =====
+
+  // 访问令牌，页面刷新时从 localStorage 恢复
+  const token = ref<string>(localStorage.getItem('token') || '')
+  // 刷新令牌，用于令牌续期
+  const refreshToken = ref<string>(localStorage.getItem('refreshToken') || '')
+  // 当前登录用户信息
+  const userInfo = ref<UserInfo | null>(null)
+  // 用户拥有的权限编码列表
+  const permissions = ref<string[]>([])
+  // 用户拥有的角色编码列表
+  const roles = ref<string[]>([])
+
+  // ===== 计算属性 =====
+
+  // 是否已登录（通过 token 是否存在判断）
+  const isLoggedIn = computed(() => !!token.value)
+
+  // ===== 操作方法 =====
+
+  /**
+   * 用户登录操作
+   * 1. 调用登录接口获取令牌
+   * 2. 将令牌持久化到 localStorage
+   * 3. 获取用户信息和权限
+   * 4. 跳转到工作台页面
+   * @param username 用户名
+   * @param password 密码
+   */
+  async function loginAction(username: string, password: string) {
+    try {
+      const res = await login({ username, password })
+      // 保存令牌到状态和本地存储
+      token.value = res.accessToken
+      refreshToken.value = res.refreshToken
+      localStorage.setItem('token', res.accessToken)
+      localStorage.setItem('refreshToken', res.refreshToken)
+
+      // 登录成功后立即获取用户信息和权限
+      await getUserInfoAction()
+
+      // 跳转到工作台首页
+      router.push('/dashboard')
+      return res
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * 获取当前登录用户的信息和权限
+   * 从后端获取最新的用户信息、权限列表和角色列表
+   */
+  async function getUserInfoAction() {
+    try {
+      const res = await getUserInfo()
+      userInfo.value = res.userInfo           // 用户基本信息
+      permissions.value = res.permissions || [] // 权限编码列表
+      roles.value = res.roles || []             // 角色编码列表
+      return res
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * 用户登出操作
+   * 无论后端登出接口是否成功，都会清除本地认证信息并跳转到登录页
+   */
+  async function logoutAction() {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      // 无论登出接口成功与否，都清除本地状态
+      clearAuth()
+      router.push('/login')
+    }
+  }
+
+  /**
+   * 清除所有认证相关信息
+   * 清空内存中的状态和 localStorage 中的持久化数据
+   */
+  function clearAuth() {
+    token.value = ''
+    refreshToken.value = ''
+    userInfo.value = null
+    permissions.value = []
+    roles.value = []
+    localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
+  }
+
+  /**
+   * 检查当前用户是否拥有指定权限
+   * @param permission 权限编码（如 system:user:add）
+   * @returns 拥有通配符权限(*)或指定权限时返回 true
+   */
+  function hasPermission(permission: string): boolean {
+    return permissions.value.includes('*') || permissions.value.includes(permission)
+  }
+
+  /**
+   * 检查当前用户是否拥有指定角色
+   * @param role 角色编码（如 admin）
+   * @returns 拥有指定角色时返回 true
+   */
+  function hasRole(role: string): boolean {
+    return roles.value.includes(role)
+  }
+
+  // 暴露状态和方法供组件使用
+  return {
+    token,
+    refreshToken,
+    userInfo,
+    permissions,
+    roles,
+    isLoggedIn,
+    loginAction,
+    getUserInfoAction,
+    logoutAction,
+    clearAuth,
+    hasPermission,
+    hasRole
+  }
+})

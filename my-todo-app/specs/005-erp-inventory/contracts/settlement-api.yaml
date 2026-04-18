@@ -1,0 +1,743 @@
+openapi: 3.0.3
+info:
+  title: 结算管理 API
+  description: 采购付款、销售收款、发票管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: ERP 服务
+
+tags:
+  - name: payment
+    description: 采购付款
+  - name: receipt
+    description: 销售收款
+  - name: invoice
+    description: 发票管理
+
+paths:
+  /payment-accounts:
+    get:
+      tags: [payment]
+      summary: 查询应付记录列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: supplierId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [UNPAID, PARTIAL_PAID, PAID]
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PaymentAccount'
+                      total:
+                        type: integer
+                        summary:
+                          type: object
+                          properties:
+                            totalAmount:
+                              type: number
+                              format: decimal
+                            totalPaid:
+                              type: number
+                              format: decimal
+                            totalRemaining:
+                              type: number
+                              format: decimal
+
+  /payment-applications:
+    get:
+      tags: [payment]
+      summary: 查询付款申请列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: supplierId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED, PAID]
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [payment]
+      summary: 创建付款申请
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentAccountId, applicationAmount, paymentMethod]
+              properties:
+                paymentAccountId:
+                  type: integer
+                applicationAmount:
+                  type: number
+                  format: decimal
+                paymentMethod:
+                  type: string
+                  enum: [CASH, BANK_TRANSFER, CHECK, OTHER]
+                expectedPaymentDate:
+                  type: string
+                  format: date
+                remark:
+                  type: string
+      responses:
+        '200':
+          description: 创建成功
+
+  /payment-applications/{id}/approve:
+    post:
+      tags: [payment]
+      summary: 审批付款申请
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [APPROVE, REJECT]
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: 审批成功
+
+  /payment-applications/{id}/confirm-payment:
+    post:
+      tags: [payment]
+      summary: 确认付款
+      description: 审批通过后，财务人员确认付款并录入凭证号
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentVoucherNo]
+              properties:
+                paymentVoucherNo:
+                  type: string
+                  description: 付款凭证号
+                actualPaymentDate:
+                  type: string
+                  format: date
+                remark:
+                  type: string
+      responses:
+        '200':
+          description: 确认成功
+
+  /suppliers/{supplierId}/payment-summary:
+    get:
+      tags: [payment]
+      summary: 查询供应商付款汇总
+      description: 查询供应商的应付、已付、欠款汇总
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      supplierId:
+                        type: integer
+                      supplierName:
+                        type: string
+                      creditLimit:
+                        type: number
+                        format: decimal
+                      currentDebt:
+                        type: number
+                        format: decimal
+                      availableCredit:
+                        type: number
+                        format: decimal
+                      totalUnpaid:
+                        type: number
+                        format: decimal
+                      unpaidOrderCount:
+                        type: integer
+
+  /receipt-accounts:
+    get:
+      tags: [receipt]
+      summary: 查询应收记录列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [UNRECEIVED, PARTIAL_RECEIVED, RECEIVED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      records:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReceiptAccount'
+                      total:
+                        type: integer
+                        summary:
+                          type: object
+                          properties:
+                            totalAmount:
+                              type: number
+                              format: decimal
+                            totalReceived:
+                              type: number
+                              format: decimal
+                            totalRemaining:
+                              type: number
+                              format: decimal
+
+  /receipt-registrations:
+    get:
+      tags: [receipt]
+      summary: 查询收款记录列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: query
+          schema:
+            type: integer
+        - name: receivedDateStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [receipt]
+      summary: 登记收款
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiptAccountId, receivedAmount, paymentMethod, receivedDate]
+              properties:
+                receiptAccountId:
+                  type: integer
+                receivedAmount:
+                  type: number
+                  format: decimal
+                paymentMethod:
+                  type: string
+                  enum: [CASH, BANK_TRANSFER, ALIPAY, WECHAT, CHECK]
+                receivedDate:
+                  type: string
+                  format: date
+                remark:
+                  type: string
+      responses:
+        '200':
+          description: 登记成功
+
+  /customers/{customerId}/receipt-summary:
+    get:
+      tags: [receipt]
+      summary: 查询客户收款汇总
+      description: 查询客户的应收、已收、欠款汇总
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      customerId:
+                        type: integer
+                      customerName:
+                        type: string
+                      creditLimit:
+                        type: number
+                        format: decimal
+                      currentDebt:
+                        type: number
+                        format: decimal
+                      availableCredit:
+                        type: number
+                        format: decimal
+                      totalUnreceived:
+                        type: number
+                        format: decimal
+                      unreceivedOrderCount:
+                        type: integer
+
+  /invoices:
+    get:
+      tags: [invoice]
+      summary: 查询发票列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: invoiceType
+          in: query
+          schema:
+            type: string
+            enum: [PURCHASE, SALES]
+        - name: documentType
+          in: query
+          schema:
+            type: string
+        - name: invoiceDateStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+    post:
+      tags: [invoice]
+      summary: 创建发票
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [invoiceType, documentType, documentId, invoiceDate, invoiceAmount, invoiceNo]
+              properties:
+                invoiceType:
+                  type: string
+                  enum: [PURCHASE, SALES]
+                documentType:
+                  type: string
+                  description: 关联单据类型（PURCHASE_ORDER/SALES_ORDER等）
+                documentId:
+                  type: integer
+                  description: 关联单据ID
+                invoiceDate:
+                  type: string
+                  format: date
+                invoiceAmount:
+                  type: number
+                  format: decimal
+                invoiceNo:
+                  type: string
+                  description: 发票号码
+                taxNumber:
+                  type: string
+                  description: 税号
+      responses:
+        '200':
+          description: 创建成功
+
+  /invoices/{id}:
+    get:
+      tags: [invoice]
+      summary: 查询发票详情
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+
+  /suppliers/{supplierId}/statements:
+    get:
+      tags: [payment]
+      summary: 供应商对账单
+      description: 查询供应商在指定时间段的采购订单、入库单、应付、付款明细
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: supplierId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      supplierId:
+                        type: integer
+                      supplierName:
+                        type: string
+                      period:
+                        type: string
+                      summary:
+                        type: object
+                        properties:
+                          beginningBalance:
+                            type: number
+                            format: decimal
+                            description: 期初欠款
+                          purchaseAmount:
+                            type: number
+                            format: decimal
+                            description: 本期采购金额
+                          paymentAmount:
+                            type: number
+                            format: decimal
+                            description: 本期付款金额
+                          endingBalance:
+                            type: number
+                            format: decimal
+                            description: 期末欠款
+                      orders:
+                        type: array
+                        description: 采购订单明细
+                        items:
+                          type: object
+                          properties:
+                            orderNo:
+                              type: string
+                            orderDate:
+                              type: string
+                              format: date
+                            amount:
+                              type: number
+                              format: decimal
+                      receipts:
+                        type: array
+                        description: 入库单明细
+                        items:
+                          type: object
+                      payments:
+                        type: array
+                        description: 付款明细
+                        items:
+                          type: object
+
+  /customers/{customerId}/statements:
+    get:
+      tags: [receipt]
+      summary: 客户对账单
+      description: 查询客户在指定时间段的销售订单、出库单、应收、收款明细
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: object
+                    properties:
+                      customerId:
+                        type: integer
+                      customerName:
+                        type: string
+                      period:
+                        type: string
+                      summary:
+                        type: object
+                        properties:
+                          beginningBalance:
+                            type: number
+                            format: decimal
+                            description: 期初欠款
+                          salesAmount:
+                            type: number
+                            format: decimal
+                            description: 本期销售金额
+                          receiptAmount:
+                            type: number
+                            format: decimal
+                            description: 本期收款金额
+                          endingBalance:
+                            type: number
+                            format: decimal
+                            description: 期末欠款
+                      orders:
+                        type: array
+                        description: 销售订单明细
+                        items:
+                          type: object
+                      deliveries:
+                        type: array
+                        description: 出库单明细
+                        items:
+                          type: object
+                      receipts:
+                        type: array
+                        description: 收款明细
+                        items:
+                          type: object
+                      invoices:
+                        type: array
+                        description: 发票明细
+                        items:
+                          type: object
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PaymentAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        paymentNo:
+          type: string
+        supplierId:
+          type: integer
+        supplierName:
+          type: string
+        purchaseOrderId:
+          type: integer
+        purchaseOrderNo:
+          type: string
+        receiptId:
+          type: integer
+        receiptNo:
+          type: string
+        totalAmount:
+          type: number
+          format: decimal
+        paidAmount:
+          type: number
+          format: decimal
+        remainingAmount:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [UNPAID, PARTIAL_PAID, PAID]
+        createdAt:
+          type: string
+          format: date-time
+
+    ReceiptAccount:
+      type: object
+      properties:
+        id:
+          type: integer
+        receiptNo:
+          type: string
+        customerId:
+          type: integer
+        customerName:
+          type: string
+        salesOrderId:
+          type: integer
+        salesOrderNo:
+          type: string
+        deliveryId:
+          type: integer
+        deliveryNo:
+          type: string
+        totalAmount:
+          type: number
+          format: decimal
+        receivedAmount:
+          type: number
+          format: decimal
+        remainingAmount:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [UNRECEIVED, PARTIAL_RECEIVED, RECEIVED]
+        createdAt:
+          type: string
+          format: date-time
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: integer
+        invoiceNo:
+          type: string
+        invoiceType:
+          type: string
+          enum: [PURCHASE, SALES]
+        documentType:
+          type: string
+        documentId:
+          type: integer
+        invoiceDate:
+          type: string
+          format: date
+        invoiceAmount:
+          type: number
+          format: decimal
+        taxNumber:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

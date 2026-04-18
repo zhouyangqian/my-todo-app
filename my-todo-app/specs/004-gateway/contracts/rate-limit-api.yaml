@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: 限流配置管理 API
+  description: 限流规则配置管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关管理
+
+tags:
+  - name: rateLimit
+    description: 限流配置管理
+
+paths:
+  /gateway/rate-limits:
+    get:
+      tags: [rateLimit]
+      summary: 查询限流配置列表
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RateLimitConfig'
+
+    post:
+      tags: [rateLimit]
+      summary: 创建限流配置
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dimension, limit, windowSeconds]
+              properties:
+                dimension:
+                  type: string
+                  enum: [USER, TENANT, API, IP]
+                resource:
+                  type: string
+                  example: "user-service"
+                limit:
+                  type: integer
+                  example: 100
+                windowSeconds:
+                  type: integer
+                  example: 60
+                burst:
+                  type: integer
+                  example: 20
+      responses:
+        '200':
+          description: 创建成功
+
+  /gateway/rate-limits/{id}:
+    put:
+      tags: [rateLimit]
+      summary: 更新限流配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                limit:
+                  type: integer
+                burst:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [rateLimit]
+      summary: 删除限流配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RateLimitConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+        dimension:
+          type: string
+          enum: [USER, TENANT, API, IP]
+        resource:
+          type: string
+        limit:
+          type: integer
+        windowSeconds:
+          type: integer
+        burst:
+          type: integer
+        whitelist:
+          type: array
+          items:
+            type: string

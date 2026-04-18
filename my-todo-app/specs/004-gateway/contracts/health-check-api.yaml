@@ -1,0 +1,188 @@
+openapi: 3.0.3
+info:
+  title: 健康检查配置 API
+  description: 后端服务健康检查配置接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关管理
+
+tags:
+  - name: healthCheck
+    description: 健康检查配置
+
+paths:
+  /gateway/health-checks:
+    get:
+      tags: [healthCheck]
+      summary: 查询健康检查配置列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HealthCheckConfig'
+
+    post:
+      tags: [healthCheck]
+      summary: 创建健康检查配置
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [serviceId, interval]
+              properties:
+                serviceId:
+                  type: string
+                  example: "user-service"
+                interval:
+                  type: integer
+                  example: 10
+                timeout:
+                  type: integer
+                  example: 5
+                failureThreshold:
+                  type: integer
+                  example: 3
+                healthPath:
+                  type: string
+                  example: "/actuator/health"
+      responses:
+        '200':
+          description: 创建成功
+
+  /gateway/health-checks/{id}:
+    put:
+      tags: [healthCheck]
+      summary: 更新健康检查配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                interval:
+                  type: integer
+                timeout:
+                  type: integer
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags: [healthCheck]
+      summary: 删除健康检查配置
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 删除成功
+
+  /gateway/health-checks/service-instances:
+    get:
+      tags: [healthCheck]
+      summary: 查询服务实例状态
+      description: 查询所有服务实例的健康状态
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceInstanceState'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HealthCheckConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+        serviceId:
+          type: string
+        interval:
+          type: integer
+        timeout:
+          type: integer
+        failureThreshold:
+          type: integer
+        healthPath:
+          type: string
+        status:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ServiceInstanceState:
+      type: object
+      properties:
+        instanceId:
+          type: string
+        serviceId:
+          type: string
+        address:
+          type: string
+        status:
+          type: string
+          enum: [HEALTHY, UNHEALTHY]
+        lastCheckTime:
+          type: string
+          format: date-time
+        failureCount:
+          type: integer

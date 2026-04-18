@@ -1,0 +1,646 @@
+openapi: 3.0.3
+info:
+  title: API Marketplace
+  description: |
+    API开放平台 API，提供完整的API市场功能，包括API定义、开发者应用、订阅管理、使用记录和计费。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/api-market
+
+security:
+  - BearerAuth: []
+  - TenantId: []
+
+tags:
+  - name: api-definitions
+    description: API定义管理
+  - name: applications
+    description: 开发者应用
+  - name: subscriptions
+    description: API订阅
+  - name: usage
+    description: 使用记录
+  - name: billing
+    description: 计费管理
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    TenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-Id
+
+  schemas:
+    ApiDefinition:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiName:
+          type: string
+        apiCode:
+          type: string
+        apiVersion:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        endpointUrl:
+          type: string
+        httpMethod:
+          type: string
+        pricePerCall:
+          type: number
+          format: decimal
+        freeQuotaPerDay:
+          type: integer
+        rateLimitPerMinute:
+          type: integer
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, DEPRECATED]
+        auditStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        createdAt:
+          type: string
+          format: date-time
+
+    ApiDefinitionCreateRequest:
+      type: object
+      required:
+        - apiName
+        - apiCode
+        - apiVersion
+        - endpointUrl
+        - httpMethod
+      properties:
+        apiName:
+          type: string
+        apiCode:
+          type: string
+        apiVersion:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        endpointUrl:
+          type: string
+        httpMethod:
+          type: string
+        requestFormat:
+          type: string
+        responseFormat:
+          type: string
+        pricePerCall:
+          type: number
+          format: decimal
+        freeQuotaPerDay:
+          type: integer
+        rateLimitPerMinute:
+          type: integer
+
+    DeveloperApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+        appName:
+          type: string
+        appCode:
+          type: string
+        appDescription:
+          type: string
+        callbackUrl:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED]
+        createdAt:
+          type: string
+          format: date-time
+
+    ApplicationCreateRequest:
+      type: object
+      required:
+        - appName
+        - appCode
+      properties:
+        appName:
+          type: string
+        appCode:
+          type: string
+        appDescription:
+          type: string
+        callbackUrl:
+          type: string
+
+    ApiSubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiId:
+          type: integer
+        appId:
+          type: integer
+        subscriptionStatus:
+          type: string
+          enum: [ACTIVE, SUSPENDED, CANCELLED]
+        subscribeTime:
+          type: string
+          format: date-time
+        unsubscribeTime:
+          type: string
+          format: date-time
+
+    ApiUsageRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiId:
+          type: integer
+        subscriptionId:
+          type: integer
+        appId:
+          type: integer
+        callTime:
+          type: string
+          format: date-time
+        success:
+          type: boolean
+        responseTimeMs:
+          type: integer
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+
+    ApiCallBilling:
+      type: object
+      properties:
+        id:
+          type: integer
+        apiId:
+          type: integer
+        billingDate:
+          type: string
+          format: date
+        totalCalls:
+          type: integer
+        freeCalls:
+          type: integer
+        paidCalls:
+          type: integer
+        unitPrice:
+          type: number
+          format: decimal
+        totalAmount:
+          type: number
+          format: decimal
+        billed:
+          type: boolean
+
+paths:
+  /apis:
+    get:
+      tags:
+        - api-definitions
+      summary: 获取API列表
+      operationId: listApis
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: auditStatus
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回API列表
+
+    post:
+      tags:
+        - api-definitions
+      summary: 创建API定义
+      operationId: createApiDefinition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiDefinitionCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /apis/{id}:
+    get:
+      tags:
+        - api-definitions
+      summary: 获取API详情
+      operationId: getApiDefinition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回API详情
+
+    put:
+      tags:
+        - api-definitions
+      summary: 更新API定义
+      operationId: updateApiDefinition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiDefinitionCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - api-definitions
+      summary: 删除API定义
+      operationId: deleteApiDefinition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /apis/{id}/publish:
+    post:
+      tags:
+        - api-definitions
+      summary: 发布API
+      operationId: publishApi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 发布成功
+
+  /apis/{id}/audit:
+    post:
+      tags:
+        - api-definitions
+      summary: 审核API
+      operationId: auditApi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - auditStatus
+              properties:
+                auditStatus:
+                  type: string
+                  enum: [APPROVED, REJECTED]
+                auditRemark:
+                  type: string
+      responses:
+        '200':
+          description: 审核完成
+
+  /applications:
+    get:
+      tags:
+        - applications
+      summary: 获取应用列表
+      operationId: listApplications
+      responses:
+        '200':
+          description: 成功返回应用列表
+
+    post:
+      tags:
+        - applications
+      summary: 创建应用
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /applications/{id}:
+    get:
+      tags:
+        - applications
+      summary: 获取应用详情
+      operationId: getApplication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回应用详情
+
+    delete:
+      tags:
+        - applications
+      summary: 删除应用
+      operationId: deleteApplication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /applications/{id}/api-keys:
+    get:
+      tags:
+        - applications
+      summary: 获取应用的API密钥
+      operationId: getApplicationApiKeys
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回API密钥
+
+    post:
+      tags:
+        - applications
+      summary: 生成新的API密钥
+      operationId: generateApiKey
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: 密钥生成成功
+
+  /subscriptions:
+    get:
+      tags:
+        - subscriptions
+      summary: 获取订阅列表
+      operationId: listSubscriptions
+      parameters:
+        - name: apiId
+          in: query
+          schema:
+            type: integer
+        - name: appId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回订阅列表
+
+    post:
+      tags:
+        - subscriptions
+      summary: 订阅API
+      operationId: subscribeApi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - apiId
+                - appId
+              properties:
+                apiId:
+                  type: integer
+                appId:
+                  type: integer
+      responses:
+        '201':
+          description: 订阅成功
+
+  /subscriptions/{id}:
+    delete:
+      tags:
+        - subscriptions
+      summary: 取消订阅
+      operationId: unsubscribeApi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 取消订阅成功
+
+  /subscriptions/{id}/suspend:
+    post:
+      tags:
+        - subscriptions
+      summary: 暂停订阅
+      operationId: suspendSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 暂停成功
+
+  /subscriptions/{id}/activate:
+    post:
+      tags:
+        - subscriptions
+      summary: 激活订阅
+      operationId: activateSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 激活成功
+
+  /usage:
+    get:
+      tags:
+        - usage
+      summary: 获取API使用记录
+      operationId: listUsageRecords
+      parameters:
+        - name: apiId
+          in: query
+          schema:
+            type: integer
+        - name: subscriptionId
+          in: query
+          schema:
+            type: integer
+        - name: appId
+          in: query
+          schema:
+            type: integer
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回使用记录
+
+  /usage/summary:
+    get:
+      tags:
+        - usage
+      summary: 获取使用统计摘要
+      operationId: getUsageSummary
+      parameters:
+        - name: apiId
+          in: query
+          schema:
+            type: integer
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 成功返回统计摘要
+
+  /billing:
+    get:
+      tags:
+        - billing
+      summary: 获取计费记录
+      operationId: listBillingRecords
+      parameters:
+        - name: apiId
+          in: query
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: billed
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 成功返回计费记录
+
+  /billing/summary:
+    get:
+      tags:
+        - billing
+      summary: 获取计费汇总
+      operationId: getBillingSummary
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 成功返回计费汇总

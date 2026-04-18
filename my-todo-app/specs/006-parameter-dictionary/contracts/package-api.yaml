@@ -1,0 +1,522 @@
+openapi: 3.0.3
+info:
+  title: Package Management API
+  description: |
+    SaaS套餐管理 API，提供套餐定义、功能配置、订阅管理等功能。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/package
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: packages
+    description: 套餐管理
+  - name: features
+    description: 功能配置
+  - name: subscriptions
+    description: 订阅管理
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    SaasPackage:
+      type: object
+      properties:
+        id:
+          type: integer
+        packageCode:
+          type: string
+        packageName:
+          type: string
+        description:
+          type: string
+        billingCycle:
+          type: string
+          enum: [MONTHLY, YEARLY]
+        basePrice:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          default: CNY
+        maxUsers:
+          type: integer
+        maxStorageGb:
+          type: integer
+        maxApiCallsPerDay:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    PackageCreateRequest:
+      type: object
+      required:
+        - packageCode
+        - packageName
+        - billingCycle
+        - basePrice
+      properties:
+        packageCode:
+          type: string
+        packageName:
+          type: string
+        description:
+          type: string
+        billingCycle:
+          type: string
+          enum: [MONTHLY, YEARLY]
+        basePrice:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        maxUsers:
+          type: integer
+        maxStorageGb:
+          type: integer
+        maxApiCallsPerDay:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        sortOrder:
+          type: integer
+
+    PackageFeature:
+      type: object
+      properties:
+        id:
+          type: integer
+        packageId:
+          type: integer
+        featureCode:
+          type: string
+        featureName:
+          type: string
+        featureValue:
+          type: string
+        isIncluded:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    TenantSubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenantId:
+          type: string
+        packageId:
+          type: integer
+        subscriptionStatus:
+          type: string
+          enum: [ACTIVE, SUSPENDED, CANCELLED]
+        subscribeTime:
+          type: string
+          format: date-time
+        expireTime:
+          type: string
+          format: date-time
+        autoRenew:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    SubscriptionCreateRequest:
+      type: object
+      required:
+        - tenantId
+        - packageId
+      properties:
+        tenantId:
+          type: string
+        packageId:
+          type: integer
+        autoRenew:
+          type: boolean
+
+paths:
+  /packages:
+    get:
+      tags:
+        - packages
+      summary: 获取套餐列表
+      operationId: listPackages
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: billingCycle
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回套餐列表
+
+    post:
+      tags:
+        - packages
+      summary: 创建套餐
+      operationId: createPackage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /packages/{id}:
+    get:
+      tags:
+        - packages
+      summary: 获取套餐详情
+      operationId: getPackage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回套餐详情
+
+    put:
+      tags:
+        - packages
+      summary: 更新套餐
+      operationId: updatePackage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - packages
+      summary: 删除套餐
+      operationId: deletePackage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /packages/{id}/features:
+    get:
+      tags:
+        - features
+      summary: 获取套餐功能列表
+      operationId: listPackageFeatures
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回功能列表
+
+    post:
+      tags:
+        - features
+      summary: 添加套餐功能
+      operationId: addPackageFeature
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - featureCode
+                - featureName
+                - isIncluded
+              properties:
+                featureCode:
+                  type: string
+                featureName:
+                  type: string
+                featureValue:
+                  type: string
+                isIncluded:
+                  type: boolean
+      responses:
+        '201':
+          description: 添加成功
+
+  /features/{featureId}:
+    put:
+      tags:
+        - features
+      summary: 更新套餐功能
+      operationId: updatePackageFeature
+      parameters:
+        - name: featureId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                featureValue:
+                  type: string
+                isIncluded:
+                  type: boolean
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - features
+      summary: 删除套餐功能
+      operationId: deletePackageFeature
+      parameters:
+        - name: featureId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /subscriptions:
+    get:
+      tags:
+        - subscriptions
+      summary: 获取订阅列表
+      operationId: listSubscriptions
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: packageId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回订阅列表
+
+    post:
+      tags:
+        - subscriptions
+      summary: 创建订阅
+      operationId: createSubscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /subscriptions/{id}:
+    get:
+      tags:
+        - subscriptions
+      summary: 获取订阅详情
+      operationId: getSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回订阅详情
+
+    put:
+      tags:
+        - subscriptions
+      summary: 更新订阅
+      operationId: updateSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                autoRenew:
+                  type: boolean
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - subscriptions
+      summary: 取消订阅
+      operationId: cancelSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 取消成功
+
+  /subscriptions/{id}/renew:
+    post:
+      tags:
+        - subscriptions
+      summary: 续订订阅
+      operationId: renewSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packageId:
+                  type: integer
+                  description: 升级到新套餐ID
+      responses:
+        '200':
+          description: 续订成功
+
+  /subscriptions/{id}/suspend:
+    post:
+      tags:
+        - subscriptions
+      summary: 暂停订阅
+      operationId: suspendSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 暂停成功
+
+  /subscriptions/{id}/activate:
+    post:
+      tags:
+        - subscriptions
+      summary: 激活订阅
+      operationId: activateSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 激活成功
+
+  /tenants/{tenantId}/subscription:
+    get:
+      tags:
+        - subscriptions
+      summary: 获取租户当前订阅
+      operationId: getTenantSubscription
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回租户订阅
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSubscription'

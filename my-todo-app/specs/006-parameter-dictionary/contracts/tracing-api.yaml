@@ -1,0 +1,599 @@
+openapi: 3.0.3
+info:
+  title: Distributed Tracing API
+  description: |
+    分布式链路追踪 API，提供SkyWalking/Zipkin集成配置、告警设置、仪表盘管理等功能。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/tracing
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: configs
+    description: 追踪配置
+  - name: alerts
+    description: 告警配置
+  - name: dashboards
+    description: 仪表盘
+  - name: traces
+    description: 链路查询
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    TraceConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+        serviceName:
+          type: string
+        tracingEnabled:
+          type: boolean
+        samplingRate:
+          type: number
+          format: decimal
+        agentConfig:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TraceConfigCreateRequest:
+      type: object
+      required:
+        - serviceName
+      properties:
+        serviceName:
+          type: string
+        tracingEnabled:
+          type: boolean
+          default: true
+        samplingRate:
+          type: number
+          format: decimal
+          minimum: 0
+          maximum: 1
+        agentConfig:
+          type: object
+
+    TraceAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+        alertName:
+          type: string
+        serviceName:
+          type: string
+        metricType:
+          type: string
+          enum: [RESPONSE_TIME, ERROR_RATE, THROUGHPUT]
+        thresholdValue:
+          type: number
+          format: decimal
+        comparisonOperator:
+          type: string
+          enum: [GT, LT, GTE, LTE]
+        timeWindowMinutes:
+          type: integer
+        notificationChannels:
+          type: object
+        status:
+          type: string
+          enum: [ENABLED, DISABLED]
+        createdAt:
+          type: string
+          format: date-time
+
+    TraceAlertCreateRequest:
+      type: object
+      required:
+        - alertName
+        - serviceName
+        - metricType
+        - thresholdValue
+        - comparisonOperator
+        - timeWindowMinutes
+      properties:
+        alertName:
+          type: string
+        serviceName:
+          type: string
+        metricType:
+          type: string
+          enum: [RESPONSE_TIME, ERROR_RATE, THROUGHPUT]
+        thresholdValue:
+          type: number
+          format: decimal
+        comparisonOperator:
+          type: string
+          enum: [GT, LT, GTE, LTE]
+        timeWindowMinutes:
+          type: integer
+        notificationChannels:
+          type: object
+          properties:
+            email:
+              type: array
+              items:
+                type: string
+            webhook:
+              type: array
+              items:
+                type: string
+            sms:
+              type: array
+              items:
+                type: string
+
+    TraceDashboard:
+      type: object
+      properties:
+        id:
+          type: integer
+        dashboardName:
+          type: string
+        description:
+          type: string
+        config:
+          type: object
+        isPublic:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TraceDashboardCreateRequest:
+      type: object
+      required:
+        - dashboardName
+        - config
+      properties:
+        dashboardName:
+          type: string
+        description:
+          type: string
+        config:
+          type: object
+          description: 仪表盘配置（面板布局、查询等）
+        isPublic:
+          type: boolean
+          default: false
+
+    TraceQuery:
+      type: object
+      properties:
+        traceId:
+          type: string
+        serviceName:
+          type: string
+        operationName:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        minDuration:
+          type: integer
+        maxDuration:
+          type: integer
+        tags:
+          type: object
+        limit:
+          type: integer
+          default: 20
+
+    Trace:
+      type: object
+      properties:
+        traceId:
+          type: string
+        serviceName:
+          type: string
+        operationName:
+          type: string
+        duration:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        spans:
+          type: array
+          items:
+            type: object
+            properties:
+              spanId:
+                type: integer
+              parentSpanId:
+                type: integer
+              operationName:
+                type: string
+              serviceName:
+                type: string
+              startTime:
+                type: string
+                format: date-time
+              duration:
+                type: integer
+              tags:
+                type: object
+              logs:
+                type: array
+                items:
+                  type: object
+
+paths:
+  /configs:
+    get:
+      tags:
+        - configs
+      summary: 获取追踪配置列表
+      operationId: listTraceConfigs
+      responses:
+        '200':
+          description: 成功返回配置列表
+
+    post:
+      tags:
+        - configs
+      summary: 创建追踪配置
+      operationId: createTraceConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceConfigCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /configs/{id}:
+    get:
+      tags:
+        - configs
+      summary: 获取追踪配置详情
+      operationId: getTraceConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回配置详情
+
+    put:
+      tags:
+        - configs
+      summary: 更新追踪配置
+      operationId: updateTraceConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceConfigCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - configs
+      summary: 删除追踪配置
+      operationId: deleteTraceConfig
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /alerts:
+    get:
+      tags:
+        - alerts
+      summary: 获取告警配置列表
+      operationId: listTraceAlerts
+      parameters:
+        - name: serviceName
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回告警配置列表
+
+    post:
+      tags:
+        - alerts
+      summary: 创建告警配置
+      operationId: createTraceAlert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceAlertCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /alerts/{id}:
+    get:
+      tags:
+        - alerts
+      summary: 获取告警配置详情
+      operationId: getTraceAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回告警配置详情
+
+    put:
+      tags:
+        - alerts
+      summary: 更新告警配置
+      operationId: updateTraceAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceAlertCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - alerts
+      summary: 删除告警配置
+      operationId: deleteTraceAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /alerts/{id}/toggle:
+    post:
+      tags:
+        - alerts
+      summary: 启用/禁用告警
+      operationId: toggleTraceAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enabled
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        '200':
+          description: 状态更新成功
+
+  /dashboards:
+    get:
+      tags:
+        - dashboards
+      summary: 获取仪表盘列表
+      operationId: listTraceDashboards
+      responses:
+        '200':
+          description: 成功返回仪表盘列表
+
+    post:
+      tags:
+        - dashboards
+      summary: 创建仪表盘
+      operationId: createTraceDashboard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceDashboardCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /dashboards/{id}:
+    get:
+      tags:
+        - dashboards
+      summary: 获取仪表盘详情
+      operationId: getTraceDashboard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回仪表盘详情
+
+    put:
+      tags:
+        - dashboards
+      summary: 更新仪表盘
+      operationId: updateTraceDashboard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceDashboardCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - dashboards
+      summary: 删除仪表盘
+      operationId: deleteTraceDashboard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /traces/query:
+    post:
+      tags:
+        - traces
+      summary: 查询链路
+      operationId: queryTraces
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TraceQuery'
+      responses:
+        '200':
+          description: 成功返回链路列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trace'
+
+  /traces/{traceId}:
+    get:
+      tags:
+        - traces
+      summary: 获取链路详情
+      operationId: getTraceDetail
+      parameters:
+        - name: traceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功返回链路详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trace'
+
+  /metrics/services:
+    get:
+      tags:
+        - traces
+      summary: 获取服务列表及指标
+      operationId: listServiceMetrics
+      parameters:
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: 成功返回服务指标列表
+
+  /metrics/top:
+    get:
+      tags:
+        - traces
+      summary: 获取Top N慢链路
+      operationId: getTopSlowTraces
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: startTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: 成功返回Top N慢链路

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+      </profile>
+      <profile name="Annotation profile for my-todo-app" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$PROJECT_DIR$/../../../../maven/repositoryz/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
+          <entry name="$PROJECT_DIR$/../../../../maven/repositoryz/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
+          <entry name="$PROJECT_DIR$/../../../../maven/repositoryz/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
+          <entry name="$PROJECT_DIR$/../../../../maven/repositoryz/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
+        </processorPath>
+        <module name="common-security" />
+        <module name="common-feign" />
+        <module name="finance-service" />
+        <module name="permission-service" />
+        <module name="user-service" />
+        <module name="common-redis" />
+        <module name="dict-service" />
+        <module name="common-mybatis" />
+        <module name="auth-service" />
+        <module name="erp-service" />
+        <module name="common-web" />
+        <module name="gateway" />
+        <module name="common-core" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

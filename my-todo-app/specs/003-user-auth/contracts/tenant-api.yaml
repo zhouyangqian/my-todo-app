@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: 租户管理 API
+  description: 租户注册、查询接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: tenant
+    description: 租户管理
+
+paths:
+  /tenant/register:
+    post:
+      tags: [tenant]
+      summary: 租户注册
+      description: 访客注册成为新租户，同时创建租户和管理员账户
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenantName, tenantCode, adminEmail, adminPassword]
+              properties:
+                tenantName:
+                  type: string
+                  example: "示例公司"
+                  description: 租户名称 (2-100字符)
+                tenantCode:
+                  type: string
+                  example: "example_company"
+                  description: 租户代码 (2-50字符，小写字母、数字、下划线)
+                contactEmail:
+                  type: string
+                  format: email
+                  example: "admin@example.com"
+                  description: 联系邮箱
+                contactPhone:
+                  type: string
+                  example: "13800138000"
+                  description: 联系电话 (可选)
+                adminUsername:
+                  type: string
+                  example: "admin"
+                  description: 管理员用户名 (3-50字符)
+                adminEmail:
+                  type: string
+                  format: email
+                  example: "admin@example.com"
+                  description: 管理员邮箱
+                adminPassword:
+                  type: string
+                  format: password
+                  example: "Password123"
+                  description: 管理员密码 (最少8位，包含字母和数字)
+      responses:
+        '200':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      tenantId:
+                        type: integer
+                        example: 1
+                      userId:
+                        type: integer
+                        example: 1
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: 注册失败
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "租户名称已存在"
+        '409':
+          description: 租户代码或邮箱冲突
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "该邮箱已被使用"
+
+  /tenant/info:
+    get:
+      tags: [tenant]
+      summary: 查询租户信息
+      description: 查询当前租户的基本信息 (需要登录)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+        '401':
+          description: 未授权
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Tenant:
+      type: object
+      properties:
+        tenantId:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        status:
+          type: integer
+          enum: [0, 1, 2]
+          description: 0=禁用, 1=正常, 2=过期
+        userLimit:
+          type: integer
+          description: 用户数量上限
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string

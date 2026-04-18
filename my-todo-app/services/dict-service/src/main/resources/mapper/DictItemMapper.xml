@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dict.mapper.DictItemMapper">
+
+    <!-- 根据字典类型编码查询字典项 -->
+    <select id="selectByDictCode" resultType="com.example.dict.entity.DictItem">
+        SELECT di.*
+        FROM sys_dict_item di
+        INNER JOIN sys_dict_type dt ON di.dict_type_id = dt.id
+        WHERE dt.dict_code = #{dictCode}
+          AND dt.tenant_id = #{tenantId}
+          AND dt.deleted = 0
+          AND dt.status = 1
+          AND di.deleted = 0
+          AND di.status = 1
+        ORDER BY di.sort ASC
+    </select>
+
+</mapper>

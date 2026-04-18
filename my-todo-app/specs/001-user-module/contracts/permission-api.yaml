@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: 用户权限查询 API
+  description: 查询用户权限列表接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: permission
+    description: 用户权限查询
+
+paths:
+  /users/{userId}/permissions:
+    get:
+      tags: [permission]
+      summary: 查询用户权限列表
+      description: 查询指定用户的所有权限（来自角色和直接授予）
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            description: 用户 ID
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                      username:
+                        type: string
+                      roles:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            roleId:
+                              type: integer
+                            roleName:
+                              type: string
+                            roleCode:
+                              type: string
+                            permissions:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  permissionId:
+                                    type: integer
+                                  permissionCode:
+                                    type: string
+                                    example: "user:create"
+                                  permissionName:
+                                    type: string
+                                    example: "创建用户"
+                      directPermissions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            permissionId:
+                              type: integer
+                            permissionCode:
+                              type: string
+                            permissionName:
+                              type: string
+                      allPermissionCodes:
+                        type: array
+                        items:
+                          type: string
+                        description: 所有权限代码列表（去重）
+
+  /users/{userId}/roles:
+    get:
+      tags: [permission]
+      summary: 查询用户角色列表
+      description: 查询指定用户的角色列表
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        roleId:
+                          type: integer
+                        roleName:
+                          type: string
+                        roleCode:
+                          type: string
+                        description:
+                          type: string
+
+    post:
+      tags: [permission]
+      summary: 为用户分配角色
+      description: 为指定用户分配一个或多个角色
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleIds]
+              properties:
+                roleIds:
+                  type: array
+                  items:
+                    type: integer
+                  description: 角色 ID 列表
+                mode:
+                  type: string
+                  enum: [replace, append]
+                  default: replace
+                  description: replace=替换原有角色, append=追加到原有角色
+      responses:
+        '200':
+          description: 分配成功
+        '400':
+          description: 用户数量已达上限
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "用户数量已达上限（5个），请升级套餐"
+
+    delete:
+      tags: [permission]
+      summary: 撤销用户角色
+      description: 撤销指定用户的一个或多个角色
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleIds]
+              properties:
+                roleIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: 撤销成功
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

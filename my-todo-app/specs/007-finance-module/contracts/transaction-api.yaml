@@ -1,0 +1,666 @@
+openapi: 3.0.3
+info:
+  title: 财务模块 - 收支记录API
+  description: 收支记录管理接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/finance
+
+tags:
+  - name: Transaction
+    description: 收支记录管理
+  - name: Account
+    description: 财务账户管理
+
+paths:
+  /accounts:
+    get:
+      tags:
+        - Account
+      summary: 查询账户列表
+      operationId: listAccounts
+      parameters:
+        - name: accountType
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountResponse'
+      security:
+        - bearerAuth: []
+
+    post:
+      tags:
+        - Account
+      summary: 创建账户
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponse'
+      security:
+        - bearerAuth: []
+
+  /accounts/{id}:
+    get:
+      tags:
+        - Account
+      summary: 获取账户详情
+      operationId: getAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDetailResponse'
+      security:
+        - bearerAuth: []
+
+    put:
+      tags:
+        - Account
+      summary: 更新账户
+      operationId: updateAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+      security:
+        - bearerAuth: []
+
+  /accounts/{id}/balance:
+    get:
+      tags:
+        - Account
+      summary: 获取账户余额
+      operationId: getAccountBalance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBalanceResponse'
+      security:
+        - bearerAuth: []
+
+  /transactions:
+    get:
+      tags:
+        - Transaction
+      summary: 查询收支记录列表
+      operationId: listTransactions
+      parameters:
+        - name: transType
+          in: query
+          description: 交易类型
+          schema:
+            type: string
+            enum: [INCOME, EXPENSE, TRANSFER]
+        - name: accountId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: categoryCode
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPageResponse'
+      security:
+        - bearerAuth: []
+
+    post:
+      tags:
+        - Transaction
+      summary: 创建收支记录
+      operationId: createTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+      security:
+        - bearerAuth: []
+
+  /transactions/{id}:
+    get:
+      tags:
+        - Transaction
+      summary: 获取收支记录详情
+      operationId: getTransaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetailResponse'
+      security:
+        - bearerAuth: []
+
+    put:
+      tags:
+        - Transaction
+      summary: 更新收支记录
+      operationId: updateTransaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+      security:
+        - bearerAuth: []
+
+    delete:
+      tags:
+        - Transaction
+      summary: 删除收支记录
+      operationId: deleteTransaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 删除成功
+      security:
+        - bearerAuth: []
+
+  /transfers:
+    post:
+      tags:
+        - Transaction
+      summary: 账户间转账
+      operationId: createTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '201':
+          description: 转账成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+      security:
+        - bearerAuth: []
+
+  /transactions/summary:
+    get:
+      tags:
+        - Transaction
+      summary: 收支汇总统计
+      operationId: getTransactionSummary
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: accountId
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionSummaryResponse'
+      security:
+        - bearerAuth: []
+
+  /transactions/export:
+    get:
+      tags:
+        - Transaction
+      summary: 导出收支记录
+      operationId: exportTransactions
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [EXCEL, CSV]
+            default: EXCEL
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    AccountCreateRequest:
+      type: object
+      required:
+        - accountCode
+        - accountName
+        - accountType
+        - currency
+      properties:
+        accountCode:
+          type: string
+          maxLength: 32
+        accountName:
+          type: string
+          maxLength: 100
+        accountType:
+          type: integer
+          enum: [1, 2, 3, 4, 5]
+          description: 1=银行账户, 2=现金账户, 3=支付宝, 4=微信, 5=其他
+        currency:
+          type: string
+          default: CNY
+        initialBalance:
+          type: number
+          default: 0
+        remark:
+          type: string
+
+    AccountUpdateRequest:
+      type: object
+      properties:
+        accountName:
+          type: string
+        status:
+          type: integer
+        remark:
+          type: string
+
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountCode:
+          type: string
+        accountName:
+          type: string
+        accountType:
+          type: integer
+        accountTypeName:
+          type: string
+        currency:
+          type: string
+        balance:
+          type: number
+        status:
+          type: integer
+
+    AccountDetailResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AccountResponse'
+        - type: object
+          properties:
+            remark:
+              type: string
+            createdByName:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+
+    AccountBalanceResponse:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        accountName:
+          type: string
+        currency:
+          type: string
+        balance:
+          type: number
+        frozenAmount:
+          type: number
+        availableBalance:
+          type: number
+        lastUpdateTime:
+          type: string
+          format: date-time
+
+    TransactionCreateRequest:
+      type: object
+      required:
+        - transType
+        - categoryCode
+        - accountId
+        - amount
+        - transDate
+      properties:
+        transType:
+          type: string
+          enum: [INCOME, EXPENSE]
+        categoryCode:
+          type: string
+          description: 科目代码
+        accountId:
+          type: integer
+          format: int64
+        amount:
+          type: number
+          minimum: 0.01
+        currency:
+          type: string
+          default: CNY
+        exchangeRate:
+          type: number
+        transDate:
+          type: string
+          format: date
+        remark:
+          type: string
+          maxLength: 500
+
+    TransactionUpdateRequest:
+      type: object
+      properties:
+        categoryCode:
+          type: string
+        amount:
+          type: number
+        transDate:
+          type: string
+          format: date
+        remark:
+          type: string
+
+    TransferRequest:
+      type: object
+      required:
+        - fromAccountId
+        - toAccountId
+        - amount
+        - transDate
+      properties:
+        fromAccountId:
+          type: integer
+          format: int64
+          description: 转出账户
+        toAccountId:
+          type: integer
+          format: int64
+          description: 转入账户
+        amount:
+          type: number
+          minimum: 0.01
+        transDate:
+          type: string
+          format: date
+        remark:
+          type: string
+
+    TransferResponse:
+      type: object
+      properties:
+        expenseTransId:
+          type: integer
+          format: int64
+          description: 支出记录ID
+        incomeTransId:
+          type: integer
+          format: int64
+          description: 收入记录ID
+        fromAccountBalance:
+          type: number
+          description: 转出账户余额
+        toAccountBalance:
+          type: number
+          description: 转入账户余额
+
+    TransactionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        transNo:
+          type: string
+        transType:
+          type: string
+        amount:
+          type: number
+        transDate:
+          type: string
+          format: date
+        status:
+          type: integer
+
+    TransactionDetailResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        transNo:
+          type: string
+        transType:
+          type: string
+        categoryCode:
+          type: string
+        categoryName:
+          type: string
+        direction:
+          type: integer
+        accountId:
+          type: integer
+          format: int64
+        accountName:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        exchangeRate:
+          type: number
+        baseAmount:
+          type: number
+        transDate:
+          type: string
+          format: date
+        sourceType:
+          type: string
+        sourceId:
+          type: integer
+          format: int64
+        status:
+          type: integer
+        remark:
+          type: string
+        createdByName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TransactionPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDetailResponse'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+
+    TransactionSummaryResponse:
+      type: object
+      properties:
+        totalIncome:
+          type: number
+          description: 总收入
+        totalExpense:
+          type: number
+          description: 总支出
+        netIncome:
+          type: number
+          description: 净收入
+        incomeByCategory:
+          type: array
+          description: 按科目分类收入
+          items:
+            type: object
+            properties:
+              categoryCode:
+                type: string
+              categoryName:
+                type: string
+              amount:
+                type: number
+        expenseByCategory:
+          type: array
+          description: 按科目分类支出
+          items:
+            type: object
+            properties:
+              categoryCode:
+                type: string
+              categoryName:
+                type: string
+              amount:
+                type: number
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

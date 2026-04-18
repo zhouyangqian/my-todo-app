@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: Activity Management API
+  description: |
+    营销活动管理 API，支持活动创建、套餐关联、参与记录等功能。
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/activity
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: activities
+    description: 营销活动
+  - name: package-activities
+    description: 套餐活动关联
+  - name: participations
+    description: 活动参与记录
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    MarketingActivity:
+      type: object
+      properties:
+        id:
+          type: integer
+        activityCode:
+          type: string
+        activityName:
+          type: string
+        activityType:
+          type: string
+          enum: [DISCOUNT, TRIAL, GIFT]
+        description:
+          type: string
+        discountType:
+          type: string
+          enum: [PERCENTAGE, FIXED]
+        discountValue:
+          type: number
+          format: decimal
+        freeTrialDays:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [DRAFT, ACTIVE, PAUSED, ENDED]
+        maxParticipants:
+          type: integer
+        currentParticipants:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ActivityCreateRequest:
+      type: object
+      required:
+        - activityCode
+        - activityName
+        - activityType
+        - startTime
+        - endTime
+      properties:
+        activityCode:
+          type: string
+        activityName:
+          type: string
+        activityType:
+          type: string
+          enum: [DISCOUNT, TRIAL, GIFT]
+        description:
+          type: string
+        discountType:
+          type: string
+          enum: [PERCENTAGE, FIXED]
+        discountValue:
+          type: number
+          format: decimal
+        freeTrialDays:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        maxParticipants:
+          type: integer
+
+    PackageActivity:
+      type: object
+      properties:
+        id:
+          type: integer
+        packageId:
+          type: integer
+        activityId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ActivitySubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenantId:
+          type: string
+        activityId:
+          type: integer
+        subscriptionId:
+          type: integer
+        joinTime:
+          type: string
+          format: date-time
+        benefitReceived:
+          type: object
+        status:
+          type: string
+          enum: [ACTIVE, EXPIRED, USED]
+        expireTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+paths:
+  /activities:
+    get:
+      tags:
+        - activities
+      summary: 获取活动列表
+      operationId: listActivities
+      parameters:
+        - name: activityType
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回活动列表
+
+    post:
+      tags:
+        - activities
+      summary: 创建活动
+      operationId: createActivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCreateRequest'
+      responses:
+        '201':
+          description: 创建成功
+
+  /activities/{id}:
+    get:
+      tags:
+        - activities
+      summary: 获取活动详情
+      operationId: getActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回活动详情
+
+    put:
+      tags:
+        - activities
+      summary: 更新活动
+      operationId: updateActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+    delete:
+      tags:
+        - activities
+      summary: 删除活动
+      operationId: deleteActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+
+  /activities/{id}/start:
+    post:
+      tags:
+        - activities
+      summary: 启动活动
+      operationId: startActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 活动已启动
+
+  /activities/{id}/pause:
+    post:
+      tags:
+        - activities
+      summary: 暂停活动
+      operationId: pauseActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 活动已暂停
+
+  /activities/{id}/end:
+    post:
+      tags:
+        - activities
+      summary: 结束活动
+      operationId: endActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 活动已结束
+
+  /activities/{id}/packages:
+    get:
+      tags:
+        - package-activities
+      summary: 获取活动关联的套餐列表
+      operationId: listActivityPackages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回套餐列表
+
+    post:
+      tags:
+        - package-activities
+      summary: 关联套餐到活动
+      operationId: linkPackageToActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 活动ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - packageIds
+              properties:
+                packageIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '201':
+          description: 关联成功
+
+  /activities/{activityId}/packages/{packageId}:
+    delete:
+      tags:
+        - package-activities
+      summary: 取消活动与套餐的关联
+      operationId: unlinkPackageFromActivity
+      parameters:
+        - name: activityId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: packageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 取消关联成功
+
+  /activities/{id}/participations:
+    get:
+      tags:
+        - participations
+      summary: 获取活动参与记录
+      operationId: listActivityParticipations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回参与记录
+
+  /activities/{id}/join:
+    post:
+      tags:
+        - participations
+      summary: 参与活动
+      operationId: joinActivity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptionId:
+                  type: integer
+      responses:
+        '201':
+          description: 参与成功
+
+  /participations/{id}:
+    get:
+      tags:
+        - participations
+      summary: 获取参与记录详情
+      operationId: getParticipation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功返回参与记录详情
+
+  /participations/{id}/cancel:
+    post:
+      tags:
+        - participations
+      summary: 取消参与
+      operationId: cancelParticipation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 取消参与成功

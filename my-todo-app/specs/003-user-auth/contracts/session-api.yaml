@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: 会话管理 API
+  description: 会话查询、强制下线接口
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: 网关路由
+
+tags:
+  - name: session
+    description: 会话管理
+
+paths:
+  /sessions:
+    get:
+      tags: [session]
+      summary: 查询用户会话列表
+      description: 查询当前用户的所有活跃会话 (需要登录)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+
+  /sessions/{sessionId}:
+    delete:
+      tags: [session]
+      summary: 强制下线指定会话
+      description: 强制终止指定会话 (仅限会话所有者或管理员)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 会话 ID
+      responses:
+        '200':
+          description: 下线成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "会话已强制下线"
+        '403':
+          description: 无权限
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 403
+                  message:
+                    type: string
+                    example: "无权限操作此会话"
+
+  /sessions/user/{userId}/force-logout:
+    post:
+      tags: [session]
+      summary: 强制用户下线
+      description: 管理员强制指定用户下线 (需要管理员权限)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 用户 ID
+      responses:
+        '200':
+          description: 下线成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "用户已被强制下线"
+        '403':
+          description: 权限不足
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 403
+                  message:
+                    type: string
+                    example: "权限不足"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Session:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: 会话 ID (UUID)
+        userId:
+          type: integer
+        username:
+          type: string
+        tenantId:
+          type: integer
+        deviceType:
+          type: string
+          enum: [WEB, MOBILE, TABLET, DESKTOP]
+          description: 设备类型
+        deviceInfo:
+          type: string
+          description: 设备信息 (User-Agent)
+        ipAddress:
+          type: string
+          description: IP 地址
+        loginTime:
+          type: string
+          format: date-time
+          description: 登录时间
+        lastActiveTime:
+          type: string
+          format: date-time
+          description: 最后活跃时间
+        isCurrent:
+          type: boolean
+          description: 是否为当前会话
