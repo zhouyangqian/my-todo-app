@@ -191,17 +191,17 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
-import { getProductPage, getProduct, createProduct, updateProduct, deleteProduct, type Product } from '@/api/erp'
+import { getProductPage, getProduct, createProduct, updateProduct, deleteProduct } from '@/api/erp'
 
 // 搜索表单
 const searchForm = reactive({
   name: '',
   sku: '',
-  status: undefined as number | undefined
+  status: undefined
 })
 
 // 分页
@@ -212,18 +212,18 @@ const pagination = reactive({
 })
 
 // 表格数据
-const tableData = ref<Product[]>([])
+const tableData = ref([])
 const loading = ref(false)
 
 // 对话框
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增商品')
-const formRef = ref<FormInstance>()
+const formRef = ref()
 const submitLoading = ref(false)
 
 // 表单数据
 const formData = reactive({
-  id: undefined as number | undefined,
+  id: undefined,
   sku: '',
   name: '',
   brand: '',
@@ -236,7 +236,7 @@ const formData = reactive({
 })
 
 // 表单验证规则
-const formRules: FormRules = {
+const formRules = {
   sku: [
     { required: true, message: '请输入商品编码', trigger: 'blur' }
   ],
@@ -297,7 +297,7 @@ const handleAdd = () => {
 }
 
 // 编辑
-const handleEdit = async (row: Product) => {
+const handleEdit = async (row) => {
   dialogTitle.value = '编辑商品'
   try {
     const data = await getProduct(row.id)
@@ -333,7 +333,7 @@ const handleSubmit = async () => {
 }
 
 // 删除
-const handleDelete = async (row: Product) => {
+const handleDelete = async (row) => {
   await ElMessageBox.confirm('确定要删除该商品吗?', '提示', {
     type: 'warning'
   })
@@ -347,12 +347,12 @@ const handleDelete = async (row: Product) => {
 }
 
 // 分页变化
-const handleSizeChange = (size: number) => {
+const handleSizeChange = (size) => {
   pagination.size = size
   loadData()
 }
 
-const handlePageChange = (page: number) => {
+const handlePageChange = (page) => {
   pagination.page = page
   loadData()
 }

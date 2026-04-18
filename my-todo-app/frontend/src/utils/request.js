@@ -1,13 +1,13 @@
-// utils/request.ts - HTTP 请求封装模块
+// utils/request.js - HTTP 请求封装模块
 // 基于 axios 封装统一的请求方法，包含请求/响应拦截器、Token 自动注入、错误处理等
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 
 // 创建 axios 实例，配置基础参数
-const service: AxiosInstance = axios.create({
+const service = axios.create({
   baseURL: '/api',          // API 基础路径，所有请求会自动添加此前缀
   timeout: 30000,           // 请求超时时间：30秒
   headers: {
@@ -17,7 +17,7 @@ const service: AxiosInstance = axios.create({
 
 // 请求拦截器 - 在每个请求发送前执行，用于注入认证信息
 service.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config) => {
     // 从用户状态管理中获取当前令牌
     const userStore = useUserStore()
     const token = userStore.token
@@ -41,7 +41,7 @@ service.interceptors.request.use(
 
 // 响应拦截器 - 在收到响应后执行，用于统一处理业务错误和 HTTP 错误
 service.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response) => {
     const res = response.data
 
     // 如果是文件下载请求（blob 类型），直接返回原始响应对象
@@ -105,21 +105,13 @@ service.interceptors.response.use(
   }
 )
 
-// 后端统一响应数据结构类型
-export interface ApiResponse<T = any> {
-  code: number             // 业务状态码（200 表示成功）
-  message: string          // 响应消息
-  data: T                  // 业务数据（泛型）
-  timestamp: number        // 服务器时间戳
-}
-
 /**
  * GET 请求封装
  * @param url 请求路径
  * @param params URL 查询参数
  * @param config 额外的 axios 配置
  */
-export function get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+export function get(url, params, config) {
   return service.get(url, { params, ...config })
 }
 
@@ -129,7 +121,7 @@ export function get<T = any>(url: string, params?: any, config?: AxiosRequestCon
  * @param data 请求体数据
  * @param config 额外的 axios 配置
  */
-export function post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+export function post(url, data, config) {
   return service.post(url, data, config)
 }
 
@@ -139,7 +131,7 @@ export function post<T = any>(url: string, data?: any, config?: AxiosRequestConf
  * @param data 请求体数据
  * @param config 额外的 axios 配置
  */
-export function put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+export function put(url, data, config) {
   return service.put(url, data, config)
 }
 
@@ -149,7 +141,7 @@ export function put<T = any>(url: string, data?: any, config?: AxiosRequestConfi
  * @param params URL 查询参数
  * @param config 额外的 axios 配置
  */
-export function del<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+export function del(url, params, config) {
   return service.delete(url, { params, ...config })
 }
 

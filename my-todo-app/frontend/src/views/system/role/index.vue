@@ -138,10 +138,10 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 角色管理页面逻辑：角色的增删改查、权限树加载与分配
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import {
   getRoleList,
@@ -150,9 +150,7 @@ import {
   deleteRole,
   getPermissionTree,
   getRolePermissions,
-  assignRolePermissions,
-  type Role,
-  type Permission
+  assignRolePermissions
 } from '@/api/permission'
 
 // ===== 搜索相关 =====
@@ -161,13 +159,13 @@ import {
 const searchForm = reactive({
   name: '',                                  // 按角色名称筛选
   code: '',                                  // 按角色编码筛选
-  status: undefined as number | undefined    // 按状态筛选
+  status: undefined                          // 按状态筛选
 })
 
 // ===== 表格相关 =====
 
 // 角色表格数据列表
-const tableData = ref<Role[]>([])
+const tableData = ref([])
 // 表格加载状态
 const loading = ref(false)
 
@@ -178,13 +176,13 @@ const dialogVisible = ref(false)
 // 对话框标题
 const dialogTitle = ref('新增角色')
 // 表单引用
-const formRef = ref<FormInstance>()
+const formRef = ref()
 // 提交按钮加载状态
 const submitLoading = ref(false)
 
 // 角色表单数据
 const formData = reactive({
-  id: undefined as number | undefined,  // 角色ID（编辑时有值）
+  id: undefined,                         // 角色ID（编辑时有值）
   name: '',                              // 角色名称
   code: '',                              // 角色编码
   description: '',                       // 角色描述
@@ -192,7 +190,7 @@ const formData = reactive({
 })
 
 // 表单验证规则：名称必填，编码只允许字母和下划线
-const formRules: FormRules = {
+const formRules = {
   name: [
     { required: true, message: '请输入角色名称', trigger: 'blur' }
   ],
@@ -207,11 +205,11 @@ const formRules: FormRules = {
 // 权限分配对话框是否可见
 const permissionDialogVisible = ref(false)
 // 权限树数据（完整的权限层级结构）
-const permissionTree = ref<Permission[]>([])
+const permissionTree = ref([])
 // 当前角色已选中的权限ID列表（用于树的默认选中）
-const checkedPermissionIds = ref<number[]>([])
+const checkedPermissionIds = ref([])
 // 当前正在分配权限的角色ID
-const currentRoleId = ref<number>()
+const currentRoleId = ref()
 // 权限树组件引用
 const treeRef = ref()
 // 权限保存按钮加载状态
@@ -278,7 +276,7 @@ const handleAdd = () => {
  * 编辑角色：将当前行数据填充到表单
  * @param row 当前行角色数据
  */
-const handleEdit = (row: Role) => {
+const handleEdit = (row) => {
   dialogTitle.value = '编辑角色'
   formData.id = row.id
   formData.name = row.name
@@ -320,7 +318,7 @@ const handleSubmit = async () => {
  * 删除角色（需二次确认）
  * @param row 当前行角色数据
  */
-const handleDelete = async (row: Role) => {
+const handleDelete = async (row) => {
   await ElMessageBox.confirm('确定要删除该角色吗?', '提示', {
     type: 'warning'
   })
@@ -339,7 +337,7 @@ const handleDelete = async (row: Role) => {
  * 2. 获取该角色当前已分配的权限ID
  * @param row 当前行角色数据
  */
-const handleAssignPermission = async (row: Role) => {
+const handleAssignPermission = async (row) => {
   currentRoleId.value = row.id
   // 首次打开时加载权限树（后续使用缓存）
   if (permissionTree.value.length === 0) {
@@ -364,7 +362,7 @@ const handleSavePermission = async () => {
   permissionLoading.value = true
   try {
     // 获取所有被勾选的权限节点ID（不包括半选的父节点）
-    const checkedKeys = treeRef.value.getCheckedKeys(false) as number[]
+    const checkedKeys = treeRef.value.getCheckedKeys(false)
     await assignRolePermissions(currentRoleId.value, checkedKeys)
     ElMessage.success('保存成功')
     permissionDialogVisible.value = false

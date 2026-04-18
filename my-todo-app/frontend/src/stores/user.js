@@ -1,20 +1,10 @@
-// stores/user.ts - 用户状态管理模块（Pinia Store）
+// stores/user.js - 用户状态管理模块（Pinia Store）
 // 管理用户登录状态、Token、用户信息、权限和角色等全局状态
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login, logout, getUserInfo } from '@/api/auth'
 import router from '@/router'
-
-// 用户基本信息类型
-export interface UserInfo {
-  userId: number          // 用户唯一标识
-  username: string        // 登录用户名
-  email: string           // 邮箱
-  realName: string        // 真实姓名
-  avatar: string          // 头像URL
-  tenantId: number        // 所属租户ID（多租户架构）
-}
 
 /**
  * 用户状态管理 Store（使用 Composition API 风格）
@@ -24,15 +14,15 @@ export const useUserStore = defineStore('user', () => {
   // ===== 状态定义 =====
 
   // 访问令牌，页面刷新时从 localStorage 恢复
-  const token = ref<string>(localStorage.getItem('token') || '')
+  const token = ref(localStorage.getItem('token') || '')
   // 刷新令牌，用于令牌续期
-  const refreshToken = ref<string>(localStorage.getItem('refreshToken') || '')
+  const refreshToken = ref(localStorage.getItem('refreshToken') || '')
   // 当前登录用户信息
-  const userInfo = ref<UserInfo | null>(null)
+  const userInfo = ref(null)
   // 用户拥有的权限编码列表
-  const permissions = ref<string[]>([])
+  const permissions = ref([])
   // 用户拥有的角色编码列表
-  const roles = ref<string[]>([])
+  const roles = ref([])
 
   // ===== 计算属性 =====
 
@@ -50,7 +40,7 @@ export const useUserStore = defineStore('user', () => {
    * @param username 用户名
    * @param password 密码
    */
-  async function loginAction(username: string, password: string) {
+  async function loginAction(username, password) {
     try {
       const res = await login({ username, password })
       // 保存令牌到状态和本地存储
@@ -119,18 +109,16 @@ export const useUserStore = defineStore('user', () => {
   /**
    * 检查当前用户是否拥有指定权限
    * @param permission 权限编码（如 system:user:add）
-   * @returns 拥有通配符权限(*)或指定权限时返回 true
    */
-  function hasPermission(permission: string): boolean {
+  function hasPermission(permission) {
     return permissions.value.includes('*') || permissions.value.includes(permission)
   }
 
   /**
    * 检查当前用户是否拥有指定角色
    * @param role 角色编码（如 admin）
-   * @returns 拥有指定角色时返回 true
    */
-  function hasRole(role: string): boolean {
+  function hasRole(role) {
     return roles.value.includes(role)
   }
 

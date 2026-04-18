@@ -1,4 +1,4 @@
-// main.ts - 应用入口文件，负责创建 Vue 实例并注册全局插件（路由、状态管理、UI 框架等）
+// main.js - 应用入口文件，负责创建 Vue 实例并注册全局插件（路由、状态管理、UI 框架等）
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

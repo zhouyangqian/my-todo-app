@@ -99,7 +99,7 @@
   </el-container>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 主布局组件逻辑：侧边栏折叠控制、菜单高亮、面包屑生成、用户下拉菜单
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

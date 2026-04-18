@@ -128,12 +128,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 用户管理页面逻辑：搜索、分页、增删改查、启用/禁用用户
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
-import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUser, type User } from '@/api/user'
+import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUser } from '@/api/user'
 
 // ===== 搜索相关 =====
 
@@ -141,7 +141,7 @@ import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUse
 const searchForm = reactive({
   username: '',                              // 按用户名筛选
   realName: '',                              // 按姓名筛选
-  status: undefined as number | undefined    // 按状态筛选（1-启用，0-禁用）
+  status: undefined                          // 按状态筛选（1-启用，0-禁用）
 })
 
 // ===== 分页相关 =====
@@ -156,7 +156,7 @@ const pagination = reactive({
 // ===== 表格相关 =====
 
 // 用户表格数据列表
-const tableData = ref<User[]>([])
+const tableData = ref([])
 // 表格加载状态
 const loading = ref(false)
 
@@ -167,13 +167,13 @@ const dialogVisible = ref(false)
 // 对话框标题（新增/编辑）
 const dialogTitle = ref('新增用户')
 // 表单引用，用于触发表单验证
-const formRef = ref<FormInstance>()
+const formRef = ref()
 // 提交按钮加载状态，防止重复提交
 const submitLoading = ref(false)
 
 // 表单数据（新增/编辑共用）
 const formData = reactive({
-  id: undefined as number | undefined,  // 用户ID（编辑时有值）
+  id: undefined,                         // 用户ID（编辑时有值）
   username: '',                          // 用户名
   realName: '',                          // 真实姓名
   email: '',                             // 邮箱
@@ -182,7 +182,7 @@ const formData = reactive({
 })
 
 // 表单验证规则
-const formRules: FormRules = {
+const formRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
@@ -255,7 +255,7 @@ const handleAdd = () => {
  * 编辑按钮处理：将当前行数据填充到表单并打开对话框
  * @param row 当前行的用户数据
  */
-const handleEdit = (row: User) => {
+const handleEdit = (row) => {
   dialogTitle.value = '编辑用户'
   formData.id = row.id
   formData.username = row.username
@@ -298,7 +298,7 @@ const handleSubmit = async () => {
  * 切换用户启用/禁用状态
  * @param row 当前行的用户数据
  */
-const handleToggleStatus = async (row: User) => {
+const handleToggleStatus = async (row) => {
   // 根据当前状态确定操作文本（启用 -> 禁用 / 禁用 -> 启用）
   const action = row.status === 1 ? '禁用' : '启用'
   await ElMessageBox.confirm(`确定要${action}该用户吗?`, '提示', {
@@ -321,7 +321,7 @@ const handleToggleStatus = async (row: User) => {
  * 删除用户（需二次确认）
  * @param row 当前行的用户数据
  */
-const handleDelete = async (row: User) => {
+const handleDelete = async (row) => {
   await ElMessageBox.confirm('确定要删除该用户吗?', '提示', {
     type: 'warning'
   })
@@ -338,7 +338,7 @@ const handleDelete = async (row: User) => {
  * 每页条数变化处理
  * @param size 新的每页条数
  */
-const handleSizeChange = (size: number) => {
+const handleSizeChange = (size) => {
   pagination.size = size
   loadData()
 }
@@ -347,7 +347,7 @@ const handleSizeChange = (size: number) => {
  * 页码变化处理
  * @param page 新的页码
  */
-const handlePageChange = (page: number) => {
+const handlePageChange = (page) => {
   pagination.page = page
   loadData()
 }
