@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 404 页面逻辑：提供返回首页的导航功能
 import { useRouter } from 'vue-router'
 

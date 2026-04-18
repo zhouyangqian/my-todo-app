@@ -1,4 +1,4 @@
-// stores/index.ts - Pinia 状态管理入口文件
+// stores/index.js - Pinia 状态管理入口文件
 // 创建 Pinia 实例并统一导出所有 store 模块
 
 import { createPinia } from 'pinia'

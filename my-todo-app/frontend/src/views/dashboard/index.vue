@@ -95,7 +95,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 工作台首页逻辑：目前为静态展示页面，导入图标组件
 import { Plus, Goods, User, Document } from '@element-plus/icons-vue'
 </script>

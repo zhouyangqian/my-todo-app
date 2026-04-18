@@ -1,13 +1,13 @@
-// router/index.ts - 路由配置与导航守卫
+// router/index.js - 路由配置与导航守卫
 // 定义应用的所有页面路由，包括登录页、布局容器页、系统管理、字典管理、进销存、财务管理等模块
 // 配置路由守卫实现登录鉴权和页面标题自动更新
 
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import NProgress from 'nprogress'
 import { useUserStore } from '@/stores/user'
 
 // 路由配置表 - 定义所有页面路由的路径、组件和元信息
-const routes: RouteRecordRaw[] = [
+const routes = [
   {
     path: '/login',
     name: 'Login',

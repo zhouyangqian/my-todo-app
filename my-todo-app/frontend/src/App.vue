@@ -4,7 +4,7 @@
   <router-view />
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 应用根组件 - 无需额外逻辑，仅作为路由出口
 </script>
 

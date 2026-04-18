@@ -54,17 +54,16 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 // 登录页面逻辑：表单数据绑定、验证规则、登录提交处理
 import { ref, reactive } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
 // 用户状态管理实例，用于调用登录方法
 const userStore = useUserStore()
 
 // 登录表单引用，用于触发表单验证
-const loginFormRef = ref<FormInstance>()
+const loginFormRef = ref()
 // 登录按钮加载状态，防止重复提交
 const loading = ref(false)
 
@@ -75,7 +74,7 @@ const loginForm = reactive({
 })
 
 // 表单验证规则
-const loginRules: FormRules = {
+const loginRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' }
   ],

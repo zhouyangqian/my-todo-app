@@ -1,5 +1,5 @@
-// api/index.ts - API 模块统一导出入口
-// 将所有子模块的接口和类型统一导出，方便外部通过 @/api 直接引用
+// api/index.js - API 模块统一导出入口
+// 将所有子模块的接口统一导出，方便外部通过 @/api 直接引用
 
 export * from './auth'        // 认证相关接口（登录、登出、Token 刷新等）
 export * from './user'        // 用户管理接口（用户 CRUD、地址管理等）
