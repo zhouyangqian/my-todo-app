@@ -20,6 +20,12 @@
             <artifactId>common-core</artifactId>
         </dependency>
 
+        <!-- Spring Boot Web (provides Jakarta Servlet API) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <!-- Spring Cloud OpenFeign -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
