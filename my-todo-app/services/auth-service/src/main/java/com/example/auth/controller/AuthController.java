@@ -3,6 +3,7 @@ package com.example.auth.controller;
 import com.example.auth.dto.*;
 import com.example.auth.service.AuthService;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.security.jwt.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * 用户登录
@@ -77,12 +79,19 @@ public class AuthController {
     /**
      * 退出所有设备的登录
      * <p>使该用户所有会话和刷新令牌失效</p>
+     * <p>从 JWT Token 中解析用户ID，防止请求头伪造</p>
      *
-     * @param userId 用户ID（由网关从 Token 中解析注入）
+     * @param authorization Authorization 请求头（Bearer Token）
      */
     @Operation(summary = "退出所有设备登录")
     @PostMapping("/logout-all")
-    public ApiResponse<Void> logoutAll(@RequestHeader("X-User-Id") Long userId) {
+    public ApiResponse<Void> logoutAll(@RequestHeader(value = "Authorization", required = false) String authorization) {
+        // 从 Token 中解析用户ID，防止请求头伪造
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return ApiResponse.error(401, "缺少有效的认证令牌");
+        }
+        String token = authorization.substring(7);
+        Long userId = jwtTokenProvider.getUserId(token);
         authService.logoutAll(userId);
         return ApiResponse.success();
     }
@@ -103,14 +112,21 @@ public class AuthController {
     /**
      * 修改密码
      * <p>修改成功后会强制所有设备重新登录</p>
+     * <p>从 JWT Token 中解析用户ID，防止请求头伪造</p>
      *
-     * @param userId  用户ID（由网关注入）
+     * @param authorization Authorization 请求头（Bearer Token）
      * @param request 修改密码请求（旧密码、新密码、确认密码）
      */
     @Operation(summary = "修改密码")
     @PostMapping("/change-password")
-    public ApiResponse<Void> changePassword(@RequestHeader("X-User-Id") Long userId,
+    public ApiResponse<Void> changePassword(@RequestHeader(value = "Authorization", required = false) String authorization,
                                             @Valid @RequestBody ChangePasswordRequest request) {
+        // 从 Token 中解析用户ID，防止请求头伪造
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return ApiResponse.error(401, "缺少有效的认证令牌");
+        }
+        String token = authorization.substring(7);
+        Long userId = jwtTokenProvider.getUserId(token);
         authService.changePassword(userId, request);
         return ApiResponse.success();
     }
