@@ -21,6 +21,7 @@ node_modules/
 dist/
 .nuxt/
 .vuepress/dist/
+package-lock.json
 
 # Logs
 logs/

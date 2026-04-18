@@ -25,15 +25,15 @@ mvn verify                  # integration tests (uses Testcontainers)
 cd services/auth-service && mvn spring-boot:run
 ```
 
-**Frontend** (requires Node 18+):
+**Frontend** (requires Node 18+, pnpm 9+):
 
 ```bash
 cd frontend
-npm install
-npm run dev                 # dev server on :3000, proxies API to :8080
-npm run test                # Vitest
-npm run test:coverage       # Vitest with coverage
-npm run build               # production build
+pnpm install
+pnpm run dev                # dev server on :3000, proxies API to :8080
+pnpm run test               # Vitest
+pnpm run test:coverage      # Vitest with coverage
+pnpm run build              # production build
 ```
 
 **Infrastructure** (Docker Compose):
