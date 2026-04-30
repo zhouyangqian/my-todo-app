@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * 用户服务启动类
@@ -20,6 +21,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication   // 开启 Spring Boot 自动配置和组件扫描
 @EnableDiscoveryClient  // 启用服务注册与发现，将本服务注册到注册中心
 @MapperScan("com.example.user.mapper")  // 扫描指定包下的 MyBatis Mapper 接口，自动生成实现类
+@ComponentScan(basePackages = {"com.example.user", "com.example.common"})
 public class UserServiceApplication {
 
     /**

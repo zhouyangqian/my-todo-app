@@ -10,7 +10,7 @@ import { get, post, put, del } from '@/utils/request'
  * @param params 分页参数和筛选条件（名称、SKU编码、分类、状态）
  */
 export function getProductPage(params) {
-  return get('/erp/products', params)
+  return get('/erp/products/get-product-page', params)
 }
 
 /**
@@ -18,7 +18,7 @@ export function getProductPage(params) {
  * @param id 商品ID
  */
 export function getProduct(id) {
-  return get(`/erp/products/${id}`)
+  return get(`/erp/products/get-product/${id}`)
 }
 
 /**
@@ -26,7 +26,7 @@ export function getProduct(id) {
  * @param data 商品信息
  */
 export function createProduct(data) {
-  return post('/erp/products', data)
+  return post('/erp/products/create-product', data)
 }
 
 /**
@@ -35,7 +35,7 @@ export function createProduct(data) {
  * @param data 需要更新的商品字段
  */
 export function updateProduct(id, data) {
-  return put(`/erp/products/${id}`, data)
+  return put(`/erp/products/update-product/${id}`, data)
 }
 
 /**
@@ -43,7 +43,7 @@ export function updateProduct(id, data) {
  * @param id 商品ID
  */
 export function deleteProduct(id) {
-  return del(`/erp/products/${id}`)
+  return del(`/erp/products/delete-product/${id}`)
 }
 
 // ============ 库存 API ============
@@ -53,7 +53,7 @@ export function deleteProduct(id) {
  * @param params 分页参数和筛选条件（商品ID、仓库ID）
  */
 export function getInventoryPage(params) {
-  return get('/erp/inventory', params)
+  return get('/erp/inventory/get-inventory-page', params)
 }
 
 /**
@@ -91,10 +91,25 @@ export function getInventoryFlowPage(params) {
 // ============ 仓库 API ============
 
 /**
- * 获取所有仓库列表（不分页）
+ * 分页查询仓库列表
+ * @param params 分页参数和筛选条件（名称、状态）
  */
-export function getWarehouseList() {
-  return get('/erp/warehouses')
+export function getWarehousePage(params) {
+  return get('/erp/warehouses/get-warehouse-page', params)
+}
+
+/**
+ * 获取所有仓库列表（不分页，用于下拉选择）
+ */
+export function getWarehouses() {
+  return get('/erp/warehouses/get-all-warehouses')
+}
+
+/**
+ * 获取默认仓库
+ */
+export function getDefaultWarehouse() {
+  return get('/erp/warehouses/get-default-warehouse')
 }
 
 /**
@@ -102,7 +117,7 @@ export function getWarehouseList() {
  * @param data 仓库信息
  */
 export function createWarehouse(data) {
-  return post('/erp/warehouses', data)
+  return post('/erp/warehouses/create-warehouse', data)
 }
 
 /**
@@ -111,7 +126,7 @@ export function createWarehouse(data) {
  * @param data 需要更新的仓库字段
  */
 export function updateWarehouse(id, data) {
-  return put(`/erp/warehouses/${id}`, data)
+  return put(`/erp/warehouses/update-warehouse/${id}`, data)
 }
 
 /**
@@ -119,7 +134,15 @@ export function updateWarehouse(id, data) {
  * @param id 仓库ID
  */
 export function deleteWarehouse(id) {
-  return del(`/erp/warehouses/${id}`)
+  return del(`/erp/warehouses/delete-warehouse/${id}`)
+}
+
+/**
+ * 设置默认仓库
+ * @param id 仓库ID
+ */
+export function setDefaultWarehouse(id) {
+  return post(`/erp/warehouses/${id}/default`)
 }
 
 // ============ 供应商 API ============
@@ -129,7 +152,7 @@ export function deleteWarehouse(id) {
  * @param params 分页参数和筛选条件（名称、编码、状态）
  */
 export function getSupplierPage(params) {
-  return get('/erp/suppliers', params)
+  return get('/erp/suppliers/get-supplier-page', params)
 }
 
 /**
@@ -137,7 +160,7 @@ export function getSupplierPage(params) {
  * @param data 供应商信息
  */
 export function createSupplier(data) {
-  return post('/erp/suppliers', data)
+  return post('/erp/suppliers/create-supplier', data)
 }
 
 /**
@@ -146,7 +169,7 @@ export function createSupplier(data) {
  * @param data 需要更新的供应商字段
  */
 export function updateSupplier(id, data) {
-  return put(`/erp/suppliers/${id}`, data)
+  return put(`/erp/suppliers/update-supplier/${id}`, data)
 }
 
 /**
@@ -154,7 +177,7 @@ export function updateSupplier(id, data) {
  * @param id 供应商ID
  */
 export function deleteSupplier(id) {
-  return del(`/erp/suppliers/${id}`)
+  return del(`/erp/suppliers/delete-supplier/${id}`)
 }
 
 // ============ 客户 API ============
@@ -164,7 +187,7 @@ export function deleteSupplier(id) {
  * @param params 分页参数和筛选条件（名称、编码、状态）
  */
 export function getCustomerPage(params) {
-  return get('/erp/customers', params)
+  return get('/erp/customers/get-customer-page', params)
 }
 
 /**
@@ -172,7 +195,7 @@ export function getCustomerPage(params) {
  * @param data 客户信息
  */
 export function createCustomer(data) {
-  return post('/erp/customers', data)
+  return post('/erp/customers/create-customer', data)
 }
 
 /**
@@ -181,7 +204,7 @@ export function createCustomer(data) {
  * @param data 需要更新的客户字段
  */
 export function updateCustomer(id, data) {
-  return put(`/erp/customers/${id}`, data)
+  return put(`/erp/customers/update-customer/${id}`, data)
 }
 
 /**
@@ -189,5 +212,114 @@ export function updateCustomer(id, data) {
  * @param id 客户ID
  */
 export function deleteCustomer(id) {
-  return del(`/erp/customers/${id}`)
+  return del(`/erp/customers/delete-customer/${id}`)
+}
+
+// ============ 销售订单 API ============
+
+/**
+ * 分页查询销售订单列表
+ * @param params 分页参数和筛选条件（订单号、客户、状态）
+ */
+export function getSalesOrderPage(params) {
+  return get('/erp/sales-orders/get-sales-order-page', params)
+}
+
+/**
+ * 获取销售订单详情
+ * @param id 订单ID
+ */
+export function getSalesOrderDetail(id) {
+  return get(`/erp/sales-orders/get-sales-order/${id}`)
+}
+
+/**
+ * 创建销售订单
+ * @param data 订单信息
+ */
+export function createSalesOrder(data) {
+  return post('/erp/sales-orders/create-sales-order', data)
+}
+
+/**
+ * 更新销售订单
+ * @param id 订单ID
+ * @param data 订单信息
+ */
+export function updateSalesOrder(id, data) {
+  return put(`/erp/sales-orders/update-sales-order/${id}`, data)
+}
+
+/**
+ * 提交销售订单审核
+ * @param id 订单ID
+ */
+export function submitSalesOrder(id) {
+  return post(`/erp/sales-orders/submit-for-approval/${id}`)
+}
+
+/**
+ * 审核销售订单
+ * @param id 订单ID
+ */
+export function approveSalesOrder(id) {
+  return post(`/erp/sales-orders/approve-order/${id}`)
+}
+
+/**
+ * 取消销售订单
+ * @param id 订单ID
+ */
+export function cancelSalesOrder(id) {
+  return post(`/erp/sales-orders/cancel-order/${id}`)
+}
+
+// ============ 销售出库单 API ============
+
+/**
+ * 分页查询销售出库单列表
+ * @param params 分页参数和筛选条件（出库单号、订单、状态）
+ */
+export function getSalesShipmentPage(params) {
+  return get('/erp/sales-shipments/get-sales-shipment-page', params)
+}
+
+/**
+ * 获取销售出库单详情
+ * @param id 出库单ID
+ */
+export function getSalesShipmentDetail(id) {
+  return get(`/erp/sales-shipments/get-sales-shipment/${id}`)
+}
+
+/**
+ * 获取订单的可发货商品列表
+ * @param orderId 订单ID
+ */
+export function getShippableItems(orderId) {
+  return get(`/erp/sales-shipments/get-shippable-items/${orderId}`)
+}
+
+/**
+ * 创建销售出库单
+ * @param data 出库单信息
+ */
+export function createSalesShipment(data) {
+  return post('/erp/sales-shipments/create-sales-shipment', data)
+}
+
+/**
+ * 审核销售出库单
+ * @param id 出库单ID
+ */
+export function approveSalesShipment(id) {
+  return post(`/erp/sales-shipments/approve-shipment/${id}`)
+}
+
+/**
+ * 取消销售出库单
+ * @param id 出库单ID
+ */
+export function cancelSalesShipment(id) {
+  return post(`/erp/sales-shipments/cancel-shipment/${id}`)
 }

@@ -1,6 +1,7 @@
 package com.example.auth.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -36,11 +37,13 @@ public class RefreshToken implements Serializable {
     private Long sessionId;
 
     /** 令牌过期时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime expireTime;
 
     /** 是否已吊销：0-有效，1-已吊销 */
     private Integer revoked;
 
     /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 }

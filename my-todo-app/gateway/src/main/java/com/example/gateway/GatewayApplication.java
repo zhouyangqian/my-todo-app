@@ -11,7 +11,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * 请求日志记录和全局异常处理。通过 Nacos 实现服务发现。
  * </p>
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class
+})
 @EnableDiscoveryClient
 public class GatewayApplication {
 

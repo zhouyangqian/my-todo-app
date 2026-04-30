@@ -1,5 +1,6 @@
 package com.example.common.core.result;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,15 +24,19 @@ public class PageResult<T> implements Serializable {
     private List<T> records;
 
     /** 总记录数 */
+    @JsonSerialize(using = PaginationNumberSerializer.class)
     private Long total;
 
     /** 当前页码（从1开始） */
+    @JsonSerialize(using = PaginationNumberSerializer.class)
     private Long current;
 
     /** 每页大小 */
+    @JsonSerialize(using = PaginationNumberSerializer.class)
     private Long size;
 
     /** 总页数 */
+    @JsonSerialize(using = PaginationNumberSerializer.class)
     private Long pages;
 
     /** 默认构造函数，初始化空分页结果 */

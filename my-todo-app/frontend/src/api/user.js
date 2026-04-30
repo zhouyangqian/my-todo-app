@@ -5,64 +5,72 @@ import { get, post, put, del } from '@/utils/request'
 
 /**
  * 分页查询用户列表
- * @param params 查询参数（分页、用户名、姓名、部门、状态等筛选条件）
+ * @param {Object} params 查询参数（分页、用户名、姓名、部门、状态等筛选条件）
+ * @returns {Promise}
  */
 export function getUserPage(params) {
-  return get('/users', params)
+  return get('/users/get-user-page', params)
 }
 
 /**
  * 根据ID获取用户详情
- * @param id 用户ID
+ * @param {string} id 用户ID
+ * @returns {Promise}
  */
 export function getUser(id) {
-  return get(`/users/${id}`)
+  return get(`/users/get-user/${id}`)
 }
 
 /**
  * 创建新用户
- * @param data 用户信息
+ * @param {Object} data 用户信息
+ * @returns {Promise}
  */
 export function createUser(data) {
-  return post('/users', data)
+  return post('/users/create-user', data)
 }
 
 /**
  * 更新用户信息
- * @param id 用户ID
- * @param data 需要更新的用户字段
+ * @param {string} id 用户ID
+ * @param {Object} data 需要更新的用户字段
+ * @returns {Promise}
  */
 export function updateUser(id, data) {
-  return put(`/users/${id}`, data)
+  return put(`/users/update-user/${id}`, data)
 }
 
 /**
  * 删除用户
- * @param id 用户ID
+ * @param {string} id 用户ID
+ * @returns {Promise}
  */
 export function deleteUser(id) {
-  return del(`/users/${id}`)
+  return del(`/users/delete-user/${id}`)
 }
 
 /**
  * 启用用户（将用户状态设置为启用）
- * @param id 用户ID
+ * @param {string} id 用户ID
+ * @returns {Promise}
  */
 export function enableUser(id) {
-  return post(`/users/${id}/enable`)
+  return post(`/users/enable-user/${id}`)
 }
 
 /**
  * 禁用用户（将用户状态设置为禁用，禁止登录）
- * @param id 用户ID
+ * @param {string} id 用户ID
+ * @returns {Promise}
  */
 export function disableUser(id) {
-  return post(`/users/${id}/disable`)
+  return post(`/users/disable-user/${id}`)
 }
 
 /**
  * 获取用户的所有收货地址
- * @param userId 用户ID
+ * @param {string} userId 用户ID
+ * @returns {Promise}
  */
 export function getUserAddresses(userId) {
   return get(`/users/${userId}/addresses`)
@@ -70,8 +78,9 @@ export function getUserAddresses(userId) {
 
 /**
  * 为用户添加新的收货地址
- * @param userId 用户ID
- * @param data 地址信息
+ * @param {string} userId 用户ID
+ * @param {Object} data 地址信息
+ * @returns {Promise}
  */
 export function addUserAddress(userId, data) {
   return post(`/users/${userId}/addresses`, data)
@@ -79,8 +88,9 @@ export function addUserAddress(userId, data) {
 
 /**
  * 设置用户的默认收货地址
- * @param userId 用户ID
- * @param addressId 地址ID
+ * @param {string} userId 用户ID
+ * @param {string} addressId 地址ID
+ * @returns {Promise}
  */
 export function setDefaultAddress(userId, addressId) {
   return post(`/users/${userId}/addresses/${addressId}/default`)

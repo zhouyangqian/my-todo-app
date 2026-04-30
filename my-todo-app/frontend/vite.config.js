@@ -27,10 +27,23 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    strictPort: true,
+    host: '0.0.0.0',
+    open: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+        target: 'http://localhost:8088',
+        changeOrigin: true,
+        rewrite: (path) => path
+      }
+    }
+  },
+  // SPA 路由 fallback - 所有路由都返回 index.html
+  // 这样刷新页面时不会出现 404
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
       }
     }
   },

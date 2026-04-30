@@ -213,4 +213,13 @@ public class JwtTokenProvider {
         Claims claims = parseToken(token);
         return claims.getExpiration();
     }
+
+    /**
+     * 获取 JWT 配置属性
+     *
+     * @return JwtProperties
+     */
+    public JwtProperties getJwtProperties() {
+        return jwtProperties;
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -69,6 +70,16 @@ public class Inventory implements Serializable {
     private BigDecimal availableQuantity;
 
     /**
+     * 库存下限，低于此值触发库存不足预警
+     */
+    private BigDecimal stockMin;
+
+    /**
+     * 库存上限，高于此值触发库存积压预警
+     */
+    private BigDecimal stockMax;
+
+    /**
      * 成本价，当前批次商品的单位成本价格，用于成本核算
      */
     private BigDecimal costPrice;
@@ -76,11 +87,13 @@ public class Inventory implements Serializable {
     /**
      * 生产日期，商品的生产日期，用于保质期管理
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime productionDate;
 
     /**
      * 过期日期，商品的有效期限，用于临期预警和过期商品处理
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime expiryDate;
 
     /**
@@ -92,12 +105,14 @@ public class Inventory implements Serializable {
      * 创建时间，记录库存记录的创建时间戳，插入时自动填充
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /**
      * 更新时间，记录库存记录最近一次修改的时间戳，插入和更新时自动填充
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 
     /**

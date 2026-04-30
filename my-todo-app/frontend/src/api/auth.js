@@ -33,7 +33,7 @@ export function refreshToken(refreshToken) {
  * 用于页面初始化时加载用户数据
  */
 export function getUserInfo() {
-  return get('/permissions/user/me')
+  return get('/permissions/get-current-user-permissions')
 }
 
 /**

@@ -3,6 +3,7 @@ package com.example.gateway.filter;
 import cn.hutool.core.util.StrUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -43,6 +44,20 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
     private static final String BEARER_PREFIX = "Bearer ";
 
     /**
+     * 初始化时验证 JWT 配置
+     */
+    @PostConstruct
+    public void init() {
+        if (jwtSecret == null || jwtSecret.isEmpty()) {
+            log.error("JWT Secret 未配置！");
+        } else if (jwtSecret.length() < 32) {
+            log.warn("JWT Secret 长度不足 32 字符，当前长度: {}", jwtSecret.length());
+        } else {
+            log.info("JWT 配置加载成功，Secret 长度: {}，前缀: {}", jwtSecret.length(), jwtSecret.substring(0, 5) + "...");
+        }
+    }
+
+    /**
      * 过滤器核心逻辑
      * <p>
      * 1. 认证相关端点（/api/auth/）跳过验证
@@ -56,25 +71,33 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
 
+        log.debug("处理请求路径: {}", path);
+
         // 认证相关端点和健康检查端点跳过 Token 验证
         if (path.startsWith("/api/auth/") || path.equals("/actuator/health")) {
+            log.debug("跳过 Token 验证: {}", path);
             return chain.filter(exchange);
         }
 
         // 获取 Authorization 请求头
         String authorization = request.getHeaders().getFirst(AUTHORIZATION_HEADER);
+        log.debug("Authorization 请求头: {}", authorization != null ? "存在 (" + authorization.substring(0, Math.min(20, authorization.length())) + "...)" : "不存在");
 
         // 检查请求头是否有效
         if (StrUtil.isBlank(authorization) || !authorization.startsWith(BEARER_PREFIX)) {
+            log.warn("缺少或无效的 Authorization 请求头");
             return unauthorized(exchange, "缺少或无效的 Authorization 请求头");
         }
 
         // 提取 Bearer 后面的 Token 字符串
         String token = authorization.substring(BEARER_PREFIX.length());
+        log.debug("Token 长度: {}", token.length());
 
         try {
             // 解析 Token，获取声明信息
             Claims claims = parseToken(token);
+            log.debug("Token 解析成功 - userId: {}, username: {}, tenantId: {}",
+                claims.get("userId"), claims.get("username"), claims.get("tenantId"));
 
             // 将用户信息注入请求头，传递给下游微服务
             ServerHttpRequest mutatedRequest = request.mutate()
@@ -89,7 +112,7 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
             log.warn("令牌已过期: {}", e.getMessage());
             return unauthorized(exchange, "令牌已过期");
         } catch (Exception e) {
-            log.warn("无效令牌: {}", e.getMessage());
+            log.error("无效令牌: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             return unauthorized(exchange, "无效的令牌");
         }
     }

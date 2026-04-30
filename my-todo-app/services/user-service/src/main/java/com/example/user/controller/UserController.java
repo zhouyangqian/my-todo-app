@@ -2,6 +2,7 @@ package com.example.user.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.user.entity.User;
 import com.example.user.entity.UserAddress;
 import com.example.user.service.UserService;
@@ -50,8 +51,8 @@ public class UserController {
      * @return 分页包装的用户列表数据
      */
     @Operation(summary = "分页查询用户")
-    @GetMapping
-    public ApiResponse<Page<User>> getUserPage(
+    @GetMapping("/get-user-page")
+    public ApiResponse<PageResult<User>> getUserPage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -61,7 +62,9 @@ public class UserController {
             @RequestParam(required = false) Integer status) {
         // 调用服务层执行分页查询
         Page<User> result = userService.getUserPage(tenantId, page, size, username, realName, deptId, status);
-        return ApiResponse.success(result);
+        // 转换为 PageResult 返回
+        PageResult<User> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     /**
@@ -71,7 +74,7 @@ public class UserController {
      * @return 用户详细信息
      */
     @Operation(summary = "获取用户详情")
-    @GetMapping("/{id}")
+    @GetMapping("/get-user/{id}")
     public ApiResponse<User> getUser(@PathVariable Long id) {
         // 根据主键查询用户信息
         User user = userService.getUserById(id);
@@ -91,7 +94,7 @@ public class UserController {
      * @return 创建成功后的用户信息（含自动生成的ID）
      */
     @Operation(summary = "创建用户")
-    @PostMapping
+    @PostMapping("/create-user")
     public ApiResponse<User> createUser(
             @RequestBody User user,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -118,15 +121,15 @@ public class UserController {
      * @return 更新后的用户完整信息
      */
     @Operation(summary = "更新用户")
-    @PutMapping("/{id}")
+    @PutMapping("/update-user/{id}")
     public ApiResponse<User> updateUser(
             @PathVariable Long id,
             @RequestBody User user,
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         // 将路径中的ID设置到用户对象，确保更新的是目标用户
         user.setId(id);
-        // 设置更新人ID，用于审计追踪
-        user.setUpdatedBy(userId);
+        // 设置更新人ID，用于审计追踪（如果请求头中没有则使用默认值）
+        user.setUpdatedBy(userId != null ? userId : 1L);
         // 调用服务层执行更新操作
         User updated = userService.updateUser(user);
         return ApiResponse.success(updated);
@@ -143,7 +146,7 @@ public class UserController {
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "删除用户")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-user/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable Long id) {
         // 调用服务层执行软删除
         userService.deleteUser(id);
@@ -160,7 +163,7 @@ public class UserController {
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "启用用户")
-    @PostMapping("/{id}/enable")
+    @PostMapping("/enable-user/{id}")
     public ApiResponse<Void> enableUser(@PathVariable Long id) {
         // 将用户状态设置为1（启用）
         userService.updateUserStatus(id, 1);
@@ -177,7 +180,7 @@ public class UserController {
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "禁用用户")
-    @PostMapping("/{id}/disable")
+    @PostMapping("/disable-user/{id}")
     public ApiResponse<Void> disableUser(@PathVariable Long id) {
         // 将用户状态设置为0（禁用）
         userService.updateUserStatus(id, 0);

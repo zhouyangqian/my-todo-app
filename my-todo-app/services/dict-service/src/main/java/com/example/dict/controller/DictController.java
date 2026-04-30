@@ -2,6 +2,7 @@ package com.example.dict.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.dict.entity.DictItem;
 import com.example.dict.entity.DictType;
 import com.example.dict.service.DictService;
@@ -26,25 +27,26 @@ public class DictController {
     // ==================== 字典类型 ====================
 
     @Operation(summary = "分页查询字典类型")
-    @GetMapping("/types")
-    public ApiResponse<Page<DictType>> getDictTypePage(
+    @GetMapping("/types/get-dict-type-page")
+    public ApiResponse<PageResult<DictType>> getDictTypePage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String dictName) {
         Page<DictType> result = dictService.getDictTypePage(tenantId, page, size, dictName);
-        return ApiResponse.success(result);
+        PageResult<DictType> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     @Operation(summary = "获取字典类型详情")
-    @GetMapping("/types/{id}")
+    @GetMapping("/types/get-dict-type/{id}")
     public ApiResponse<DictType> getDictType(@PathVariable Long id) {
         DictType dictType = dictService.getById(id);
         return ApiResponse.success(dictType);
     }
 
     @Operation(summary = "创建字典类型")
-    @PostMapping("/types")
+    @PostMapping("/types/create-dict-type")
     public ApiResponse<DictType> createDictType(
             @RequestBody DictType dictType,
             @RequestHeader("X-User-Id") Long userId) {
@@ -54,7 +56,7 @@ public class DictController {
     }
 
     @Operation(summary = "更新字典类型")
-    @PutMapping("/types/{id}")
+    @PutMapping("/types/update-dict-type/{id}")
     public ApiResponse<DictType> updateDictType(
             @PathVariable Long id,
             @RequestBody DictType dictType,
@@ -66,7 +68,7 @@ public class DictController {
     }
 
     @Operation(summary = "删除字典类型")
-    @DeleteMapping("/types/{id}")
+    @DeleteMapping("/types/delete-dict-type/{id}")
     public ApiResponse<Void> deleteDictType(
             @PathVariable Long id,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
@@ -93,7 +95,7 @@ public class DictController {
     }
 
     @Operation(summary = "添加字典项")
-    @PostMapping("/items")
+    @PostMapping("/items/add-dict-item")
     public ApiResponse<DictItem> addDictItem(
             @RequestBody DictItem dictItem,
             @RequestHeader("X-User-Id") Long userId) {
@@ -103,7 +105,7 @@ public class DictController {
     }
 
     @Operation(summary = "更新字典项")
-    @PutMapping("/items/{id}")
+    @PutMapping("/items/update-dict-item/{id}")
     public ApiResponse<DictItem> updateDictItem(
             @PathVariable Long id,
             @RequestBody DictItem dictItem,
@@ -115,7 +117,7 @@ public class DictController {
     }
 
     @Operation(summary = "删除字典项")
-    @DeleteMapping("/items/{id}")
+    @DeleteMapping("/items/delete-dict-item/{id}")
     public ApiResponse<Void> deleteDictItem(
             @PathVariable Long id,
             @RequestHeader("X-Tenant-Id") Long tenantId) {

@@ -45,7 +45,6 @@
       </template>
 
       <el-table :data="tableData" v-loading="loading" border stripe>
-        <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="realName" label="姓名" width="100" />
         <el-table-column prop="email" label="邮箱" width="180" />
@@ -173,7 +172,7 @@ const submitLoading = ref(false)
 
 // 表单数据（新增/编辑共用）
 const formData = reactive({
-  id: undefined,                         // 用户ID（编辑时有值）
+  id: undefined,                         // 用户ID（编辑时有值，string类型）
   username: '',                          // 用户名
   realName: '',                          // 真实姓名
   email: '',                             // 邮箱
@@ -253,11 +252,11 @@ const handleAdd = () => {
 
 /**
  * 编辑按钮处理：将当前行数据填充到表单并打开对话框
- * @param row 当前行的用户数据
+ * @param {Object} row 当前行的用户数据
  */
 const handleEdit = (row) => {
   dialogTitle.value = '编辑用户'
-  formData.id = row.id
+  formData.id = String(row.id)  // 确保id是字符串类型
   formData.username = row.username
   formData.realName = row.realName
   formData.email = row.email

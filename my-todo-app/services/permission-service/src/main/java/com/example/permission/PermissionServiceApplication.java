@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * 权限服务启动类
@@ -21,6 +22,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication
 @EnableDiscoveryClient
 @MapperScan("com.example.permission.mapper")
+@ComponentScan(basePackages = {"com.example.permission", "com.example.common"})
 public class PermissionServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(PermissionServiceApplication.class, args);

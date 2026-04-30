@@ -1,6 +1,7 @@
 package com.example.user.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -89,6 +90,7 @@ public class UserAddress implements Serializable {
      * <p>在插入记录时自动填充当前时间</p>
      */
     @TableField(fill = FieldFill.INSERT)  // 插入时自动填充
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /**
@@ -96,5 +98,6 @@ public class UserAddress implements Serializable {
      * <p>在插入和更新记录时自动填充当前时间</p>
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)  // 插入和更新时均自动填充
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

@@ -2,6 +2,7 @@ package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Customer;
 import com.example.erp.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,26 +22,27 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @Operation(summary = "分页查询客户")
-    @GetMapping
-    public ApiResponse<Page<Customer>> getCustomerPage(
+    @GetMapping("/get-customer-page")
+    public ApiResponse<PageResult<Customer>> getCustomerPage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) Integer status) {
         Page<Customer> result = customerService.getCustomerPage(tenantId, page, size, customerName, status);
-        return ApiResponse.success(result);
+        PageResult<Customer> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     @Operation(summary = "获取客户详情")
-    @GetMapping("/{id}")
+    @GetMapping("/get-customer/{id}")
     public ApiResponse<Customer> getCustomer(@PathVariable Long id) {
         Customer customer = customerService.getById(id);
         return ApiResponse.success(customer);
     }
 
     @Operation(summary = "创建客户")
-    @PostMapping
+    @PostMapping("/create-customer")
     public ApiResponse<Customer> createCustomer(
             @RequestBody Customer customer,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -52,7 +54,7 @@ public class CustomerController {
     }
 
     @Operation(summary = "更新客户")
-    @PutMapping("/{id}")
+    @PutMapping("/update-customer/{id}")
     public ApiResponse<Customer> updateCustomer(
             @PathVariable Long id,
             @RequestBody Customer customer,
@@ -64,7 +66,7 @@ public class CustomerController {
     }
 
     @Operation(summary = "删除客户")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-customer/{id}")
     public ApiResponse<Void> deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
         return ApiResponse.success();

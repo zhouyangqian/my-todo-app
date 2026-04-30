@@ -11,13 +11,14 @@ spring:
       discovery:
         server-addr: ${NACOS_SERVER:localhost:8848}
       config:
+        enabled: false
         server-addr: ${NACOS_SERVER:localhost:8848}
         file-extension: yaml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:my_todo_erp}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:my-todo-app-dev}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:root}
+    password: ${MYSQL_PASSWORD:123456}
     type: com.alibaba.druid.pool.DruidDataSource
   data:
     redis:

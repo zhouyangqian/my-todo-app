@@ -96,6 +96,7 @@
       :title="dialogTitle"
       width="600px"
       :close-on-click-modal="false"
+      @closed="handleDialogClosed"
     >
       <el-form
         ref="formRef"
@@ -106,7 +107,13 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="商品编码" prop="sku">
-              <el-input v-model="formData.sku" placeholder="请输入商品编码" />
+              <el-input v-model="formData.sku" placeholder="请输入或生成商品编码">
+                <template #append>
+                  <el-button size="small" @click="generateSku" :disabled="!!formData.id">
+                    <el-icon><Lightning /></el-icon>
+                  </el-button>
+                </template>
+              </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -194,7 +201,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus, Lightning } from '@element-plus/icons-vue'
 import { getProductPage, getProduct, createProduct, updateProduct, deleteProduct } from '@/api/erp'
 
 // 搜索表单
@@ -280,19 +287,54 @@ const handleReset = () => {
   handleSearch()
 }
 
+// 生成商品编码
+const generateSku = async () => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const dateStr = `${year}${month}${day}`
+
+  // 获取所有商品数据来计算最大编码
+  try {
+    const res = await getProductPage({ page: 1, size: 9999 })
+    const allSkus = res.records || []
+
+    // 从所有数据中找出今天的最大编码
+    const todaySkus = allSkus
+      .filter(item => item.sku && item.sku.startsWith(`P${dateStr}`))
+      .map(item => {
+        const seqStr = item.sku.slice(-4)
+        const seq = parseInt(seqStr)
+        return isNaN(seq) ? 0 : seq
+      })
+
+    const maxSeq = todaySkus.length > 0 ? Math.max(...todaySkus) : 0
+    const seq = String(maxSeq + 1).padStart(4, '0')
+
+    formData.sku = `P${dateStr}${seq}`
+  } catch (error) {
+    // 如果获取失败，使用默认格式
+    formData.sku = `P${dateStr}0001`
+  }
+}
+
 // 新增
 const handleAdd = () => {
   dialogTitle.value = '新增商品'
-  formData.id = undefined
-  formData.sku = ''
-  formData.name = ''
-  formData.brand = ''
-  formData.model = ''
-  formData.unit = ''
-  formData.costPrice = 0
-  formData.salePrice = 0
-  formData.status = 1
-  formData.description = ''
+  // 使用 Object.assign 重置表单数据
+  Object.assign(formData, {
+    id: undefined,
+    sku: '',
+    name: '',
+    brand: '',
+    model: '',
+    unit: '',
+    costPrice: 0,
+    salePrice: 0,
+    status: 1,
+    description: ''
+  })
   dialogVisible.value = true
 }
 
@@ -301,9 +343,22 @@ const handleEdit = async (row) => {
   dialogTitle.value = '编辑商品'
   try {
     const data = await getProduct(row.id)
-    Object.assign(formData, data)
+    // 使用 Object.assign 更新 reactive 对象的多个属性
+    Object.assign(formData, {
+      id: data.id,
+      sku: data.sku || '',
+      name: data.name || '',
+      brand: data.brand || '',
+      model: data.model || '',
+      unit: data.unit || '',
+      costPrice: data.costPrice || 0,
+      salePrice: data.salePrice || 0,
+      status: data.status ?? 1,
+      description: data.description || ''
+    })
     dialogVisible.value = true
   } catch (error) {
+    console.error('获取数据失败:', error)
     ElMessage.error('获取数据失败')
   }
 }

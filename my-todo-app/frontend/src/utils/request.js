@@ -28,8 +28,38 @@ service.interceptors.request.use(
     }
 
     // 添加租户ID到请求头，用于后端多租户数据隔离
-    const tenantId = userStore.userInfo?.tenantId || 1
+    // 优先使用 userInfo 中的 tenantId，否则使用 localStorage 中的值，最后使用默认值 1
+    let tenantId = userStore.userInfo?.tenantId
+    if (!tenantId) {
+      const savedTenantId = localStorage.getItem('tenantId')
+      tenantId = savedTenantId ? parseInt(savedTenantId) : 1
+    }
     config.headers['X-Tenant-Id'] = tenantId
+
+    // 添加用户ID到请求头，用于后端记录创建人/更新人
+    // 注意：后端返回的字段名是 userId，不是 id
+    if (userStore.userInfo?.userId) {
+      config.headers['X-User-Id'] = userStore.userInfo.userId
+    }
+
+    // 添加用户名到请求头，用于后端获取当前用户信息
+    if (userStore.userInfo?.username) {
+      config.headers['X-Username'] = userStore.userInfo.username
+    }
+
+    // 添加用户其他信息到请求头
+    if (userStore.userInfo?.email) {
+      config.headers['X-Email'] = userStore.userInfo.email
+    }
+    if (userStore.userInfo?.realName) {
+      config.headers['X-RealName'] = userStore.userInfo.realName
+    }
+    if (userStore.userInfo?.phone) {
+      config.headers['X-Phone'] = userStore.userInfo.phone
+    }
+    if (userStore.userInfo?.avatar) {
+      config.headers['X-Avatar'] = userStore.userInfo.avatar
+    }
 
     return config
   },
@@ -51,7 +81,14 @@ service.interceptors.response.use(
 
     // 业务状态码判断（后端返回的 code 不为 200 时表示业务异常）
     if (res.code !== 200) {
-      ElMessage.error(res.message || '请求失败')
+      // 使用 grouped 模式避免重复消息
+      ElMessage({
+        message: res.message || '请求失败',
+        type: 'error',
+        duration: 3000,
+        showClose: true,
+        grouping: true
+      })
 
       // 401 未授权 - 令牌过期或无效，清除认证信息并跳转到登录页
       if (res.code === 401) {
@@ -64,7 +101,7 @@ service.interceptors.response.use(
     }
 
     // 正常响应，返回业务数据
-    return res
+    return res.data
   },
   (error) => {
     console.error('Response error:', error)
@@ -73,32 +110,47 @@ service.interceptors.response.use(
     if (error.response) {
       const status = error.response.status
 
+      let errorMsg = ''
       switch (status) {
         case 401:
           // 未授权 - 令牌失效，需要重新登录
-          ElMessage.error('登录已过期，请重新登录')
+          errorMsg = '登录已过期，请重新登录'
           const userStore = useUserStore()
           userStore.clearAuth()
           router.push('/login')
           break
         case 403:
           // 禁止访问 - 当前用户无权限
-          ElMessage.error('没有权限访问')
+          errorMsg = '没有权限访问'
           break
         case 404:
           // 资源不存在
-          ElMessage.error('请求的资源不存在')
+          errorMsg = '请求的资源不存在'
           break
         case 500:
           // 服务器内部错误
-          ElMessage.error('服务器内部错误')
+          errorMsg = '服务器内部错误'
           break
         default:
-          ElMessage.error(error.message || '请求失败')
+          errorMsg = error.message || '请求失败'
       }
+
+      ElMessage({
+        message: errorMsg,
+        type: 'error',
+        duration: 3000,
+        showClose: true,
+        grouping: true
+      })
     } else {
       // 无响应对象，通常是网络连接问题
-      ElMessage.error('网络错误，请检查网络连接')
+      ElMessage({
+        message: '网络错误，请检查网络连接',
+        type: 'error',
+        duration: 3000,
+        showClose: true,
+        grouping: true
+      })
     }
 
     return Promise.reject(error)

@@ -2,6 +2,7 @@ package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Supplier;
 import com.example.erp.service.SupplierService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,26 +22,27 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @Operation(summary = "分页查询供应商")
-    @GetMapping
-    public ApiResponse<Page<Supplier>> getSupplierPage(
+    @GetMapping("/get-supplier-page")
+    public ApiResponse<PageResult<Supplier>> getSupplierPage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String supplierName,
             @RequestParam(required = false) Integer status) {
         Page<Supplier> result = supplierService.getSupplierPage(tenantId, page, size, supplierName, status);
-        return ApiResponse.success(result);
+        PageResult<Supplier> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     @Operation(summary = "获取供应商详情")
-    @GetMapping("/{id}")
+    @GetMapping("/get-supplier/{id}")
     public ApiResponse<Supplier> getSupplier(@PathVariable Long id) {
         Supplier supplier = supplierService.getById(id);
         return ApiResponse.success(supplier);
     }
 
     @Operation(summary = "创建供应商")
-    @PostMapping
+    @PostMapping("/create-supplier")
     public ApiResponse<Supplier> createSupplier(
             @RequestBody Supplier supplier,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -52,7 +54,7 @@ public class SupplierController {
     }
 
     @Operation(summary = "更新供应商")
-    @PutMapping("/{id}")
+    @PutMapping("/update-supplier/{id}")
     public ApiResponse<Supplier> updateSupplier(
             @PathVariable Long id,
             @RequestBody Supplier supplier,
@@ -64,7 +66,7 @@ public class SupplierController {
     }
 
     @Operation(summary = "删除供应商")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-supplier/{id}")
     public ApiResponse<Void> deleteSupplier(@PathVariable Long id) {
         supplierService.deleteSupplier(id);
         return ApiResponse.success();

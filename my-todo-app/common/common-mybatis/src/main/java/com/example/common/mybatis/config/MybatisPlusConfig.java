@@ -72,8 +72,12 @@ public class MybatisPlusConfig {
      * <p>
      * 在插入和更新操作时，自动填充以下字段：
      * <ul>
-     *   <li>createTime - 插入时自动设置为当前时间</li>
-     *   <li>updateTime - 插入和更新时自动设置为当前时间</li>
+     *   <li>tenantId - 插入时从上下文中获取当前租户ID（需要配合认证上下文）</li>
+     *   <li>deleted - 插入时默认设置为 0（未删除）</li>
+     *   <li>createdBy - 插入时从上下文中获取当前用户ID（需要配合认证上下文）</li>
+     *   <li>createdAt - 插入时自动设置为当前时间</li>
+     *   <li>updatedBy - 更新时从上下文中获取当前用户ID</li>
+     *   <li>updatedAt - 插入和更新时自动设置为当前时间</li>
      * </ul>
      * </p>
      */
@@ -82,15 +86,23 @@ public class MybatisPlusConfig {
         return new MetaObjectHandler() {
             @Override
             public void insertFill(MetaObject metaObject) {
+                // 插入时自动填充租户ID（需要从认证上下文获取，这里先设为默认值1）
+                this.strictInsertFill(metaObject, "tenantId", Long.class, 1L);
+                // 插入时自动填充 deleted 字段为 0（未删除）
+                this.strictInsertFill(metaObject, "deleted", Integer.class, 0);
+                // 插入时自动填充创建人ID（需要从认证上下文获取，这里先设为默认值1）
+                this.strictInsertFill(metaObject, "createdBy", Long.class, 1L);
                 // 插入时自动填充创建时间和更新时间
-                this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, LocalDateTime.now());
-                this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+                this.strictInsertFill(metaObject, "createdAt", LocalDateTime.class, LocalDateTime.now());
+                this.strictInsertFill(metaObject, "updatedAt", LocalDateTime.class, LocalDateTime.now());
             }
 
             @Override
             public void updateFill(MetaObject metaObject) {
+                // 更新时自动填充更新人ID（需要从认证上下文获取，这里先设为默认值1）
+                this.strictInsertFill(metaObject, "updatedBy", Long.class, 1L);
                 // 更新时自动填充更新时间
-                this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());
+                this.strictUpdateFill(metaObject, "updatedAt", LocalDateTime.class, LocalDateTime.now());
             }
         };
     }

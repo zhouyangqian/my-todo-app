@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8088
 
 spring:
   application:
@@ -12,13 +12,7 @@ spring:
         server-addr: ${NACOS_SERVER:localhost:8848}
         namespace: ${NACOS_NAMESPACE:}
       config:
-        server-addr: ${NACOS_SERVER:localhost:8848}
-        namespace: ${NACOS_NAMESPACE:}
-        file-extension: yaml
-        shared-configs:
-          - data-id: common.yaml
-            group: DEFAULT_GROUP
-            refresh: true
+        enabled: false
     gateway:
       discovery:
         locator:
@@ -38,40 +32,30 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
-          filters:
-            - TokenFilter
 
         # Permission Service
         - id: permission-service
           uri: lb://permission-service
           predicates:
-            - Path=/api/permissions/**,/api/roles/**
-          filters:
-            - TokenFilter
+            - Path=/api/permissions/**,/api/roles/**,/api/system/**
 
         # ERP Service
         - id: erp-service
           uri: lb://erp-service
           predicates:
             - Path=/api/erp/**
-          filters:
-            - TokenFilter
 
         # Finance Service
         - id: finance-service
           uri: lb://finance-service
           predicates:
             - Path=/api/finance/**
-          filters:
-            - TokenFilter
 
         # Dict Service
         - id: dict-service
           uri: lb://dict-service
           predicates:
-            - Path=/api/dict/**
-          filters:
-            - TokenFilter
+            - Path=/api/dict/**,/api/config/**
 
   data:
     redis:

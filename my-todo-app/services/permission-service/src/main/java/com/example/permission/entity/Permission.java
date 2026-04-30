@@ -1,10 +1,12 @@
 package com.example.permission.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 权限实体类
@@ -66,6 +68,10 @@ public class Permission implements Serializable {
     /** 是否在菜单中可见：0-隐藏，1-显示 */
     private Integer visible;
 
+    /** 子权限列表（非数据库字段，用于树形结构展示） */
+    @TableField(exist = false)
+    private List<Permission> children;
+
     /** 逻辑删除标志：0-未删除，1-已删除，使用MyBatis-Plus逻辑删除自动处理 */
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
@@ -77,6 +83,7 @@ public class Permission implements Serializable {
 
     /** 创建时间，插入时自动填充 */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /** 最后更新人ID，更新时自动填充 */
@@ -85,5 +92,6 @@ public class Permission implements Serializable {
 
     /** 最后更新时间，插入和更新时自动填充 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,7 @@
 package com.example.erp.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.erp.entity.Warehouse;
@@ -57,8 +58,8 @@ public class WarehouseService extends ServiceImpl<WarehouseMapper, Warehouse> {
         if (status != null) {
             wrapper.eq(Warehouse::getStatus, status);
         }
-        // 按排序字段升序排列
-        wrapper.orderByAsc(Warehouse::getSort);
+        // 按仓库编码升序排列
+        wrapper.orderByAsc(Warehouse::getWarehouseCode);
         return page(new Page<>(page, size), wrapper);
     }
 
@@ -77,7 +78,7 @@ public class WarehouseService extends ServiceImpl<WarehouseMapper, Warehouse> {
                 .eq(Warehouse::getTenantId, tenantId)
                 .eq(Warehouse::getDeleted, 0)
                 .eq(Warehouse::getStatus, 1)
-                .orderByAsc(Warehouse::getSort)
+                .orderByAsc(Warehouse::getWarehouseCode)
         );
     }
 
@@ -206,10 +207,10 @@ public class WarehouseService extends ServiceImpl<WarehouseMapper, Warehouse> {
      */
     private void clearDefaultWarehouse(Long tenantId) {
         update(
-            new LambdaQueryWrapper<Warehouse>()
+            new LambdaUpdateWrapper<Warehouse>()
                 .eq(Warehouse::getTenantId, tenantId)
-                .eq(Warehouse::getIsDefault, 1),
-            wrapper -> wrapper.set(Warehouse::getIsDefault, 0)
+                .eq(Warehouse::getIsDefault, 1)
+                .set(Warehouse::getIsDefault, 0)
         );
     }
 }

@@ -1,6 +1,7 @@
 package com.example.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.user.entity.User;
@@ -170,10 +171,30 @@ public class UserService extends ServiceImpl<UserMapper, User> {
      */
     @Transactional  // 开启数据库事务，出现异常时自动回滚
     public User updateUser(User user) {
+        // 记录更新前的用户信息
+        log.info("更新用户 - ID: {}, username: {}, email: {}, phone: {}, realName: {}, status: {}",
+                user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getRealName(), user.getStatus());
+
+        // 先查询用户是否存在
+        User existingUser = getById(user.getId());
+        if (existingUser == null) {
+            log.warn("用户不存在，ID: {}", user.getId());
+            return user;
+        }
+        log.info("更新前用户数据: username={}, email={}, phone={}, realName={}",
+                existingUser.getUsername(), existingUser.getEmail(), existingUser.getPhone(), existingUser.getRealName());
+
         // 调用 MyBatis-Plus 的 updateById 方法，根据主键更新非空字段
-        updateById(user);
-        // 记录操作日志
-        log.info("更新用户: {}", user.getUsername());
+        boolean success = updateById(user);
+
+        // 记录更新结果
+        log.info("更新结果: success={}, 影响行数: {}", success, success ? "1" : "0");
+
+        // 重新查询验证
+        User updated = getById(user.getId());
+        log.info("更新后用户数据: username={}, email={}, phone={}, realName={}",
+                updated.getUsername(), updated.getEmail(), updated.getPhone(), updated.getRealName());
+
         return user;
     }
 
@@ -258,11 +279,11 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         // 如果新地址被设置为默认地址，需要先取消该用户下其他已有的默认地址
         if (address.getIsDefault() != null && address.getIsDefault() == 1) {
             // 将该用户下所有当前默认地址的 isDefault 字段设为0（取消默认）
-            userAddressMapper.update(
-                new LambdaQueryWrapper<UserAddress>()
+            userAddressMapper.update(null,
+                new LambdaUpdateWrapper<UserAddress>()
                     .eq(UserAddress::getUserId, address.getUserId())  // 限定当前用户
-                    .eq(UserAddress::getIsDefault, 1),                 // 查找当前的默认地址
-                wrapper -> wrapper.set(UserAddress::getIsDefault, 0)   // 将其设为非默认
+                    .eq(UserAddress::getIsDefault, 1)                 // 查找当前的默认地址
+                    .set(UserAddress::getIsDefault, 0)                // 将其设为非默认
             );
         }
         // 插入新的地址记录到数据库
@@ -288,11 +309,11 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     @Transactional  // 开启数据库事务，确保取消旧默认和设置新默认的原子性
     public void setDefaultAddress(Long userId, Long addressId) {
         // 第一步：取消该用户下所有当前的默认地址
-        userAddressMapper.update(
-            new LambdaQueryWrapper<UserAddress>()
+        userAddressMapper.update(null,
+            new LambdaUpdateWrapper<UserAddress>()
                 .eq(UserAddress::getUserId, userId)     // 限定当前用户
-                .eq(UserAddress::getIsDefault, 1),       // 查找所有默认地址
-            wrapper -> wrapper.set(UserAddress::getIsDefault, 0)  // 取消默认标记
+                .eq(UserAddress::getIsDefault, 1)       // 查找所有默认地址
+                .set(UserAddress::getIsDefault, 0)      // 取消默认标记
         );
 
         // 第二步：将指定的地址设置为默认

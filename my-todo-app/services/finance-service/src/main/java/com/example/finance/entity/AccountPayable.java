@@ -1,6 +1,7 @@
 package com.example.finance.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -60,9 +61,11 @@ public class AccountPayable implements Serializable {
     private String currency;
 
     /** 业务日期，即采购或服务发生的实际日期 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime bizDate;
 
     /** 应付日期（到期日期），超过此日期未付款则视为逾期 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime dueDate;
 
     /** 结算状态：0-未结算（全额未付），1-部分结算（已付部分），2-已结算（全额已付） */
@@ -82,6 +85,7 @@ public class AccountPayable implements Serializable {
 
     /** 创建时间，记录数据创建的时间戳，插入时自动填充 */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /** 更新人ID，记录最后一次修改该数据的操作者，更新时自动填充 */
@@ -90,5 +94,6 @@ public class AccountPayable implements Serializable {
 
     /** 更新时间，记录数据最后一次修改的时间戳，插入和更新时均自动填充 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

@@ -42,7 +42,7 @@ public class MultiTenantHandler implements TenantLineHandler {
             return new LongValue(tenantId);
         }
         // 返回 null 表示不注入租户条件（适用于未登录的场景）
-        return new NullValue();
+        return null;
     }
 
     /**
@@ -80,57 +80,18 @@ public class MultiTenantHandler implements TenantLineHandler {
      */
     @Override
     public boolean ignoreTable(String tableName) {
-        // 系统表不需要租户隔离
+        // 系统表和认证相关表不需要租户隔离
         return tableName.startsWith("sys_")
             || tableName.startsWith("gateway_")
+            || tableName.equals("user")              // 用户表（认证服务）
+            || tableName.equals("login_session")      // 登录会话表
+            || tableName.equals("refresh_token")      // 刷新令牌表
+            || tableName.equals("login_log")          // 登录日志表
+            || tableName.equals("captcha")            // 验证码表
+            || tableName.equals("password_history")   // 密码历史表
+            || tableName.equals("social_account")     // 社交账号表
             || tableName.equals("databasechangelog")
             || tableName.equals("databasechangeloglock");
     }
 }
 
-/**
- * 租户上下文
- * <p>
- * 使用 ThreadLocal 存储当前线程的租户ID，方便在任意位置获取。
- * </p>
- * <p>
- * 使用场景：
- * <ul>
- *   <li>在拦截器中从 JWT Token 解析出租户ID并设置到上下文</li>
- *   <li>在多租户拦截器中从上下文获取租户ID</li>
- *   <li>在业务代码中获取当前租户ID进行权限判断</li>
- * </ul>
- * </p>
- */
-class TenantContext {
-
-    private static final ThreadLocal<Long> TENANT_ID = new ThreadLocal<>();
-
-    /**
-     * 设置当前租户ID
-     *
-     * @param tenantId 租户ID
-     */
-    public static void setTenantId(Long tenantId) {
-        TENANT_ID.set(tenantId);
-    }
-
-    /**
-     * 获取当前租户ID
-     *
-     * @return 租户ID，如果未设置则返回 null
-     */
-    public static Long getTenantId() {
-        return TENANT_ID.get();
-    }
-
-    /**
-     * 清除当前租户ID
-     * <p>
-     * 在请求结束时调用，避免 ThreadLocal 内存泄漏。
-     * </p>
-     */
-    public static void clear() {
-        TENANT_ID.remove();
-    }
-}

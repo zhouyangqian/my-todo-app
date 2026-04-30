@@ -1,6 +1,7 @@
 package com.example.permission.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -41,5 +42,6 @@ public class UserRole implements Serializable {
 
     /** 创建时间，插入时自动填充 */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 }

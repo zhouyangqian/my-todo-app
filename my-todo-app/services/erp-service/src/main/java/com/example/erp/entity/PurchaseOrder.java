@@ -1,6 +1,7 @@
 package com.example.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -57,11 +58,13 @@ public class PurchaseOrder implements Serializable {
     /**
      * 订单日期，采购订单的下单日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime orderDate;
 
     /**
      * 预计到货日期，与供应商约定的预计到货时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime expectedDate;
 
     /**
@@ -98,6 +101,7 @@ public class PurchaseOrder implements Serializable {
     /**
      * 审核时间，订单审核通过的时间戳
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime approvedAt;
 
     /**
@@ -127,6 +131,7 @@ public class PurchaseOrder implements Serializable {
      * 创建时间，记录采购订单的创建时间戳，插入时自动填充
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /**
@@ -139,5 +144,6 @@ public class PurchaseOrder implements Serializable {
      * 更新时间，记录最近一次修改的时间戳，插入和更新时自动填充
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

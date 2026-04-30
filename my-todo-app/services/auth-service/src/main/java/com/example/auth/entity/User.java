@@ -3,6 +3,7 @@ package com.example.auth.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.common.core.entity.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -47,18 +48,21 @@ public class User extends BaseEntity {
     private Integer locked;
 
     /** 锁定截止时间（超过此时间自动解锁） */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime lockedUntil;
 
     /** 连续登录失败次数（达到上限后锁定账号） */
     private Integer loginFailCount;
 
     /** 最后登录时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime lastLoginTime;
 
     /** 最后登录IP */
     private String lastLoginIp;
 
     /** 密码最后修改时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime passwordChangedAt;
 
     /** 账号是否未过期（非数据库字段，Spring Security 使用） */

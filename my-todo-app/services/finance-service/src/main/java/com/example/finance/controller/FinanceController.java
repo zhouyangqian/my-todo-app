@@ -2,6 +2,7 @@ package com.example.finance.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.finance.entity.*;
 import com.example.finance.service.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,14 +66,16 @@ public class FinanceController {
      * @return 分页查询结果
      */
     @Operation(summary = "分页查询应收账款")
-    @GetMapping("/receivables")
-    public ApiResponse<Page<AccountReceivable>> getReceivablePage(
+    @GetMapping("/receivables/get-receivable-page")
+    public ApiResponse<PageResult<AccountReceivable>> getReceivablePage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Long customerId,
             @RequestParam(required = false) Integer status) {
-        return ApiResponse.success(accountReceivableService.getPage(tenantId, page, size, customerId, status));
+        Page<AccountReceivable> result = accountReceivableService.getPage(tenantId, page, size, customerId, status);
+        PageResult<AccountReceivable> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     /**
@@ -84,7 +87,7 @@ public class FinanceController {
      * @return 创建成功的应收账款对象
      */
     @Operation(summary = "创建应收账款")
-    @PostMapping("/receivables")
+    @PostMapping("/receivables/create-receivable")
     public ApiResponse<AccountReceivable> createReceivable(
             @RequestBody AccountReceivable receivable,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -103,7 +106,7 @@ public class FinanceController {
      * @return 操作结果
      */
     @Operation(summary = "应收账款收款")
-    @PostMapping("/receivables/{id}/receive")
+    @PostMapping("/receivables/receive-payment/{id}")
     public ApiResponse<Void> receivePayment(
             @PathVariable Long id,
             @RequestParam BigDecimal amount) {
@@ -121,7 +124,7 @@ public class FinanceController {
      * @return 逾期的应收账款列表
      */
     @Operation(summary = "获取逾期应收账款")
-    @GetMapping("/receivables/overdue")
+    @GetMapping("/receivables/get-overdue-receivables")
     public ApiResponse<List<AccountReceivable>> getOverdueReceivables(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         return ApiResponse.success(accountReceivableService.getOverdueList(tenantId));
@@ -140,14 +143,16 @@ public class FinanceController {
      * @return 分页查询结果
      */
     @Operation(summary = "分页查询应付账款")
-    @GetMapping("/payables")
-    public ApiResponse<Page<AccountPayable>> getPayablePage(
+    @GetMapping("/payables/get-payable-page")
+    public ApiResponse<PageResult<AccountPayable>> getPayablePage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Long supplierId,
             @RequestParam(required = false) Integer status) {
-        return ApiResponse.success(accountPayableService.getPage(tenantId, page, size, supplierId, status));
+        Page<AccountPayable> result = accountPayableService.getPage(tenantId, page, size, supplierId, status);
+        PageResult<AccountPayable> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     /**
@@ -159,7 +164,7 @@ public class FinanceController {
      * @return 创建成功的应付账款对象
      */
     @Operation(summary = "创建应付账款")
-    @PostMapping("/payables")
+    @PostMapping("/payables/create-payable")
     public ApiResponse<AccountPayable> createPayable(
             @RequestBody AccountPayable payable,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -178,7 +183,7 @@ public class FinanceController {
      * @return 操作结果
      */
     @Operation(summary = "应付账款付款")
-    @PostMapping("/payables/{id}/pay")
+    @PostMapping("/payables/make-payment/{id}")
     public ApiResponse<Void> makePayment(
             @PathVariable Long id,
             @RequestParam BigDecimal amount) {
@@ -196,7 +201,7 @@ public class FinanceController {
      * @return 逾期的应付账款列表
      */
     @Operation(summary = "获取逾期应付账款")
-    @GetMapping("/payables/overdue")
+    @GetMapping("/payables/get-overdue-payables")
     public ApiResponse<List<AccountPayable>> getOverduePayables(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         return ApiResponse.success(accountPayableService.getOverdueList(tenantId));
@@ -220,8 +225,8 @@ public class FinanceController {
      * @return 分页查询结果
      */
     @Operation(summary = "分页查询收支记录")
-    @GetMapping("/records")
-    public ApiResponse<Page<PaymentRecord>> getRecordPage(
+    @GetMapping("/records/get-record-page")
+    public ApiResponse<PageResult<PaymentRecord>> getRecordPage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -229,7 +234,9 @@ public class FinanceController {
             @RequestParam(required = false) Integer bizType,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endDate) {
-        return ApiResponse.success(paymentRecordService.getPage(tenantId, page, size, recordType, bizType, startDate, endDate));
+        Page<PaymentRecord> result = paymentRecordService.getPage(tenantId, page, size, recordType, bizType, startDate, endDate);
+        PageResult<PaymentRecord> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     /**
@@ -245,7 +252,7 @@ public class FinanceController {
      * @return 创建成功的收支记录对象（含自动生成的单据编号）
      */
     @Operation(summary = "创建收支记录")
-    @PostMapping("/records")
+    @PostMapping("/records/create-record")
     public ApiResponse<PaymentRecord> createRecord(
             @RequestBody PaymentRecord record,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -269,7 +276,7 @@ public class FinanceController {
      * @return 操作结果
      */
     @Operation(summary = "审核收支记录")
-    @PostMapping("/records/{id}/approve")
+    @PostMapping("/records/approve-record/{id}")
     public ApiResponse<Void> approveRecord(
             @PathVariable Long id,
             @RequestHeader("X-User-Id") Long userId) {
@@ -288,7 +295,7 @@ public class FinanceController {
      * @return 操作结果
      */
     @Operation(summary = "取消收支记录")
-    @PostMapping("/records/{id}/cancel")
+    @PostMapping("/records/cancel-record/{id}")
     public ApiResponse<Void> cancelRecord(@PathVariable Long id) {
         paymentRecordService.cancel(id);
         return ApiResponse.success();
@@ -307,14 +314,16 @@ public class FinanceController {
      * @return 分页查询结果
      */
     @Operation(summary = "分页查询银行账户")
-    @GetMapping("/bank-accounts")
-    public ApiResponse<Page<BankAccount>> getBankAccountPage(
+    @GetMapping("/bank-accounts/get-bank-account-page")
+    public ApiResponse<PageResult<BankAccount>> getBankAccountPage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String accountName,
             @RequestParam(required = false) Integer accountType) {
-        return ApiResponse.success(bankAccountService.getPage(tenantId, page, size, accountName, accountType));
+        Page<BankAccount> result = bankAccountService.getPage(tenantId, page, size, accountName, accountType);
+        PageResult<BankAccount> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     /**
@@ -327,7 +336,7 @@ public class FinanceController {
      * @return 所有启用状态的银行账户列表
      */
     @Operation(summary = "获取所有银行账户(下拉选择)")
-    @GetMapping("/bank-accounts/all")
+    @GetMapping("/bank-accounts/get-all-bank-accounts")
     public ApiResponse<List<BankAccount>> getAllBankAccounts(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         return ApiResponse.success(bankAccountService.getAllAccounts(tenantId));
@@ -342,7 +351,7 @@ public class FinanceController {
      * @return 创建成功的银行账户对象
      */
     @Operation(summary = "创建银行账户")
-    @PostMapping("/bank-accounts")
+    @PostMapping("/bank-accounts/create-bank-account")
     public ApiResponse<BankAccount> createBankAccount(
             @RequestBody BankAccount account,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -362,7 +371,7 @@ public class FinanceController {
      * @return 更新后的银行账户对象
      */
     @Operation(summary = "更新银行账户")
-    @PutMapping("/bank-accounts/{id}")
+    @PutMapping("/bank-accounts/update-bank-account/{id}")
     public ApiResponse<BankAccount> updateBankAccount(
             @PathVariable Long id,
             @RequestBody BankAccount account,
@@ -383,7 +392,7 @@ public class FinanceController {
      * @return 操作结果
      */
     @Operation(summary = "删除银行账户")
-    @DeleteMapping("/bank-accounts/{id}")
+    @DeleteMapping("/bank-accounts/delete-bank-account/{id}")
     public ApiResponse<Void> deleteBankAccount(@PathVariable Long id) {
         bankAccountService.delete(id);
         return ApiResponse.success();

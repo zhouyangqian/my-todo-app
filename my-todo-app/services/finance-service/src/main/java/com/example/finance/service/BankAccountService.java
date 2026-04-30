@@ -1,6 +1,7 @@
 package com.example.finance.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.finance.entity.BankAccount;
@@ -27,7 +28,6 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class BankAccountService extends ServiceImpl<BankAccountMapper, BankAccount> {
 
     /**
@@ -228,10 +228,10 @@ public class BankAccountService extends ServiceImpl<BankAccountMapper, BankAccou
      */
     private void clearDefaultAccount(Long tenantId) {
         update(
-            new LambdaQueryWrapper<BankAccount>()
+            new LambdaUpdateWrapper<BankAccount>()
                 .eq(BankAccount::getTenantId, tenantId)
-                .eq(BankAccount::getIsDefault, 1),
-            wrapper -> wrapper.set(BankAccount::getIsDefault, 0)
+                .eq(BankAccount::getIsDefault, 1)
+                .set(BankAccount::getIsDefault, 0)
         );
     }
 }

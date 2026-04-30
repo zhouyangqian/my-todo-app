@@ -1,0 +1,139 @@
+package com.example.erp.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/**
+ * 销售订单明细实体类
+ * <p>
+ * 对应数据库表 erp_sales_order_item，用于记录销售订单的商品明细。
+ * 每条记录包含商品信息、订单数量、单价、折扣金额以及已发货数量和金额的追踪。
+ * 支持订单的部分发货，通过 deliveredQuantity 和 deliveredAmount 字段跟踪发货进度。
+ * 支持多租户隔离（tenantId）、软删除（deleted）和自动填充审计字段。
+ * </p>
+ *
+ * @author ERP系统
+ * @since 1.0
+ */
+@Data
+@TableName("erp_sales_order_item")
+public class SalesOrderItem implements Serializable {
+
+    /** 序列化版本号 */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 明细ID（主键，自增）
+     */
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    /**
+     * 租户ID，用于多租户数据隔离，插入时自动填充
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long tenantId;
+
+    /**
+     * 订单ID，关联销售订单表
+     */
+    private Long orderId;
+
+    /**
+     * 商品ID，关联商品表
+     */
+    private Long productId;
+
+    /**
+     * 商品编码，冗余存储便于查询显示
+     */
+    private String productCode;
+
+    /**
+     * 商品名称，冗余存储便于查询显示
+     */
+    private String productName;
+
+    /**
+     * 规格型号，商品的规格描述
+     */
+    private String specification;
+
+    /**
+     * 单位，商品的计量单位
+     */
+    private String unit;
+
+    /**
+     * 订单数量，客户购买的商品数量
+     */
+    private BigDecimal quantity;
+
+    /**
+     * 单价，商品的销售单价
+     */
+    private BigDecimal price;
+
+    /**
+     * 行折扣金额，该明细行的优惠金额
+     */
+    private BigDecimal discountAmount;
+
+    /**
+     * 行金额，该明细的总金额 = 数量 * 单价 - 折扣金额
+     */
+    private BigDecimal amount;
+
+    /**
+     * 已发货数量，累计已发货的数量，用于部分发货场景
+     */
+    private BigDecimal deliveredQuantity;
+
+    /**
+     * 已发货金额，累计已发货的金额
+     */
+    private BigDecimal deliveredAmount;
+
+    /**
+     * 备注，用于记录明细的补充说明信息
+     */
+    private String remark;
+
+    /**
+     * 软删除标记：0-未删除，1-已删除
+     */
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT)
+    private Integer deleted;
+
+    /**
+     * 创建人ID，记录明细的创建者，插入时自动填充
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createdBy;
+
+    /**
+     * 创建时间，记录明细的创建时间戳，插入时自动填充
+     */
+    @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新人ID，记录最近一次修改者，更新时自动填充
+     */
+    @TableField(fill = FieldFill.UPDATE)
+    private Long updatedBy;
+
+    /**
+     * 更新时间，记录最近一次修改的时间戳，插入和更新时自动填充
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDateTime updatedAt;
+}

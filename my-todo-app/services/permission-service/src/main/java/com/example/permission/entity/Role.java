@@ -1,6 +1,7 @@
 package com.example.permission.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -62,6 +63,7 @@ public class Role implements Serializable {
 
     /** 创建时间，插入时自动填充 */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /** 最后更新人ID，更新时自动填充 */
@@ -70,5 +72,6 @@ public class Role implements Serializable {
 
     /** 最后更新时间，插入和更新时自动填充 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,7 @@
 package com.example.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -44,9 +45,31 @@ public class Product implements Serializable {
     private String productCode;
 
     /**
+     * 商品编码（兼容前端字段名）
+     */
+    @TableField(exist = false)
+    private String sku;
+
+    /**
      * 商品名称，用于显示和搜索
      */
     private String productName;
+
+    /**
+     * 商品名称（兼容前端字段名）
+     */
+    @TableField(exist = false)
+    private String name;
+
+    /**
+     * 品牌
+     */
+    private String brand;
+
+    /**
+     * 型号
+     */
+    private String model;
 
     /**
      * 商品分类ID，关联商品分类表，用于商品分类管理
@@ -109,9 +132,10 @@ public class Product implements Serializable {
     private String imageUrl;
 
     /**
-     * 备注，用于记录商品的补充说明信息
+     * 描述
      */
-    private String remark;
+    @TableField("remark")
+    private String description;
 
     /**
      * 软删除标记：0-未删除，1-已删除。使用逻辑删除避免数据物理丢失
@@ -130,6 +154,7 @@ public class Product implements Serializable {
      * 创建时间，记录商品的创建时间戳，插入时自动填充
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /**
@@ -142,5 +167,6 @@ public class Product implements Serializable {
      * 更新时间，记录最近一次修改的时间戳，插入和更新时自动填充
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

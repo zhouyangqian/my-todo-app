@@ -1,6 +1,7 @@
 package com.example.common.core.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,8 +19,8 @@ public abstract class BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** 主键ID，自增 */
-    @TableId(type = IdType.AUTO)
+    /** 主键ID，使用雪花算法自动生成 */
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /** 租户ID，用于多租户数据隔离，插入时自动填充 */
@@ -37,6 +38,7 @@ public abstract class BaseEntity implements Serializable {
 
     /** 创建时间，插入时自动填充 */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /** 更新人用户ID，更新时自动填充 */
@@ -45,5 +47,6 @@ public abstract class BaseEntity implements Serializable {
 
     /** 更新时间，插入和更新时自动填充 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,7 @@
 package com.example.erp.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -111,5 +112,6 @@ public class InventoryFlow implements Serializable {
      * 创建时间，流水记录的创建时间（即库存变动发生时间），插入时自动填充
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 }

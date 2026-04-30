@@ -173,7 +173,7 @@ public class PermissionService extends ServiceImpl<PermissionMapper, Permission>
      * 递归构建权限树
      * <p>
      * 从权限列表中筛选出指定父ID的权限节点，
-     * 前端会按需加载子节点
+     * 并递归为每个节点设置子节点列表
      * </p>
      *
      * @param permissions 所有权限列表
@@ -181,12 +181,19 @@ public class PermissionService extends ServiceImpl<PermissionMapper, Permission>
      * @return 当前层级的权限节点列表
      */
     private List<Permission> buildTree(List<Permission> permissions, Long parentId) {
-        return permissions.stream()
-                .filter(p -> Objects.equals(p.getParentId(), parentId))
-                .peek(p -> {
-                    // 子节点由前端按需加载
-                })
-                .collect(Collectors.toList());
+        List<Permission> tree = new ArrayList<>();
+
+        for (Permission permission : permissions) {
+            // 找到当前父节点的子节点
+            if (Objects.equals(permission.getParentId(), parentId)) {
+                // 递归查找子节点
+                List<Permission> children = buildTree(permissions, permission.getId());
+                permission.setChildren(children);
+                tree.add(permission);
+            }
+        }
+
+        return tree;
     }
 
     /**

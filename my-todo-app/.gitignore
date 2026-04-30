@@ -23,6 +23,10 @@ dist/
 .vuepress/dist/
 package-lock.json
 
+# TypeScript declaration files (auto-generated)
+*.d.ts
+!**/node_modules/**/*.d.ts
+
 # Logs
 logs/
 *.log

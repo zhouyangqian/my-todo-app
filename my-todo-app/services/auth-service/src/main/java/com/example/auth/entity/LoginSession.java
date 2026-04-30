@@ -1,6 +1,7 @@
 package com.example.auth.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -41,20 +42,25 @@ public class LoginSession implements Serializable {
     private String ipAddress;
 
     /** 登录时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime loginTime;
 
     /** 令牌过期时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime expireTime;
 
     /** 退出登录时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime logoutTime;
 
     /** 会话状态：0-已登出，1-在线 */
     private Integer status;
 
     /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createdAt;
 
     /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime updatedAt;
 }

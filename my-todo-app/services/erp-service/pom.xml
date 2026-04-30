@@ -27,6 +27,10 @@
             <groupId>com.example</groupId>
             <artifactId>common-redis</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-feign</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

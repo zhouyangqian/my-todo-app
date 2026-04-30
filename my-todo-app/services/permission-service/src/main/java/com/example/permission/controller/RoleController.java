@@ -2,6 +2,7 @@ package com.example.permission.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.permission.dto.AssignPermissionsRequest;
 import com.example.permission.dto.AssignRolesRequest;
 import com.example.permission.entity.Role;
@@ -52,14 +53,15 @@ public class RoleController {
      * @return 角色分页数据
      */
     @Operation(summary = "Get role list")
-    @GetMapping
-    public ApiResponse<Page<Role>> getRoleList(
+    @GetMapping("/get-role-list")
+    public ApiResponse<PageResult<Role>> getRoleList(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String roleName) {
         Page<Role> rolePage = roleService.getRolePage(tenantId, page, size, roleName);
-        return ApiResponse.success(rolePage);
+        PageResult<Role> pageResult = PageResult.of(rolePage.getRecords(), rolePage.getTotal(), rolePage.getCurrent(), rolePage.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     /**
@@ -69,7 +71,7 @@ public class RoleController {
      * @return 角色对象
      */
     @Operation(summary = "Get role by ID")
-    @GetMapping("/{id}")
+    @GetMapping("/get-role/{id}")
     public ApiResponse<Role> getRole(@PathVariable Long id) {
         Role role = roleService.getById(id);
         return ApiResponse.success(role);
@@ -87,7 +89,7 @@ public class RoleController {
      * @return 创建成功的角色对象
      */
     @Operation(summary = "Create role")
-    @PostMapping
+    @PostMapping("/create-role")
     public ApiResponse<Role> createRole(
             @RequestBody Role role,
             @RequestHeader("X-User-Id") Long userId) {
@@ -109,7 +111,7 @@ public class RoleController {
      * @return 更新后的角色对象
      */
     @Operation(summary = "Update role")
-    @PutMapping("/{id}")
+    @PutMapping("/update-role/{id}")
     public ApiResponse<Role> updateRole(
             @PathVariable Long id,
             @RequestBody Role role,
@@ -130,7 +132,7 @@ public class RoleController {
      * @return 空响应
      */
     @Operation(summary = "Delete role")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-role/{id}")
     public ApiResponse<Void> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
         return ApiResponse.success();
@@ -143,7 +145,7 @@ public class RoleController {
      * @return 该用户拥有的角色列表
      */
     @Operation(summary = "Get roles by user ID")
-    @GetMapping("/user/{userId}")
+    @GetMapping("/get-roles-by-user/{userId}")
     public ApiResponse<List<Role>> getRolesByUser(@PathVariable Long userId) {
         List<Role> roles = roleService.getRolesByUserId(userId);
         return ApiResponse.success(roles);
@@ -178,7 +180,7 @@ public class RoleController {
      * @return 该角色关联的权限ID列表
      */
     @Operation(summary = "Get permissions by role ID")
-    @GetMapping("/{roleId}/permissions")
+    @GetMapping("/get-role-permissions/{roleId}")
     public ApiResponse<List<Long>> getRolePermissions(@PathVariable Long roleId) {
         List<Long> permissionIds = roleService.getPermissionIdsByRoleId(roleId);
         return ApiResponse.success(permissionIds);

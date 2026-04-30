@@ -2,6 +2,7 @@ package com.example.permission.controller;
 
 import com.example.common.core.result.ApiResponse;
 import com.example.permission.dto.PermissionCheckRequest;
+import com.example.permission.dto.UserInfo;
 import com.example.permission.dto.UserPermissionResponse;
 import com.example.permission.entity.Permission;
 import com.example.permission.service.PermissionService;
@@ -37,6 +38,53 @@ public class PermissionController {
     private final PermissionService permissionService;
 
     /**
+     * 获取当前登录用户的权限信息
+     * <p>
+     * 从请求头的 X-User-Id、X-Username 等中获取当前用户信息，查询该用户拥有的所有权限编码和角色编码。
+     * 这个端点供前端在登录成功后获取当前用户的权限和角色信息。
+     * </p>
+     *
+     * @param userId   用户ID（从网关注入的请求头 X-User-Id 获取）
+     * @param username 用户名（从网关注入的请求头 X-Username 获取）
+     * @param tenantId 租户ID（从网关注入的请求头 X-Tenant-Id 获取）
+     * @return 包含用户信息、权限编码集合和角色编码集合的响应对象
+     */
+    @Operation(summary = "Get current user permissions")
+    @GetMapping("/get-current-user-permissions")
+    public ApiResponse<UserPermissionResponse> getCurrentUserPermissions(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader("X-Username") String username,
+            @RequestHeader(value = "X-Email", required = false) String email,
+            @RequestHeader(value = "X-RealName", required = false) String realName,
+            @RequestHeader(value = "X-Phone", required = false) String phone,
+            @RequestHeader(value = "X-Avatar", required = false) String avatar,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        // 查询用户拥有的所有权限编码
+        Set<String> permissions = permissionService.getUserPermissions(userId, tenantId);
+        // 查询用户拥有的所有角色编码
+        Set<String> roles = permissionService.getUserRoles(userId, tenantId);
+
+        // 构建用户信息
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(userId);
+        userInfo.setUsername(username);
+        userInfo.setEmail(email);
+        userInfo.setRealName(realName);
+        userInfo.setPhone(phone);
+        userInfo.setAvatar(avatar);
+        userInfo.setTenantId(tenantId);
+
+        // 组装响应对象
+        UserPermissionResponse response = new UserPermissionResponse();
+        response.setUserInfo(userInfo);
+        response.setUserId(userId);  // 保留兼容性
+        response.setPermissions(permissions);
+        response.setRoles(roles);
+
+        return ApiResponse.success(response);
+    }
+
+    /**
      * 获取指定用户的权限信息
      * <p>
      * 根据用户ID和租户ID查询该用户拥有的所有权限编码和角色编码，
@@ -47,8 +95,8 @@ public class PermissionController {
      * @param tenantId 租户ID（请求头）
      * @return 包含用户权限编码集合和角色编码集合的响应对象
      */
-    @Operation(summary = "Get user permissions")
-    @GetMapping("/user/{userId}")
+    @Operation(summary = "Get user permissions by id")
+    @GetMapping("/get-user-permissions/{userId}")
     public ApiResponse<UserPermissionResponse> getUserPermissions(
             @PathVariable Long userId,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
@@ -78,7 +126,7 @@ public class PermissionController {
      * @return 是否拥有该权限（true/false）
      */
     @Operation(summary = "Check permission")
-    @PostMapping("/check")
+    @PostMapping("/check-permission")
     public ApiResponse<Boolean> checkPermission(
             @RequestBody PermissionCheckRequest request,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
@@ -98,7 +146,7 @@ public class PermissionController {
      * @return 权限树列表（顶级权限节点列表）
      */
     @Operation(summary = "Get permission tree")
-    @GetMapping("/tree")
+    @GetMapping("/get-permission-tree")
     public ApiResponse<List<Permission>> getPermissionTree(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         List<Permission> tree = permissionService.getPermissionTree(tenantId);
@@ -117,7 +165,7 @@ public class PermissionController {
      * @return 空响应
      */
     @Operation(summary = "Clear user permission cache")
-    @DeleteMapping("/cache/user/{userId}")
+    @DeleteMapping("/clear-user-cache/{userId}")
     public ApiResponse<Void> clearUserCache(
             @PathVariable Long userId,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
@@ -132,7 +180,7 @@ public class PermissionController {
      * @return 创建成功的权限对象
      */
     @Operation(summary = "Create permission")
-    @PostMapping
+    @PostMapping("/create-permission")
     public ApiResponse<Permission> createPermission(@RequestBody Permission permission) {
         permissionService.save(permission);
         return ApiResponse.success(permission);
@@ -146,7 +194,7 @@ public class PermissionController {
      * @return 更新后的权限对象
      */
     @Operation(summary = "Update permission")
-    @PutMapping("/{id}")
+    @PutMapping("/update-permission/{id}")
     public ApiResponse<Permission> updatePermission(
             @PathVariable Long id,
             @RequestBody Permission permission) {
@@ -165,7 +213,7 @@ public class PermissionController {
      * @return 空响应
      */
     @Operation(summary = "Delete permission")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-permission/{id}")
     public ApiResponse<Void> deletePermission(@PathVariable Long id) {
         permissionService.removeById(id);
         return ApiResponse.success();

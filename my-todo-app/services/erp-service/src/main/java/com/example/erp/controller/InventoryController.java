@@ -1,6 +1,9 @@
 package com.example.erp.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
+import com.example.erp.dto.InventoryVO;
 import com.example.erp.entity.Inventory;
 import com.example.erp.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,8 +25,21 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    @Operation(summary = "分页查询库存")
+    @GetMapping("/get-inventory-page")
+    public ApiResponse<PageResult<InventoryVO>> getInventoryPage(
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) String productName) {
+        Page<InventoryVO> result = inventoryService.getInventoryPage(tenantId, page, size, warehouseId, productName);
+        PageResult<InventoryVO> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
+    }
+
     @Operation(summary = "查询商品库存")
-    @GetMapping("/query")
+    @GetMapping("/get-inventory")
     public ApiResponse<Inventory> getInventory(
             @RequestParam Long warehouseId,
             @RequestParam Long productId) {
@@ -32,7 +48,7 @@ public class InventoryController {
     }
 
     @Operation(summary = "获取库存数量")
-    @GetMapping("/quantity")
+    @GetMapping("/get-stock-quantity")
     public ApiResponse<BigDecimal> getStockQuantity(
             @RequestParam Long warehouseId,
             @RequestParam Long productId,
@@ -75,7 +91,7 @@ public class InventoryController {
     }
 
     @Operation(summary = "锁定库存")
-    @PostMapping("/lock")
+    @PostMapping("/lock-stock")
     public ApiResponse<Void> lockStock(
             @RequestParam Long warehouseId,
             @RequestParam Long productId,
@@ -86,7 +102,7 @@ public class InventoryController {
     }
 
     @Operation(summary = "解锁库存")
-    @PostMapping("/unlock")
+    @PostMapping("/unlock-stock")
     public ApiResponse<Void> unlockStock(
             @RequestParam Long warehouseId,
             @RequestParam Long productId,
@@ -97,7 +113,7 @@ public class InventoryController {
     }
 
     @Operation(summary = "获取库存预警列表")
-    @GetMapping("/alert")
+    @GetMapping("/get-alert-inventories")
     public ApiResponse<List<Inventory>> getAlertInventories(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) Long warehouseId) {

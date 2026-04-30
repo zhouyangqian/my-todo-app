@@ -35,7 +35,7 @@ export const useUserStore = defineStore('user', () => {
    * 用户登录操作
    * 1. 调用登录接口获取令牌
    * 2. 将令牌持久化到 localStorage
-   * 3. 获取用户信息和权限
+   * 3. 从登录响应中保存用户基本信息，并获取权限
    * 4. 跳转到工作台页面
    * @param username 用户名
    * @param password 密码
@@ -43,19 +43,37 @@ export const useUserStore = defineStore('user', () => {
   async function loginAction(username, password) {
     try {
       const res = await login({ username, password })
-      // 保存令牌到状态和本地存储
-      token.value = res.accessToken
-      refreshToken.value = res.refreshToken
-      localStorage.setItem('token', res.accessToken)
-      localStorage.setItem('refreshToken', res.refreshToken)
+      // 后端返回 ApiResponse 包装的数据，实际数据在 data 字段中
+      const data = res.data || res
 
-      // 登录成功后立即获取用户信息和权限
-      await getUserInfoAction()
+      console.log('登录响应数据:', data)
+      console.log('用户信息:', data.userInfo)
+      console.log('租户ID:', data.userInfo?.tenantId)
+
+      // 保存令牌到状态和本地存储
+      token.value = data.accessToken
+      refreshToken.value = data.refreshToken
+      localStorage.setItem('token', data.accessToken)
+      localStorage.setItem('refreshToken', data.refreshToken)
+
+      // 保存登录响应中的用户基本信息
+      if (data.userInfo) {
+        userInfo.value = data.userInfo
+        // 同时保存 tenantId 到 localStorage，用于请求拦截器
+        if (data.userInfo.tenantId) {
+          localStorage.setItem('tenantId', data.userInfo.tenantId)
+          console.log('已保存租户ID到 localStorage:', data.userInfo.tenantId)
+        }
+      }
+
+      // 登录成功后立即获取用户权限和角色
+      await getUserPermissionsAction()
 
       // 跳转到工作台首页
       router.push('/dashboard')
       return res
     } catch (error) {
+      console.error('登录失败:', error)
       throw error
     }
   }
@@ -67,9 +85,26 @@ export const useUserStore = defineStore('user', () => {
   async function getUserInfoAction() {
     try {
       const res = await getUserInfo()
-      userInfo.value = res.userInfo           // 用户基本信息
-      permissions.value = res.permissions || [] // 权限编码列表
-      roles.value = res.roles || []             // 角色编码列表
+      const data = res.data || res
+      userInfo.value = data.userInfo           // 用户基本信息
+      permissions.value = data.permissions || [] // 权限编码列表
+      roles.value = data.roles || []             // 角色编码列表
+      return res
+    } catch (error) {
+      throw error
+    }
+  }
+
+  /**
+   * 获取当前登录用户的权限和角色
+   * 从后端获取最新的权限列表和角色列表
+   */
+  async function getUserPermissionsAction() {
+    try {
+      const res = await getUserInfo()
+      const data = res.data || res
+      permissions.value = data.permissions || [] // 权限编码列表
+      roles.value = data.roles || []             // 角色编码列表
       return res
     } catch (error) {
       throw error

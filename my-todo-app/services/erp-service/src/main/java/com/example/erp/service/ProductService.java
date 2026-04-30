@@ -29,27 +29,32 @@ public class ProductService extends ServiceImpl<ProductMapper, Product> {
     /**
      * 分页查询商品列表
      * <p>
-     * 根据租户ID查询该租户下的商品列表，支持按商品名称模糊搜索、
+     * 根据租户ID查询该租户下的商品列表，支持按商品名称模糊搜索、按商品编码精确搜索、
      * 按分类ID精确过滤、按状态过滤，结果按创建时间降序排列
      * </p>
      *
      * @param tenantId    租户ID
      * @param page        当前页码
      * @param size        每页条数
-     * @param productName 商品名称（可选，模糊搜索）
+     * @param name        商品名称（可选，模糊搜索）
+     * @param sku         商品编码（可选，精确搜索）
      * @param categoryId  商品分类ID（可选，精确过滤）
      * @param status      状态（可选，0-停用，1-启用）
      * @return 商品分页数据
      */
     public Page<Product> getProductPage(Long tenantId, int page, int size,
-                                         String productName, Long categoryId, Integer status) {
+                                         String name, String sku, Long categoryId, Integer status) {
         LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<>();
         // 过滤条件：租户ID匹配 + 未删除
         wrapper.eq(Product::getTenantId, tenantId)
                .eq(Product::getDeleted, 0);
         // 可选条件：按商品名称模糊搜索
-        if (productName != null && !productName.isEmpty()) {
-            wrapper.like(Product::getProductName, productName);
+        if (name != null && !name.isEmpty()) {
+            wrapper.like(Product::getName, name);
+        }
+        // 可选条件：按商品编码精确搜索
+        if (sku != null && !sku.isEmpty()) {
+            wrapper.eq(Product::getProductCode, sku);
         }
         // 可选条件：按分类ID精确过滤
         if (categoryId != null) {
@@ -61,7 +66,12 @@ public class ProductService extends ServiceImpl<ProductMapper, Product> {
         }
         // 按创建时间降序排列
         wrapper.orderByDesc(Product::getCreatedAt);
-        return page(new Page<>(page, size), wrapper);
+        Page<Product> result = page(new Page<>(page, size), wrapper);
+        
+        // 将数据库字段复制到驼峰字段，方便前端使用
+        result.getRecords().forEach(this::copyDbFieldsToFrontendFields);
+        
+        return result;
     }
 
     /**
@@ -72,12 +82,17 @@ public class ProductService extends ServiceImpl<ProductMapper, Product> {
      * @return 商品对象，未找到则返回null
      */
     public Product getByCode(String productCode, Long tenantId) {
-        return getOne(
+        Product product = getOne(
             new LambdaQueryWrapper<Product>()
                 .eq(Product::getProductCode, productCode)
                 .eq(Product::getTenantId, tenantId)
                 .eq(Product::getDeleted, 0)
         );
+        // 将数据库字段复制到驼峰字段，方便前端使用
+        if (product != null) {
+            copyDbFieldsToFrontendFields(product);
+        }
+        return product;
     }
 
     /**
@@ -102,6 +117,8 @@ public class ProductService extends ServiceImpl<ProductMapper, Product> {
         product.setStockQuantity(java.math.BigDecimal.ZERO);
         save(product);
         log.info("创建商品: {}", product.getProductCode());
+        // 将数据库字段复制到前端字段，方便前端使用
+        copyDbFieldsToFrontendFields(product);
         return product;
     }
 
@@ -130,6 +147,8 @@ public class ProductService extends ServiceImpl<ProductMapper, Product> {
         }
         updateById(product);
         log.info("更新商品: {}", product.getProductCode());
+        // 将数据库字段复制到前端字段，方便前端使用
+        copyDbFieldsToFrontendFields(product);
         return product;
     }
 
@@ -168,6 +187,23 @@ public class ProductService extends ServiceImpl<ProductMapper, Product> {
             // 在当前库存基础上累加变动数量
             product.setStockQuantity(product.getStockQuantity().add(quantity));
             updateById(product);
+        }
+    }
+
+    /**
+     * 将数据库字段复制到前端字段
+     * <p>
+     * 用于将实际存储数据的字段（productCode, productName）复制到前端期望的字段（sku, name）
+     * </p>
+     *
+     * @param product 商品对象
+     */
+    public void copyDbFieldsToFrontendFields(Product product) {
+        if (product.getProductCode() != null) {
+            product.setSku(product.getProductCode());
+        }
+        if (product.getProductName() != null) {
+            product.setName(product.getProductName());
         }
     }
 }

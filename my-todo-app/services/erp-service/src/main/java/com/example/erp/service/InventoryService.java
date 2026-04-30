@@ -1,11 +1,15 @@
 package com.example.erp.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.erp.dto.InventoryVO;
 import com.example.erp.entity.Inventory;
 import com.example.erp.entity.InventoryFlow;
+import com.example.erp.entity.Warehouse;
 import com.example.erp.mapper.InventoryFlowMapper;
 import com.example.erp.mapper.InventoryMapper;
+import com.example.erp.mapper.WarehouseMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 库存服务类
@@ -41,6 +46,9 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
     /** 库存流水数据访问层，用于记录每次出入库操作的水流日志 */
     private final InventoryFlowMapper inventoryFlowMapper;
 
+    /** 仓库数据访问层，用于关联查询仓库名称 */
+    private final WarehouseMapper warehouseMapper;
+
     /** Redis模板，用于库存数量的缓存操作 */
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -63,6 +71,62 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
                 .eq(Inventory::getWarehouseId, warehouseId)
                 .eq(Inventory::getProductId, productId)
         );
+    }
+
+    /**
+     * 分页查询库存
+     *
+     * @param tenantId    租户ID
+     * @param page        当前页码
+     * @param size        每页大小
+     * @param warehouseId 仓库ID（可选筛选）
+     * @param productName 商品名称（可选，模糊匹配）
+     * @return 分页库存结果
+     */
+    public Page<InventoryVO> getInventoryPage(Long tenantId, int page, int size, Long warehouseId, String productName) {
+        // 构建分页对象
+        Page<Inventory> pageParam = new Page<>(page, size);
+
+        // 构建查询条件
+        LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Inventory::getTenantId, tenantId)
+               .eq(warehouseId != null, Inventory::getWarehouseId, warehouseId)
+               .orderByDesc(Inventory::getUpdatedAt);
+
+        // 执行分页查询
+        Page<Inventory> result = page(pageParam, wrapper);
+
+        // 转换为 VO 并填充关联信息
+        Page<InventoryVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        List<InventoryVO> voList = result.getRecords().stream().map(inventory -> {
+            InventoryVO vo = new InventoryVO();
+            vo.setId(inventory.getId());
+            vo.setWarehouseId(inventory.getWarehouseId());
+            vo.setProductId(inventory.getProductId());
+            vo.setBatchNo(inventory.getBatchNo());
+            vo.setQuantity(inventory.getQuantity());
+            vo.setLockedQuantity(inventory.getLockedQuantity());
+            vo.setAvailableQuantity(inventory.getAvailableQuantity());
+            vo.setStockMin(inventory.getStockMin());
+            vo.setStockMax(inventory.getStockMax());
+            vo.setCostPrice(inventory.getCostPrice());
+
+            // 查询仓库名称
+            Warehouse warehouse = warehouseMapper.selectById(inventory.getWarehouseId());
+            if (warehouse != null) {
+                vo.setWarehouseName(warehouse.getWarehouseName());
+            }
+
+            // 商品名称和编码需要从商品表获取（暂时设置为空，后续可以添加商品表查询）
+            // TODO: 添加商品表关联查询
+            vo.setProductName("商品" + inventory.getProductId());
+            vo.setProductSku("SKU" + String.format("%06d", inventory.getProductId()));
+
+            return vo;
+        }).collect(Collectors.toList());
+
+        voPage.setRecords(voList);
+        return voPage;
     }
 
     /**
@@ -356,16 +420,11 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
      * @return 触发预警的库存记录列表
      */
     public List<Inventory> getAlertInventories(Long tenantId, Long warehouseId) {
-        return list(
-            new LambdaQueryWrapper<Inventory>()
-                .eq(Inventory::getTenantId, tenantId)
-                .eq(warehouseId != null, Inventory::getWarehouseId, warehouseId)
-                // 预警条件：库存低于下限 或 高于上限
-                .and(wrapper -> wrapper
-                    .lt(Inventory::getQuantity, Inventory::getStockMin)
-                    .or()
-                    .gt(Inventory::getQuantity, Inventory::getStockMax)
-                )
-        );
+        LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Inventory::getTenantId, tenantId)
+               .eq(warehouseId != null, Inventory::getWarehouseId, warehouseId)
+               // 预警条件：库存低于下限 或 高于上限（使用原生SQL比较两列）
+               .and(w -> w.apply("quantity < stock_min OR quantity > stock_max"));
+        return list(wrapper);
     }
 }

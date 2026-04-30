@@ -46,8 +46,8 @@
 
       <el-table :data="tableData" v-loading="loading" border stripe>
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="角色名称" width="150" />
-        <el-table-column prop="code" label="角色编码" width="150" />
+        <el-table-column prop="roleName" label="角色名称" width="150" />
+        <el-table-column prop="roleCode" label="角色编码" width="150" />
         <el-table-column prop="description" label="描述" min-width="200" />
         <el-table-column prop="status" label="状态" width="80">
           <template #default="{ row }">
@@ -67,6 +67,18 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 分页组件 -->
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.size"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="pagination.total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handlePageChange"
+        class="pagination"
+      />
     </el-card>
 
     <!-- 新增/编辑角色对话框 -->
@@ -162,6 +174,15 @@ const searchForm = reactive({
   status: undefined                          // 按状态筛选
 })
 
+// ===== 分页相关 =====
+
+// 分页参数
+const pagination = reactive({
+  page: 1,       // 当前页码
+  size: 10,      // 每页条数
+  total: 0       // 总记录数
+})
+
 // ===== 表格相关 =====
 
 // 角色表格数据列表
@@ -221,8 +242,13 @@ const permissionLoading = ref(false)
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await getRoleList(searchForm)
-    tableData.value = res
+    const res = await getRoleList({
+      page: pagination.page,
+      size: pagination.size,
+      ...searchForm
+    })
+    tableData.value = res.records || []
+    pagination.total = res.total || 0
   } catch (error) {
     ElMessage.error('加载数据失败')
   } finally {
@@ -243,9 +269,10 @@ const loadPermissionTree = async () => {
 }
 
 /**
- * 搜索按钮处理：重新加载数据
+ * 搜索按钮处理：重置页码到第一页后加载数据
  */
 const handleSearch = () => {
+  pagination.page = 1
   loadData()
 }
 
@@ -278,9 +305,9 @@ const handleAdd = () => {
  */
 const handleEdit = (row) => {
   dialogTitle.value = '编辑角色'
-  formData.id = row.id
-  formData.name = row.name
-  formData.code = row.code
+  formData.id = String(row.id)
+  formData.name = row.roleName || row.name   // 后端返回的是 roleName
+  formData.code = row.roleCode || row.code   // 后端返回的是 roleCode
   formData.description = row.description
   formData.status = row.status
   dialogVisible.value = true
@@ -295,13 +322,21 @@ const handleSubmit = async () => {
     if (!valid) return
     submitLoading.value = true
     try {
+      // 字段映射：前端字段 -> 后端字段
+      const submitData = {
+        roleCode: formData.code,      // code -> roleCode
+        roleName: formData.name,      // name -> roleName
+        description: formData.description,
+        status: formData.status
+      }
+
       if (formData.id) {
         // 有 ID 表示编辑模式
-        await updateRole(formData.id, formData)
+        await updateRole(formData.id, submitData)
         ElMessage.success('更新成功')
       } else {
         // 无 ID 表示新增模式
-        await createRole(formData)
+        await createRole(submitData)
         ElMessage.success('创建成功')
       }
       dialogVisible.value = false
@@ -373,6 +408,22 @@ const handleSavePermission = async () => {
   }
 }
 
+/**
+ * 每页条数变化处理
+ */
+const handleSizeChange = (size) => {
+  pagination.size = size
+  loadData()
+}
+
+/**
+ * 页码变化处理
+ */
+const handlePageChange = (page) => {
+  pagination.page = page
+  loadData()
+}
+
 // 页面挂载时加载角色列表
 onMounted(() => {
   loadData()
@@ -398,6 +449,11 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .pagination {
+      margin-top: 20px;
+      justify-content: flex-end;
     }
   }
 }

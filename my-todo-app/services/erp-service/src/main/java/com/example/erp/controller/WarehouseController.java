@@ -2,6 +2,7 @@ package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Warehouse;
 import com.example.erp.service.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,19 +24,20 @@ public class WarehouseController {
     private final WarehouseService warehouseService;
 
     @Operation(summary = "分页查询仓库")
-    @GetMapping
-    public ApiResponse<Page<Warehouse>> getWarehousePage(
+    @GetMapping("/get-warehouse-page")
+    public ApiResponse<PageResult<Warehouse>> getWarehousePage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String warehouseName,
             @RequestParam(required = false) Integer status) {
         Page<Warehouse> result = warehouseService.getWarehousePage(tenantId, page, size, warehouseName, status);
-        return ApiResponse.success(result);
+        PageResult<Warehouse> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     @Operation(summary = "获取所有仓库(下拉选择)")
-    @GetMapping("/all")
+    @GetMapping("/get-all-warehouses")
     public ApiResponse<List<Warehouse>> getAllWarehouses(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         List<Warehouse> warehouses = warehouseService.getAllWarehouses(tenantId);
@@ -43,7 +45,7 @@ public class WarehouseController {
     }
 
     @Operation(summary = "获取默认仓库")
-    @GetMapping("/default")
+    @GetMapping("/get-default-warehouse")
     public ApiResponse<Warehouse> getDefaultWarehouse(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         Warehouse warehouse = warehouseService.getDefaultWarehouse(tenantId);
@@ -51,14 +53,14 @@ public class WarehouseController {
     }
 
     @Operation(summary = "获取仓库详情")
-    @GetMapping("/{id}")
+    @GetMapping("/get-warehouse/{id}")
     public ApiResponse<Warehouse> getWarehouse(@PathVariable Long id) {
         Warehouse warehouse = warehouseService.getById(id);
         return ApiResponse.success(warehouse);
     }
 
     @Operation(summary = "创建仓库")
-    @PostMapping
+    @PostMapping("/create-warehouse")
     public ApiResponse<Warehouse> createWarehouse(
             @RequestBody Warehouse warehouse,
             @RequestHeader("X-Tenant-Id") Long tenantId,
@@ -70,7 +72,7 @@ public class WarehouseController {
     }
 
     @Operation(summary = "更新仓库")
-    @PutMapping("/{id}")
+    @PutMapping("/update-warehouse/{id}")
     public ApiResponse<Warehouse> updateWarehouse(
             @PathVariable Long id,
             @RequestBody Warehouse warehouse,
@@ -82,7 +84,7 @@ public class WarehouseController {
     }
 
     @Operation(summary = "删除仓库")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-warehouse/{id}")
     public ApiResponse<Void> deleteWarehouse(@PathVariable Long id) {
         warehouseService.deleteWarehouse(id);
         return ApiResponse.success();
