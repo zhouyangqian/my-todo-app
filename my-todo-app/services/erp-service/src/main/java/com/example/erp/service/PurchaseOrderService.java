@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
+import com.example.erp.dto.InboundRequest;
 import com.example.erp.dto.PurchaseInboundRequest;
 import com.example.erp.dto.PurchaseOrderCreateRequest;
 import com.example.erp.dto.PurchaseOrderVO;
+import com.example.erp.feign.InventoryServiceClient;
 import com.example.erp.entity.*;
 import com.example.erp.mapper.PurchaseOrderItemMapper;
 import com.example.erp.mapper.PurchaseOrderMapper;
@@ -34,7 +36,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
     private final SupplierService supplierService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
-    private final InventoryService inventoryService;
+    private final InventoryServiceClient inventoryServiceClient;
 
     /**
      * 分页查询采购订单
@@ -335,10 +337,15 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
 
             // 调用库存服务入库
             String bizNo = "PO-IN-" + order.getOrderNo();
-            inventoryService.inbound(
-                order.getWarehouseId(), item.getProductId(), itemReq.getQuantity(),
-                item.getPrice(), null, 1, bizNo, orderId, tenantId, userId
-            );
+            InboundRequest inboundReq = new InboundRequest();
+            inboundReq.setWarehouseId(order.getWarehouseId());
+            inboundReq.setProductId(item.getProductId());
+            inboundReq.setQuantity(itemReq.getQuantity());
+            inboundReq.setCostPrice(item.getPrice());
+            inboundReq.setBizType(1);
+            inboundReq.setBizNo(bizNo);
+            inboundReq.setBizId(orderId);
+            inventoryServiceClient.inbound(inboundReq, tenantId, userId);
 
             // 检查是否全部入库
             if (item.getReceivedQuantity().compareTo(item.getQuantity()) < 0) {

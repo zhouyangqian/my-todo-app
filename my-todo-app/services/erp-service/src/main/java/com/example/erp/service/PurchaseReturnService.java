@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
+import com.example.erp.dto.InboundRequest;
 import com.example.erp.entity.*;
+import com.example.erp.feign.InventoryServiceClient;
 import com.example.erp.mapper.PurchaseReturnItemMapper;
 import com.example.erp.mapper.PurchaseReturnMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,7 @@ public class PurchaseReturnService extends ServiceImpl<PurchaseReturnMapper, Pur
     private final SupplierService supplierService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
-    private final InventoryService inventoryService;
+    private final InventoryServiceClient inventoryServiceClient;
 
     /**
      * 分页查询采购退货单
@@ -138,10 +140,15 @@ public class PurchaseReturnService extends ServiceImpl<PurchaseReturnMapper, Pur
         );
         for (PurchaseReturnItem item : items) {
             String bizNo = "PR-" + purchaseReturn.getReturnNo();
-            inventoryService.inbound(
-                purchaseReturn.getWarehouseId(), item.getProductId(), item.getQuantity(),
-                item.getPrice(), null, 7, bizNo, returnId, purchaseReturn.getTenantId(), userId
-            );
+            InboundRequest inboundReq = new InboundRequest();
+            inboundReq.setWarehouseId(purchaseReturn.getWarehouseId());
+            inboundReq.setProductId(item.getProductId());
+            inboundReq.setQuantity(item.getQuantity());
+            inboundReq.setCostPrice(item.getPrice());
+            inboundReq.setBizType(7);
+            inboundReq.setBizNo(bizNo);
+            inboundReq.setBizId(returnId);
+            inventoryServiceClient.inbound(inboundReq, purchaseReturn.getTenantId(), userId);
         }
 
         purchaseReturn.setReturnStatus(2);

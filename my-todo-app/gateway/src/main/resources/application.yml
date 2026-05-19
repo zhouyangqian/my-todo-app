@@ -39,6 +39,21 @@ spring:
           predicates:
             - Path=/api/permissions/**,/api/roles/**,/api/system/**
 
+        # Inventory Service (must be before erp-service to match /api/erp/inventory/**)
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/erp/inventory/**
+          filters:
+            - RewritePath=/api/erp/inventory(?<segment>/?.*), /api/inventory${segment}
+
+        - id: inventory-check-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/erp/inventory-checks/**
+          filters:
+            - RewritePath=/api/erp/inventory-checks(?<segment>/?.*), /api/inventory/checks${segment}
+
         # ERP Service
         - id: erp-service
           uri: lb://erp-service

@@ -15,7 +15,9 @@ import com.example.erp.entity.SalesOrderItem;
 import com.example.erp.entity.SalesShipment;
 import com.example.erp.entity.SalesShipmentItem;
 import com.example.erp.entity.Warehouse;
+import com.example.erp.dto.OutboundRequest;
 import com.example.erp.feign.FinanceServiceClient;
+import com.example.erp.feign.InventoryServiceClient;
 import com.example.erp.mapper.SalesOrderItemMapper;
 import com.example.erp.mapper.SalesOrderMapper;
 import com.example.erp.mapper.SalesShipmentItemMapper;
@@ -64,7 +66,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
     private final CustomerService customerService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
-    private final InventoryService inventoryService;
+    private final InventoryServiceClient inventoryServiceClient;
     private final SalesOrderService salesOrderService;
     private final FinanceServiceClient financeServiceClient;
 
@@ -300,16 +302,14 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
 
         // 1. 扣减库存
         for (SalesShipmentItem item : shipmentItems) {
-            inventoryService.outbound(
-                shipment.getWarehouseId(),
-                item.getProductId(),
-                item.getQuantity(),
-                2, // bizType: 2=销售出库
-                shipment.getShipmentNo(), // bizNo
-                shipment.getId(), // bizId
-                shipment.getTenantId(),
-                approverId
-            );
+            OutboundRequest outboundReq = new OutboundRequest();
+            outboundReq.setWarehouseId(shipment.getWarehouseId());
+            outboundReq.setProductId(item.getProductId());
+            outboundReq.setQuantity(item.getQuantity());
+            outboundReq.setBizType(2);
+            outboundReq.setBizNo(shipment.getShipmentNo());
+            outboundReq.setBizId(shipment.getId());
+            inventoryServiceClient.outbound(outboundReq, shipment.getTenantId(), approverId);
         }
 
         // 2. 创建应收账款
