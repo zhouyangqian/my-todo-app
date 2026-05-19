@@ -1,9 +1,0 @@
-
-
-java:S11920"GDefine a constant instead of duplicating this literal "userId" 3 times.(ÏáÚĞüÿÿÿÿ8”È›úÙ3J$d190b980-5e19-4567-aecc-b304527bc185
-Œ
-java:S11922"IDefine a constant instead of duplicating this literal "tenantId" 3 times.(î±½Ô8”È›úÙ3J$f2b51a7a-6fa2-441f-973d-7dcd1a499e07
-Š
-java:S6201‰"HReplace this instanceof check and cast with 'instanceof Integer integer'(™¾ÜúÿÿÿÿJ$d4062091-2b0d-4b4a-9f68-48c1742b0adf
-Š
-java:S6201£"HReplace this instanceof check and cast with 'instanceof Integer integer'(¢òş¬ùÿÿÿÿJ$f34e67dd-6866-4682-8c7f-f61a9b3c0e68
