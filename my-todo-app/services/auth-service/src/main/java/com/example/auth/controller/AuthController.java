@@ -131,6 +131,19 @@ public class AuthController {
         return ApiResponse.success();
     }
 
+    /**
+     * 管理员重置用户密码
+     * <p>无需验证旧密码，直接设置新密码，修改成功后强制该用户所有设备重新登录</p>
+     *
+     * @param request 重置密码请求（用户ID、新密码）
+     */
+    @Operation(summary = "重置用户密码")
+    @PostMapping("/reset-password")
+    public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request.getUserId(), request.getNewPassword());
+        return ApiResponse.success();
+    }
+
     /** 健康检查接口 */
     @Operation(summary = "健康检查")
     @GetMapping("/health")

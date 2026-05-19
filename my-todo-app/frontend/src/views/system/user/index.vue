@@ -57,9 +57,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="180" />
-        <el-table-column label="操作" fixed="right" width="200">
+        <el-table-column label="操作" fixed="right" width="320">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
+            <el-button type="success" link @click="handleResetPassword(row)">设置密码</el-button>
+            <el-button type="warning" link @click="handleAssignRole(row)">分配角色</el-button>
             <el-button
               :type="row.status === 1 ? 'warning' : 'success'"
               link
@@ -99,7 +101,7 @@
         label-width="80px"
       >
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="formData.username" placeholder="请输入用户名" />
+          <el-input v-model="formData.username" placeholder="请输入用户名" @input="onUsernameInput" />
         </el-form-item>
         <el-form-item label="姓名" prop="realName">
           <el-input v-model="formData.realName" placeholder="请输入姓名" />
@@ -124,15 +126,72 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 分配角色对话框 -->
+    <el-dialog
+      v-model="roleDialogVisible"
+      title="分配角色"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-checkbox-group v-model="checkedRoleIds">
+        <div v-for="role in allRoles" :key="role.id" style="margin-bottom: 10px;">
+          <el-checkbox :value="String(role.id)">
+            {{ role.roleName }}（{{ role.roleCode }}）
+          </el-checkbox>
+        </div>
+      </el-checkbox-group>
+      <el-empty v-if="allRoles.length === 0" description="暂无可用角色" />
+      <template #footer>
+        <el-button @click="roleDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSaveRoles" :loading="roleLoading">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 设置密码对话框 -->
+    <el-dialog
+      v-model="passwordDialogVisible"
+      title="设置密码"
+      width="450px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="passwordForm" label-width="100px">
+        <el-form-item label="用户">
+          <el-input :model-value="passwordForm.username" disabled />
+        </el-form-item>
+        <el-form-item label="默认密码">
+          <el-input :model-value="passwordForm.defaultPassword" disabled>
+            <template #append>
+              <el-button @click="handleCopyDefault">复制</el-button>
+            </template>
+          </el-input>
+          <div class="form-tip">规则：姓名 + 用户总数</div>
+        </el-form-item>
+        <el-form-item label="新密码">
+          <el-input v-model="passwordForm.newPassword" placeholder="可修改为自定义密码" show-password />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSavePassword" :loading="passwordLoading">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 // 用户管理页面逻辑：搜索、分页、增删改查、启用/禁用用户
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
+import { pinyin } from 'pinyin-pro'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUser } from '@/api/user'
+import { getRoleList, getUserRoles, assignUserRoles } from '@/api/permission'
+import { resetPassword } from '@/api/auth'
 
 // ===== 搜索相关 =====
 
@@ -180,6 +239,36 @@ const formData = reactive({
   status: 1                              // 状态（默认启用）
 })
 
+// ===== 角色分配相关 =====
+
+// 角色分配对话框是否可见
+const roleDialogVisible = ref(false)
+// 所有角色列表（用于勾选）
+const allRoles = ref([])
+// 当前用户已分配的角色ID列表
+const checkedRoleIds = ref([])
+// 当前正在分配角色的用户ID
+const currentUserId = ref()
+// 角色分配按钮加载状态
+const roleLoading = ref(false)
+
+// ===== 设置密码相关 =====
+
+// 设置密码对话框是否可见
+const passwordDialogVisible = ref(false)
+// 密码表单数据
+const passwordForm = reactive({
+  userId: undefined,
+  username: '',
+  defaultPassword: '',
+  newPassword: ''
+})
+// 密码保存按钮加载状态
+const passwordLoading = ref(false)
+
+// 用户名是否被手动修改过（控制拼音自动生成）
+const usernameManuallyEdited = ref(false)
+
 // 表单验证规则
 const formRules = {
   username: [
@@ -195,6 +284,18 @@ const formRules = {
   phone: [
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ]
+}
+
+// 监听姓名变化，自动生成拼音用户名（仅新增模式且未手动修改时）
+watch(() => formData.realName, (val) => {
+  if (!val || formData.id || usernameManuallyEdited.value) return
+  const py = pinyin(val, { toneType: 'none', type: 'array' })
+  formData.username = py.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('')
+})
+
+// 用户手动输入用户名时标记，后续不再自动覆盖
+const onUsernameInput = () => {
+  usernameManuallyEdited.value = true
 }
 
 /**
@@ -247,6 +348,7 @@ const handleAdd = () => {
   formData.email = ''
   formData.phone = ''
   formData.status = 1
+  usernameManuallyEdited.value = false
   dialogVisible.value = true
 }
 
@@ -262,6 +364,7 @@ const handleEdit = (row) => {
   formData.email = row.email
   formData.phone = row.phone
   formData.status = row.status
+  usernameManuallyEdited.value = true  // 编辑模式下不自动生成
   dialogVisible.value = true
 }
 
@@ -334,6 +437,102 @@ const handleDelete = async (row) => {
 }
 
 /**
+ * 打开设置密码对话框
+ * 默认密码规则：姓名全拼 + 用户总数
+ * @param {Object} row 当前行用户数据
+ */
+const handleResetPassword = (row) => {
+  const namePinyin = row.realName
+    ? pinyin(row.realName, { toneType: 'none', type: 'array' }).join('')
+    : ''
+  const defaultPwd = namePinyin + pagination.total
+  passwordForm.userId = row.id
+  passwordForm.username = row.username
+  passwordForm.defaultPassword = defaultPwd
+  passwordForm.newPassword = defaultPwd
+  passwordDialogVisible.value = true
+}
+
+/**
+ * 复制默认密码到剪贴板
+ */
+const handleCopyDefault = () => {
+  navigator.clipboard.writeText(passwordForm.defaultPassword)
+  ElMessage.success('已复制到剪贴板')
+}
+
+/**
+ * 保存密码（调用重置密码接口）
+ */
+const handleSavePassword = async () => {
+  if (!passwordForm.newPassword) {
+    ElMessage.warning('请输入新密码')
+    return
+  }
+  passwordLoading.value = true
+  try {
+    await resetPassword({
+      userId: passwordForm.userId,
+      newPassword: passwordForm.newPassword
+    })
+    ElMessage.success('密码设置成功')
+    passwordDialogVisible.value = false
+  } catch (error) {
+    ElMessage.error('密码设置失败')
+  } finally {
+    passwordLoading.value = false
+  }
+}
+
+/**
+ * 打开角色分配对话框
+ * 1. 首次打开时加载所有角色列表
+ * 2. 获取该用户当前已分配的角色ID
+ * @param {Object} row 当前行用户数据
+ */
+const handleAssignRole = async (row) => {
+  currentUserId.value = row.id
+  // 首次打开时加载角色列表（后续使用缓存）
+  if (allRoles.value.length === 0) {
+    try {
+      const res = await getRoleList({ page: 1, size: 999 })
+      allRoles.value = res.records || []
+    } catch (error) {
+      ElMessage.error('加载角色列表失败')
+      return
+    }
+  }
+  // 获取该用户已拥有的角色（后端返回完整Role对象，需提取ID）
+  let roleIds = []
+  try {
+    const roles = await getUserRoles(row.id)
+    roleIds = (roles || []).map(r => String(r.id))
+  } catch (error) {
+    roleIds = []
+  }
+  checkedRoleIds.value = roleIds
+  roleDialogVisible.value = true
+}
+
+/**
+ * 保存角色分配
+ * 获取所有勾选的角色ID，调用接口保存
+ */
+const handleSaveRoles = async () => {
+  if (!currentUserId.value) return
+  roleLoading.value = true
+  try {
+    await assignUserRoles(currentUserId.value, checkedRoleIds.value)
+    ElMessage.success('保存成功')
+    roleDialogVisible.value = false
+  } catch (error) {
+    ElMessage.error('保存失败')
+  } finally {
+    roleLoading.value = false
+  }
+}
+
+/**
  * 每页条数变化处理
  * @param size 新的每页条数
  */
@@ -382,6 +581,12 @@ onMounted(() => {
       margin-top: 20px;
       justify-content: flex-end;
     }
+  }
+
+  .form-tip {
+    font-size: 12px;
+    color: #909399;
+    margin-top: 4px;
   }
 }
 </style>

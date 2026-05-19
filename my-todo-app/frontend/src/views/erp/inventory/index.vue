@@ -154,7 +154,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Warning } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { getInventoryPage, inbound, outbound, getWarehouses } from '@/api/erp'
+
+const router = useRouter()
 
 const searchForm = reactive({
   warehouseId: undefined,
@@ -312,7 +315,7 @@ const handleOutboundSubmit = async () => {
 }
 
 const handleViewLog = (row) => {
-  ElMessage.info('库存日志功能开发中')
+  router.push({ path: '/erp/inventory-flow', query: { warehouseId: row.warehouseId, productId: row.productId } })
 }
 
 const handleShowAlert = () => {

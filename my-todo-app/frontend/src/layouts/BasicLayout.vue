@@ -7,8 +7,10 @@
         <img src="@/assets/logo.svg" alt="Logo" class="logo-img" />
         <span v-show="!isCollapse" class="logo-text">My Todo App</span>
       </div>
-      <!-- 侧边菜单 -->
+      <!-- 侧边菜单（带滚动条） -->
+      <el-scrollbar class="sidebar-scroll">
       <el-menu
+        ref="menuRef"
         :default-active="activeMenu"
         :collapse="isCollapse"
         :collapse-transition="false"
@@ -69,34 +71,59 @@
             <el-icon><ShoppingCart /></el-icon>
             <span>进销存</span>
           </template>
-          <el-menu-item index="/erp/product">
-            <el-icon><Goods /></el-icon>
-            <span>商品管理</span>
-          </el-menu-item>
-          <el-menu-item index="/erp/warehouse">
-            <el-icon><House /></el-icon>
-            <span>仓库管理</span>
-          </el-menu-item>
-          <el-menu-item index="/erp/inventory">
-            <el-icon><Box /></el-icon>
-            <span>库存管理</span>
-          </el-menu-item>
-          <el-menu-item index="/erp/supplier">
-            <el-icon><Van /></el-icon>
-            <span>供应商管理</span>
-          </el-menu-item>
-          <el-menu-item index="/erp/customer">
-            <el-icon><Avatar /></el-icon>
-            <span>客户管理</span>
-          </el-menu-item>
-          <el-menu-item index="/erp/sales-order">
-            <el-icon><ShoppingCart /></el-icon>
-            <span>销售订单</span>
-          </el-menu-item>
-          <el-menu-item index="/erp/sales-shipment">
-            <el-icon><Van /></el-icon>
-            <span>销售出库</span>
-          </el-menu-item>
+          <!-- 商品管理 -->
+          <el-sub-menu index="erp-product" @open="handleErpOpen">
+            <template #title>
+              <el-icon><Folder /></el-icon>
+              <span>商品管理</span>
+            </template>
+            <el-menu-item index="/erp/product-category">商品分类</el-menu-item>
+            <el-menu-item index="/erp/product">商品管理</el-menu-item>
+            <el-menu-item index="/erp/product-price">商品价格</el-menu-item>
+            <el-menu-item index="/erp/product-promotion">商品促销</el-menu-item>
+          </el-sub-menu>
+          <!-- 仓库库存 -->
+          <el-sub-menu index="erp-inventory" @open="handleErpOpen">
+            <template #title>
+              <el-icon><Box /></el-icon>
+              <span>仓库库存</span>
+            </template>
+            <el-menu-item index="/erp/warehouse">仓库管理</el-menu-item>
+            <el-menu-item index="/erp/inventory">库存管理</el-menu-item>
+            <el-menu-item index="/erp/inventory-flow">库存流水</el-menu-item>
+            <el-menu-item index="/erp/inventory-check">库存盘点</el-menu-item>
+            <el-menu-item index="/erp/inventory-alert">库存预警</el-menu-item>
+          </el-sub-menu>
+          <!-- 采购管理 -->
+          <el-sub-menu index="erp-purchase" @open="handleErpOpen">
+            <template #title>
+              <el-icon><ShoppingCartFull /></el-icon>
+              <span>采购管理</span>
+            </template>
+            <el-menu-item index="/erp/purchase-order">采购订单</el-menu-item>
+            <el-menu-item index="/erp/purchase-return">采购退货</el-menu-item>
+            <el-menu-item index="/erp/supplier">供应商管理</el-menu-item>
+          </el-sub-menu>
+          <!-- 销售管理 -->
+          <el-sub-menu index="erp-sales" @open="handleErpOpen">
+            <template #title>
+              <el-icon><ShoppingCart /></el-icon>
+              <span>销售管理</span>
+            </template>
+            <el-menu-item index="/erp/sales-order">销售订单</el-menu-item>
+            <el-menu-item index="/erp/sales-return">销售退货</el-menu-item>
+            <el-menu-item index="/erp/sales-shipment">销售出库</el-menu-item>
+            <el-menu-item index="/erp/customer">客户管理</el-menu-item>
+          </el-sub-menu>
+          <!-- 报表配置 -->
+          <el-sub-menu index="erp-report" @open="handleErpOpen">
+            <template #title>
+              <el-icon><DataAnalysis /></el-icon>
+              <span>报表配置</span>
+            </template>
+            <el-menu-item index="/erp/report">报表统计</el-menu-item>
+            <el-menu-item index="/erp/config">系统配置</el-menu-item>
+          </el-sub-menu>
         </el-sub-menu>
 
         <!-- 财务子菜单 -->
@@ -123,6 +150,7 @@
           </el-menu-item>
         </el-sub-menu>
       </el-menu>
+      </el-scrollbar>
     </el-aside>
 
     <el-container class="main-container">
@@ -208,16 +236,26 @@ import {
   Files,
   Tools,
   ShoppingCart,
+  ShoppingCartFull,
   Goods,
   House,
   Box,
+  List,
   Van,
   Avatar,
   Money,
   CreditCard,
   Wallet,
   Tickets,
-  Postcard
+  Postcard,
+  Folder,
+  Document,
+  Warning,
+  RefreshLeft,
+  RefreshRight,
+  PriceTag,
+  DataAnalysis,
+  Present
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -225,9 +263,18 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const isCollapse = ref(false)
+const menuRef = ref()
 
 const toggleCollapse = () => {
   isCollapse.value = !isCollapse.value
+}
+
+// 进销存子菜单手风琴效果：同一时刻只展开一个分组
+const erpGroupKeys = ['erp-product', 'erp-inventory', 'erp-purchase', 'erp-sales', 'erp-report']
+const handleErpOpen = (index) => {
+  if (erpGroupKeys.includes(index)) {
+    erpGroupKeys.filter(k => k !== index).forEach(k => menuRef.value?.close(k))
+  }
 }
 
 const activeMenu = computed(() => route.path)
@@ -241,13 +288,24 @@ const breadcrumbMap = {
   '/system/dept': '部门管理',
   '/dict/type': '字典类型',
   '/dict/config': '系统配置',
+  '/erp/product-category': '商品分类',
   '/erp/product': '商品管理',
+  '/erp/product-price': '商品价格',
+  '/erp/product-promotion': '商品促销',
   '/erp/warehouse': '仓库管理',
   '/erp/inventory': '库存管理',
+  '/erp/inventory-flow': '库存流水',
+  '/erp/inventory-check': '库存盘点',
+  '/erp/inventory-alert': '库存预警',
   '/erp/supplier': '供应商管理',
   '/erp/customer': '客户管理',
+  '/erp/purchase-order': '采购订单',
+  '/erp/purchase-return': '采购退货',
   '/erp/sales-order': '销售订单',
+  '/erp/sales-return': '销售退货',
   '/erp/sales-shipment': '销售出库',
+  '/erp/report': '报表统计',
+  '/erp/config': '系统配置',
   '/finance/receivable': '应收账款',
   '/finance/payable': '应付账款',
   '/finance/record': '收支记录',
@@ -291,6 +349,13 @@ const handleLogout = async () => {
   background-color: #304156;
   transition: width 0.3s;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .sidebar-scroll {
+    flex: 1;
+    overflow: hidden;
+  }
 
   .logo {
     height: 50px;

@@ -101,7 +101,7 @@ export function getRolePermissions(roleId) {
  * @returns {Promise}
  */
 export function assignRolePermissions(roleId, permissionIds) {
-  return post('/roles/assign-to-user', { roleId, permissionIds })
+  return post(`/roles/${roleId}/permissions`, { permissionIds })
 }
 
 /**

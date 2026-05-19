@@ -46,20 +46,8 @@ service.interceptors.request.use(
     if (userStore.userInfo?.username) {
       config.headers['X-Username'] = userStore.userInfo.username
     }
-
-    // 添加用户其他信息到请求头
-    if (userStore.userInfo?.email) {
-      config.headers['X-Email'] = userStore.userInfo.email
-    }
-    if (userStore.userInfo?.realName) {
-      config.headers['X-RealName'] = userStore.userInfo.realName
-    }
-    if (userStore.userInfo?.phone) {
-      config.headers['X-Phone'] = userStore.userInfo.phone
-    }
-    if (userStore.userInfo?.avatar) {
-      config.headers['X-Avatar'] = userStore.userInfo.avatar
-    }
+    // 其他用户信息（realName, email, phone, avatar）不需要通过请求头传递
+    // 后端可以通过 userId 从数据库获取完整用户信息
 
     return config
   },

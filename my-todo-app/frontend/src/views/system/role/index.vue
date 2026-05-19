@@ -134,11 +134,12 @@
       <el-tree
         ref="treeRef"
         :data="permissionTree"
-        :props="{ label: 'name', children: 'children' }"
+        :props="{ label: 'permissionName', children: 'children' }"
         show-checkbox
         node-key="id"
         default-expand-all
         :default-checked-keys="checkedPermissionIds"
+        check-strictly
       />
       <template #footer>
         <el-button @click="permissionDialogVisible = false">取消</el-button>
@@ -378,14 +379,22 @@ const handleAssignPermission = async (row) => {
   if (permissionTree.value.length === 0) {
     await loadPermissionTree()
   }
-  // 获取该角色已拥有的权限ID，设置为树的默认选中项
-  try {
-    const permissionIds = await getRolePermissions(row.id)
-    checkedPermissionIds.value = permissionIds
-  } catch (error) {
-    checkedPermissionIds.value = []
-  }
+  // 先打开对话框，等DOM更新后设置选中状态
   permissionDialogVisible.value = true
+  // 获取该角色已拥有的权限ID
+  let permissionIds = []
+  try {
+    permissionIds = await getRolePermissions(row.id)
+  } catch (error) {
+    permissionIds = []
+  }
+  checkedPermissionIds.value = permissionIds
+  // 等树渲染完成后手动设置选中状态
+  setTimeout(() => {
+    if (treeRef.value) {
+      treeRef.value.setCheckedKeys(permissionIds)
+    }
+  }, 100)
 }
 
 /**

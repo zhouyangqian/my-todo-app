@@ -407,6 +407,34 @@ public class AuthService {
     }
 
     /**
+     * 管理员重置用户密码
+     * <p>无需验证旧密码，直接设置新密码，修改成功后强制该用户所有设备重新登录</p>
+     *
+     * @param userId      目标用户ID
+     * @param newPassword 新密码（明文）
+     */
+    @Transactional
+    public void resetPassword(Long userId, String newPassword) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(3001, "用户不存在");
+        }
+
+        // 更新密码
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordChangedAt(LocalDateTime.now());
+        user.setLoginFailCount(0);      // 重置登录失败次数
+        user.setLocked(0);              // 解除锁定
+        user.setLockedUntil(null);
+        userMapper.updateById(user);
+
+        // 强制所有设备重新登录
+        logoutAll(userId);
+
+        log.info("管理员重置用户密码: userId={}", userId);
+    }
+
+    /**
      * 使用 SHA-256 对令牌进行哈希
      * <p>存储令牌的哈希值而非明文，提高安全性</p>
      *

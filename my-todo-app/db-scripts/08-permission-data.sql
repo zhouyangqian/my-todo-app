@@ -133,19 +133,122 @@ UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permiss
 -- ERP管理子菜单
 INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
 SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:productCategory', '商品分类', 1, '/api/erp/product-categories/get-category-page', 'GET', 'Folder', '/erp/product-category', 'erp/product-category/index', 0, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
        'erp:product', '商品管理', 1, '/api/erp/products/get-product-page', 'GET', 'Goods', '/erp/product', 'erp/product/index', 1, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
        'erp:warehouse', '仓库管理', 1, '/api/erp/warehouses/get-warehouse-page', 'GET', 'House', '/erp/warehouse', 'erp/warehouse/index', 2, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
        'erp:inventory', '库存管理', 1, '/api/erp/inventory/get-inventory-page', 'GET', 'Box', '/erp/inventory', 'erp/inventory/index', 3, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
-       'erp:supplier', '供应商管理', 1, '/api/erp/suppliers/get-supplier-page', 'GET', 'Van', '/erp/supplier', 'erp/supplier/index', 4, 1, 1, NOW()
+       'erp:inventoryFlow', '库存流水', 1, '/api/erp/inventory/get-flow-page', 'GET', 'List', '/erp/inventory-flow', 'erp/inventory-flow/index', 4, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
-       'erp:customer', '客户管理', 1, '/api/erp/customers/get-customer-page', 'GET', 'Avatar', '/erp/customer', 'erp/customer/index', 5, 1, 1, NOW()
+       'erp:supplier', '供应商管理', 1, '/api/erp/suppliers/get-supplier-page', 'GET', 'Van', '/erp/supplier', 'erp/supplier/index', 5, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
-       'erp:salesOrder', '销售订单', 1, '/api/erp/sales-orders/get-sales-order-page', 'GET', 'ShoppingCart', '/erp/sales-order', 'erp/sales-order/index', 6, 1, 1, NOW()
+       'erp:customer', '客户管理', 1, '/api/erp/customers/get-customer-page', 'GET', 'Avatar', '/erp/customer', 'erp/customer/index', 6, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
-       'erp:salesShipment', '销售出库', 1, '/api/erp/sales-shipments/get-sales-shipment-page', 'GET', 'Van', '/erp/sales-shipment', 'erp/sales-shipment/index', 7, 1, 1, NOW();
+       'erp:salesOrder', '销售订单', 1, '/api/erp/sales-orders/get-sales-order-page', 'GET', 'ShoppingCart', '/erp/sales-order', 'erp/sales-order/index', 7, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:inventoryCheck', '库存盘点', 1, '/api/erp/inventory-checks/get-check-page', 'GET', 'Document', '/erp/inventory-check', 'erp/inventory-check/index', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:inventoryAlert', '库存预警', 1, '/api/erp/inventory/get-alert-inventories', 'GET', 'Warning', '/erp/inventory-alert', 'erp/inventory-alert/index', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:purchaseOrder', '采购订单', 1, '/api/erp/purchase-orders/get-purchase-order-page', 'GET', 'ShoppingCartFull', '/erp/purchase-order', 'erp/purchase-order/index', 7, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:purchaseReturn', '采购退货', 1, '/api/erp/purchase-returns/get-return-page', 'GET', 'RefreshLeft', '/erp/purchase-return', 'erp/purchase-return/index', 8, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:salesReturn', '销售退货', 1, '/api/erp/sales-returns/get-return-page', 'GET', 'RefreshRight', '/erp/sales-return', 'erp/sales-return/index', 10, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:productPrice', '商品价格', 1, '/api/erp/product-prices/get-price-page', 'GET', 'PriceTag', '/erp/product-price', 'erp/product-price/index', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:productPromotion', '商品促销', 1, '/api/erp/product-promotions/get-promotion-page', 'GET', 'Present', '/erp/product-promotion', 'erp/product-promotion/index', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:salesShipment', '销售出库', 1, '/api/erp/sales-shipments/get-sales-shipment-page', 'GET', 'Van', '/erp/sales-shipment', 'erp/sales-shipment/index', 8, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:report', '报表统计', 1, '/api/erp/reports/dashboard', 'GET', 'DataAnalysis', '/erp/report', 'erp/report/index', 9, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp' LIMIT 1),
+       'erp:config', '系统配置', 1, '/api/erp/configs/get-config-page', 'GET', 'Setting', '/erp/config', 'erp/config/index', 10, 1, 1, NOW();
+
+-- 商品分类按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productCategory' LIMIT 1),
+       'erp:productCategory:list', '分类列表', 2, '/api/erp/product-categories/get-category-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productCategory' LIMIT 1),
+       'erp:productCategory:detail', '分类详情', 2, '/api/erp/product-categories/get-category/{id}', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productCategory' LIMIT 1),
+       'erp:productCategory:create', '新增分类', 2, '/api/erp/product-categories/create-category', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productCategory' LIMIT 1),
+       'erp:productCategory:update', '编辑分类', 2, '/api/erp/product-categories/update-category/{id}', 'PUT', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productCategory' LIMIT 1),
+       'erp:productCategory:delete', '删除分类', 2, '/api/erp/product-categories/delete-category/{id}', 'DELETE', 5, 1, 1, NOW();
+
+-- 库存盘点按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:inventoryCheck' LIMIT 1),
+       'erp:inventoryCheck:list', '盘点列表', 2, '/api/erp/inventory-checks/get-check-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:inventoryCheck' LIMIT 1),
+       'erp:inventoryCheck:create', '新建盘点', 2, '/api/erp/inventory-checks/create-check', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:inventoryCheck' LIMIT 1),
+       'erp:inventoryCheck:submit', '提交结果', 2, '/api/erp/inventory-checks/submit-check/{id}', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:inventoryCheck' LIMIT 1),
+       'erp:inventoryCheck:cancel', '取消盘点', 2, '/api/erp/inventory-checks/cancel-check/{id}', 'POST', 4, 1, 1, NOW();
+
+-- 库存预警按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:inventoryAlert' LIMIT 1),
+       'erp:inventoryAlert:list', '预警列表', 2, '/api/erp/inventory/get-alert-inventories', 'GET', 1, 1, 1, NOW();
+
+-- 采购退货按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseReturn' LIMIT 1),
+       'erp:purchaseReturn:list', '退货列表', 2, '/api/erp/purchase-returns/get-return-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseReturn' LIMIT 1),
+       'erp:purchaseReturn:create', '新建退货', 2, '/api/erp/purchase-returns/create-return', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseReturn' LIMIT 1),
+       'erp:purchaseReturn:submit', '提交审核', 2, '/api/erp/purchase-returns/submit-for-approval/{id}', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseReturn' LIMIT 1),
+       'erp:purchaseReturn:approve', '审核退货', 2, '/api/erp/purchase-returns/approve-return/{id}', 'POST', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseReturn' LIMIT 1),
+       'erp:purchaseReturn:cancel', '取消退货', 2, '/api/erp/purchase-returns/cancel-return/{id}', 'POST', 5, 1, 1, NOW();
+
+-- 销售退货按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:salesReturn' LIMIT 1),
+       'erp:salesReturn:list', '退货列表', 2, '/api/erp/sales-returns/get-return-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:salesReturn' LIMIT 1),
+       'erp:salesReturn:create', '新建退货', 2, '/api/erp/sales-returns/create-return', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:salesReturn' LIMIT 1),
+       'erp:salesReturn:submit', '提交审核', 2, '/api/erp/sales-returns/submit-for-approval/{id}', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:salesReturn' LIMIT 1),
+       'erp:salesReturn:approve', '审核退货', 2, '/api/erp/sales-returns/approve-return/{id}', 'POST', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:salesReturn' LIMIT 1),
+       'erp:salesReturn:cancel', '取消退货', 2, '/api/erp/sales-returns/cancel-return/{id}', 'POST', 5, 1, 1, NOW();
+
+-- 商品价格按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPrice' LIMIT 1),
+       'erp:productPrice:list', '价格列表', 2, '/api/erp/product-prices/get-price-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPrice' LIMIT 1),
+       'erp:productPrice:create', '新增价格', 2, '/api/erp/product-prices/create-price', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPrice' LIMIT 1),
+       'erp:productPrice:update', '编辑价格', 2, '/api/erp/product-prices/update-price/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPrice' LIMIT 1),
+       'erp:productPrice:delete', '删除价格', 2, '/api/erp/product-prices/delete-price/{id}', 'DELETE', 4, 1, 1, NOW();
+
+-- 商品促销按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPromotion' LIMIT 1),
+       'erp:productPromotion:list', '促销列表', 2, '/api/erp/product-promotions/get-promotion-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPromotion' LIMIT 1),
+       'erp:productPromotion:create', '新增促销', 2, '/api/erp/product-promotions/create-promotion', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPromotion' LIMIT 1),
+       'erp:productPromotion:update', '编辑促销', 2, '/api/erp/product-promotions/update-promotion/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPromotion' LIMIT 1),
+       'erp:productPromotion:delete', '删除促销', 2, '/api/erp/product-promotions/delete-promotion/{id}', 'DELETE', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPromotion' LIMIT 1),
+       'erp:productPromotion:enable', '启用促销', 2, '/api/erp/product-promotions/enable-promotion/{id}', 'POST', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:productPromotion' LIMIT 1),
+       'erp:productPromotion:disable', '停用促销', 2, '/api/erp/product-promotions/disable-promotion/{id}', 'POST', 6, 1, 1, NOW();
 
 -- 商品管理按钮
 INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
@@ -213,6 +316,23 @@ UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permiss
        'erp:customer:update', '编辑客户', 2, '/api/erp/customers/update-customer/{id}', 'PUT', 4, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:customer' LIMIT 1),
        'erp:customer:delete', '删除客户', 2, '/api/erp/customers/delete-customer/{id}', 'DELETE', 5, 1, 1, NOW();
+
+-- 采购订单按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:list', '订单列表', 2, '/api/erp/purchase-orders/get-purchase-order-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:detail', '订单详情', 2, '/api/erp/purchase-orders/get-purchase-order/{id}', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:create', '新建订单', 2, '/api/erp/purchase-orders/create-purchase-order', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:update', '编辑订单', 2, '/api/erp/purchase-orders/update-purchase-order/{id}', 'PUT', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:submit', '提交审核', 2, '/api/erp/purchase-orders/submit-for-approval/{id}', 'POST', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:approve', '审核订单', 2, '/api/erp/purchase-orders/approve-order/{id}', 'POST', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:purchaseOrder' LIMIT 1),
+       'erp:purchaseOrder:cancel', '取消订单', 2, '/api/erp/purchase-orders/cancel-order/{id}', 'POST', 7, 1, 1, NOW();
 
 -- 销售订单按钮
 INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
@@ -303,6 +423,30 @@ UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permiss
        'finance:bankAccount:update', '编辑账户', 2, '/api/finance/bank-accounts/update-bank-account/{id}', 'PUT', 4, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='finance:bankAccount' LIMIT 1),
        'finance:bankAccount:delete', '删除账户', 2, '/api/finance/bank-accounts/delete-bank-account/{id}', 'DELETE', 5, 1, 1, NOW();
+
+-- 报表统计按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:report' LIMIT 1),
+       'erp:report:dashboard', 'Dashboard', 2, '/api/erp/reports/dashboard', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:report' LIMIT 1),
+       'erp:report:sales', '销售报表', 2, '/api/erp/reports/sales', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:report' LIMIT 1),
+       'erp:report:purchase', '采购报表', 2, '/api/erp/reports/purchase', 'GET', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:report' LIMIT 1),
+       'erp:report:inventory', '库存报表', 2, '/api/erp/reports/inventory', 'GET', 4, 1, 1, NOW();
+
+-- 系统配置按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:config' LIMIT 1),
+       'erp:config:list', '配置列表', 2, '/api/erp/configs/get-config-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:config' LIMIT 1),
+       'erp:config:create', '新增配置', 2, '/api/erp/configs/create-config', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:config' LIMIT 1),
+       'erp:config:update', '编辑配置', 2, '/api/erp/configs/update-config/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:config' LIMIT 1),
+       'erp:config:delete', '删除配置', 2, '/api/erp/configs/delete-config/{id}', 'DELETE', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='erp:config' LIMIT 1),
+       'erp:config:batchUpdate', '批量更新', 2, '/api/erp/configs/batch-update', 'POST', 5, 1, 1, NOW();
 
 -- ==================== 7. 分配角色权限 ====================
 -- 为超级管理员分配所有权限

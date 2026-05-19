@@ -3,6 +3,48 @@
 
 import { get, post, put, del } from '@/utils/request'
 
+// ============ 商品分类 API ============
+
+/**
+ * 分页查询商品分类列表
+ * @param params 分页参数和筛选条件
+ */
+export function getProductCategoryPage(params) {
+  return get('/erp/product-categories/get-category-page', params)
+}
+
+/**
+ * 获取所有分类（下拉选择用）
+ */
+export function getAllProductCategories() {
+  return get('/erp/product-categories/get-all-categories')
+}
+
+/**
+ * 创建商品分类
+ * @param data 分类信息
+ */
+export function createProductCategory(data) {
+  return post('/erp/product-categories/create-category', data)
+}
+
+/**
+ * 更新商品分类
+ * @param id 分类ID
+ * @param data 分类信息
+ */
+export function updateProductCategory(id, data) {
+  return put(`/erp/product-categories/update-category/${id}`, data)
+}
+
+/**
+ * 删除商品分类
+ * @param id 分类ID
+ */
+export function deleteProductCategory(id) {
+  return del(`/erp/product-categories/delete-category/${id}`)
+}
+
 // ============ 商品（产品）API ============
 
 /**
@@ -86,6 +128,16 @@ export function transfer(data) {
  */
 export function getInventoryFlowPage(params) {
   return get('/erp/inventory/flow', params)
+}
+
+// ============ 库存流水 API ============
+
+/**
+ * 分页查询库存流水记录
+ * @param params 分页参数和筛选条件（仓库ID、商品ID、业务类型）
+ */
+export function getInventoryFlowPage(params) {
+  return get('/erp/inventory/get-flow-page', params)
 }
 
 // ============ 仓库 API ============
@@ -215,6 +267,74 @@ export function deleteCustomer(id) {
   return del(`/erp/customers/delete-customer/${id}`)
 }
 
+// ============ 采购订单 API ============
+
+/**
+ * 分页查询采购订单列表
+ * @param params 分页参数和筛选条件（订单号、供应商、状态）
+ */
+export function getPurchaseOrderPage(params) {
+  return get('/erp/purchase-orders/get-purchase-order-page', params)
+}
+
+/**
+ * 获取采购订单详情
+ * @param id 订单ID
+ */
+export function getPurchaseOrderDetail(id) {
+  return get(`/erp/purchase-orders/get-purchase-order/${id}`)
+}
+
+/**
+ * 创建采购订单
+ * @param data 订单信息
+ */
+export function createPurchaseOrder(data) {
+  return post('/erp/purchase-orders/create-purchase-order', data)
+}
+
+/**
+ * 更新采购订单
+ * @param id 订单ID
+ * @param data 订单信息
+ */
+export function updatePurchaseOrder(id, data) {
+  return put(`/erp/purchase-orders/update-purchase-order/${id}`, data)
+}
+
+/**
+ * 提交采购订单审核
+ * @param id 订单ID
+ */
+export function submitPurchaseOrder(id) {
+  return post(`/erp/purchase-orders/submit-for-approval/${id}`)
+}
+
+/**
+ * 审核采购订单
+ * @param id 订单ID
+ */
+export function approvePurchaseOrder(id) {
+  return post(`/erp/purchase-orders/approve-order/${id}`)
+}
+
+/**
+ * 取消采购订单
+ * @param id 订单ID
+ */
+export function cancelPurchaseOrder(id) {
+  return post(`/erp/purchase-orders/cancel-order/${id}`)
+}
+
+/**
+ * 采购入库
+ * @param id 订单ID
+ * @param data 入库明细
+ */
+export function purchaseInbound(id, data) {
+  return post(`/erp/purchase-orders/inbound/${id}`, data)
+}
+
 // ============ 销售订单 API ============
 
 /**
@@ -322,4 +442,184 @@ export function approveSalesShipment(id) {
  */
 export function cancelSalesShipment(id) {
   return post(`/erp/sales-shipments/cancel-shipment/${id}`)
+}
+
+// ============ 库存盘点 API ============
+
+export function getInventoryCheckPage(params) {
+  return get('/erp/inventory-checks/get-check-page', params)
+}
+
+export function getInventoryCheckDetail(id) {
+  return get(`/erp/inventory-checks/get-check/${id}`)
+}
+
+export function createInventoryCheck(data) {
+  return post('/erp/inventory-checks/create-check', data)
+}
+
+export function submitInventoryCheck(id, data) {
+  return post(`/erp/inventory-checks/submit-check/${id}`, data)
+}
+
+export function cancelInventoryCheck(id) {
+  return post(`/erp/inventory-checks/cancel-check/${id}`)
+}
+
+// ============ 库存预警 API ============
+
+export function getAlertInventories(params) {
+  return get('/erp/inventory/get-alert-inventories', params)
+}
+
+// ============ 采购退货 API ============
+
+export function getPurchaseReturnPage(params) {
+  return get('/erp/purchase-returns/get-return-page', params)
+}
+
+export function getPurchaseReturnDetail(id) {
+  return get(`/erp/purchase-returns/get-return/${id}`)
+}
+
+export function createPurchaseReturn(data) {
+  return post('/erp/purchase-returns/create-return', data)
+}
+
+export function submitPurchaseReturn(id) {
+  return post(`/erp/purchase-returns/submit-for-approval/${id}`)
+}
+
+export function approvePurchaseReturn(id) {
+  return post(`/erp/purchase-returns/approve-return/${id}`)
+}
+
+export function cancelPurchaseReturn(id) {
+  return post(`/erp/purchase-returns/cancel-return/${id}`)
+}
+
+// ============ 销售退货 API ============
+
+export function getSalesReturnPage(params) {
+  return get('/erp/sales-returns/get-return-page', params)
+}
+
+export function getSalesReturnDetail(id) {
+  return get(`/erp/sales-returns/get-return/${id}`)
+}
+
+export function createSalesReturn(data) {
+  return post('/erp/sales-returns/create-return', data)
+}
+
+export function submitSalesReturn(id) {
+  return post(`/erp/sales-returns/submit-for-approval/${id}`)
+}
+
+export function approveSalesReturn(id) {
+  return post(`/erp/sales-returns/approve-return/${id}`)
+}
+
+export function cancelSalesReturn(id) {
+  return post(`/erp/sales-returns/cancel-return/${id}`)
+}
+
+// ============ 商品促销 API ============
+
+export function getProductPromotionPage(params) {
+  return get('/erp/product-promotions/get-promotion-page', params)
+}
+
+export function getActivePromotions(productId) {
+  return get(`/erp/product-promotions/get-active-promotions/${productId}`)
+}
+
+export function createProductPromotion(data) {
+  return post('/erp/product-promotions/create-promotion', data)
+}
+
+export function updateProductPromotion(id, data) {
+  return put(`/erp/product-promotions/update-promotion/${id}`, data)
+}
+
+export function deleteProductPromotion(id) {
+  return del(`/erp/product-promotions/delete-promotion/${id}`)
+}
+
+export function enableProductPromotion(id) {
+  return post(`/erp/product-promotions/enable-promotion/${id}`)
+}
+
+export function disableProductPromotion(id) {
+  return post(`/erp/product-promotions/disable-promotion/${id}`)
+}
+
+// ============ 商品价格 API ============
+
+export function getProductPricePage(params) {
+  return get('/erp/product-prices/get-price-page', params)
+}
+
+export function getPricesByProduct(productId) {
+  return get(`/erp/product-prices/get-prices-by-product/${productId}`)
+}
+
+export function createProductPrice(data) {
+  return post('/erp/product-prices/create-price', data)
+}
+
+export function updateProductPrice(id, data) {
+  return put(`/erp/product-prices/update-price/${id}`, data)
+}
+
+export function deleteProductPrice(id) {
+  return del(`/erp/product-prices/delete-price/${id}`)
+}
+
+// ============ 报表统计 API ============
+
+export function getDashboard() {
+  return get('/erp/reports/dashboard')
+}
+
+export function getSalesReport(params) {
+  return get('/erp/reports/sales', params)
+}
+
+export function getPurchaseReport(params) {
+  return get('/erp/reports/purchase', params)
+}
+
+export function getInventoryReport(params) {
+  return get('/erp/reports/inventory', params)
+}
+
+// ============ 系统配置 API ============
+
+export function getConfigPage(params) {
+  return get('/erp/configs/get-config-page', params)
+}
+
+export function getConfigsByType(configType) {
+  return get(`/erp/configs/get-configs-by-type/${configType}`)
+}
+
+export function getConfigValue(configKey) {
+  return get('/erp/configs/get-config-value', { configKey })
+}
+
+export function createConfig(data) {
+  return post('/erp/configs/create-config', data)
+}
+
+export function updateConfig(id, data) {
+  return put(`/erp/configs/update-config/${id}`, data)
+}
+
+export function deleteConfig(id) {
+  return del(`/erp/configs/delete-config/${id}`)
+}
+
+export function batchUpdateConfigs(configType, data) {
+  return post(`/erp/configs/batch-update?configType=${configType}`, data)
 }

@@ -66,10 +66,28 @@ const routes = [
       },
       // ERP
       {
+        path: 'erp/product-category',
+        name: 'ProductCategory',
+        component: () => import('@/views/erp/product-category/index.vue'),
+        meta: { title: '商品分类', icon: 'Folder' }
+      },
+      {
         path: 'erp/product',
         name: 'Product',
         component: () => import('@/views/erp/product/index.vue'),
         meta: { title: '商品管理', icon: 'Goods' }
+      },
+      {
+        path: 'erp/product-price',
+        name: 'ProductPrice',
+        component: () => import('@/views/erp/product-price/index.vue'),
+        meta: { title: '商品价格', icon: 'PriceTag' }
+      },
+      {
+        path: 'erp/product-promotion',
+        name: 'ProductPromotion',
+        component: () => import('@/views/erp/product-promotion/index.vue'),
+        meta: { title: '商品促销', icon: 'Present' }
       },
       {
         path: 'erp/warehouse',
@@ -84,6 +102,24 @@ const routes = [
         meta: { title: '库存管理', icon: 'Box' }
       },
       {
+        path: 'erp/inventory-flow',
+        name: 'InventoryFlow',
+        component: () => import('@/views/erp/inventory-flow/index.vue'),
+        meta: { title: '库存流水', icon: 'List' }
+      },
+      {
+        path: 'erp/inventory-check',
+        name: 'InventoryCheck',
+        component: () => import('@/views/erp/inventory-check/index.vue'),
+        meta: { title: '库存盘点', icon: 'Document' }
+      },
+      {
+        path: 'erp/inventory-alert',
+        name: 'InventoryAlert',
+        component: () => import('@/views/erp/inventory-alert/index.vue'),
+        meta: { title: '库存预警', icon: 'Warning' }
+      },
+      {
         path: 'erp/supplier',
         name: 'Supplier',
         component: () => import('@/views/erp/supplier/index.vue'),
@@ -96,16 +132,46 @@ const routes = [
         meta: { title: '客户管理', icon: 'Avatar' }
       },
       {
+        path: 'erp/purchase-order',
+        name: 'PurchaseOrder',
+        component: () => import('@/views/erp/purchase-order/index.vue'),
+        meta: { title: '采购订单', icon: 'ShoppingCartFull' }
+      },
+      {
+        path: 'erp/purchase-return',
+        name: 'PurchaseReturn',
+        component: () => import('@/views/erp/purchase-return/index.vue'),
+        meta: { title: '采购退货', icon: 'RefreshLeft' }
+      },
+      {
         path: 'erp/sales-order',
         name: 'SalesOrder',
         component: () => import('@/views/erp/sales-order/index.vue'),
         meta: { title: '销售订单', icon: 'ShoppingCart' }
       },
       {
+        path: 'erp/sales-return',
+        name: 'SalesReturn',
+        component: () => import('@/views/erp/sales-return/index.vue'),
+        meta: { title: '销售退货', icon: 'RefreshRight' }
+      },
+      {
         path: 'erp/sales-shipment',
         name: 'SalesShipment',
         component: () => import('@/views/erp/sales-shipment/index.vue'),
         meta: { title: '销售出库', icon: 'Van' }
+      },
+      {
+        path: 'erp/report',
+        name: 'ErpReport',
+        component: () => import('@/views/erp/report/index.vue'),
+        meta: { title: '报表统计', icon: 'DataAnalysis' }
+      },
+      {
+        path: 'erp/config',
+        name: 'ErpConfig',
+        component: () => import('@/views/erp/config/index.vue'),
+        meta: { title: '系统配置', icon: 'Setting' }
       },
       // 财务管理
       {

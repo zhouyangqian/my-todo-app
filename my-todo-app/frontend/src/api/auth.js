@@ -43,3 +43,11 @@ export function getUserInfo() {
 export function changePassword(data) {
   return post('/auth/change-password', data)
 }
+
+/**
+ * 管理员重置用户密码（无需旧密码）
+ * @param {Object} data 包含 userId 和 newPassword
+ */
+export function resetPassword(data) {
+  return post('/auth/reset-password', data)
+}

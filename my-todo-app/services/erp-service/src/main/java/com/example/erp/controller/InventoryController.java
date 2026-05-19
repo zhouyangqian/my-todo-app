@@ -5,6 +5,7 @@ import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.dto.InventoryVO;
 import com.example.erp.entity.Inventory;
+import com.example.erp.entity.InventoryFlow;
 import com.example.erp.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -110,6 +111,20 @@ public class InventoryController {
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         inventoryService.unlockStock(warehouseId, productId, quantity, tenantId);
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "分页查询库存流水")
+    @GetMapping("/get-flow-page")
+    public ApiResponse<PageResult<InventoryFlow>> getFlowPage(
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) Integer bizType) {
+        Page<InventoryFlow> result = inventoryService.getFlowPage(tenantId, page, size, warehouseId, productId, bizType);
+        PageResult<InventoryFlow> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        return ApiResponse.success(pageResult);
     }
 
     @Operation(summary = "获取库存预警列表")

@@ -74,6 +74,21 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
     }
 
     /**
+     * 查询仓库的所有库存记录
+     *
+     * @param warehouseId 仓库ID
+     * @param tenantId    租户ID
+     * @return 该仓库下所有库存记录
+     */
+    public List<Inventory> getInventoriesByWarehouse(Long warehouseId, Long tenantId) {
+        return list(
+            new LambdaQueryWrapper<Inventory>()
+                .eq(Inventory::getWarehouseId, warehouseId)
+                .eq(Inventory::getTenantId, tenantId)
+        );
+    }
+
+    /**
      * 分页查询库存
      *
      * @param tenantId    租户ID
@@ -406,6 +421,28 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
     public void clearStockCache(Long warehouseId, Long productId, Long tenantId) {
         String cacheKey = STOCK_CACHE_KEY + tenantId + ":" + warehouseId + ":" + productId;
         redisTemplate.delete(cacheKey);
+    }
+
+    /**
+     * 分页查询库存流水
+     *
+     * @param tenantId    租户ID
+     * @param page        当前页码
+     * @param size        每页大小
+     * @param warehouseId 仓库ID（可选）
+     * @param productId   商品ID（可选）
+     * @param bizType     业务类型（可选）
+     * @return 分页流水结果
+     */
+    public Page<InventoryFlow> getFlowPage(Long tenantId, int page, int size,
+                                            Long warehouseId, Long productId, Integer bizType) {
+        LambdaQueryWrapper<InventoryFlow> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(InventoryFlow::getTenantId, tenantId)
+               .eq(warehouseId != null, InventoryFlow::getWarehouseId, warehouseId)
+               .eq(productId != null, InventoryFlow::getProductId, productId)
+               .eq(bizType != null, InventoryFlow::getBizType, bizType)
+               .orderByDesc(InventoryFlow::getCreatedAt);
+        return inventoryFlowMapper.selectPage(new Page<>(page, size), wrapper);
     }
 
     /**
