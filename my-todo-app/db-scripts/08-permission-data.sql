@@ -50,7 +50,9 @@ UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permiss
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='system:user' LIMIT 1),
        'system:user:enable', '启用用户', 2, '/api/users/enable-user/{id}', 'POST', 6, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='system:user' LIMIT 1),
-       'system:user:disable', '禁用用户', 2, '/api/users/disable-user/{id}', 'POST', 7, 1, 1, NOW();
+       'system:user:disable', '禁用用户', 2, '/api/users/disable-user/{id}', 'POST', 7, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='system:user' LIMIT 1),
+       'system:user:kick', '踢出用户', 2, '/api/auth/kick-user/{id}', 'POST', 8, 1, 1, NOW();
 
 -- 角色管理按钮
 INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
-import com.example.inventory.dto.InventoryVO;
+import com.example.inventory.api.dto.InventoryDTO;
 import com.example.inventory.entity.Inventory;
 import com.example.inventory.entity.InventoryFlow;
 import com.example.inventory.mapper.InventoryFlowMapper;
@@ -60,7 +60,7 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
         );
     }
 
-    public Page<InventoryVO> getInventoryPage(Long tenantId, int page, int size, Long warehouseId, String productName) {
+    public Page<InventoryDTO> getInventoryPage(Long tenantId, int page, int size, Long warehouseId, String productName) {
         Page<Inventory> pageParam = new Page<>(page, size);
 
         LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<>();
@@ -70,9 +70,9 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
 
         Page<Inventory> result = page(pageParam, wrapper);
 
-        Page<InventoryVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
-        List<InventoryVO> voList = result.getRecords().stream().map(inventory -> {
-            InventoryVO vo = new InventoryVO();
+        Page<InventoryDTO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        List<InventoryDTO> voList = result.getRecords().stream().map(inventory -> {
+            InventoryDTO vo = new InventoryDTO();
             vo.setId(inventory.getId());
             vo.setWarehouseId(inventory.getWarehouseId());
             vo.setProductId(inventory.getProductId());

@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Customer;
@@ -21,6 +22,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
+    @RequiresPermission(code = "erp:customer:list", name = "查询客户列表")
     @Operation(summary = "分页查询客户")
     @GetMapping("/get-customer-page")
     public ApiResponse<PageResult<Customer>> getCustomerPage(
@@ -34,6 +36,7 @@ public class CustomerController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:customer:detail", name = "查询客户详情")
     @Operation(summary = "获取客户详情")
     @GetMapping("/get-customer/{id}")
     public ApiResponse<Customer> getCustomer(@PathVariable Long id) {
@@ -41,6 +44,7 @@ public class CustomerController {
         return ApiResponse.success(customer);
     }
 
+    @RequiresPermission(code = "erp:customer:create", name = "新增客户")
     @Operation(summary = "创建客户")
     @PostMapping("/create-customer")
     public ApiResponse<Customer> createCustomer(
@@ -53,6 +57,7 @@ public class CustomerController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:customer:update", name = "更新客户")
     @Operation(summary = "更新客户")
     @PutMapping("/update-customer/{id}")
     public ApiResponse<Customer> updateCustomer(
@@ -65,6 +70,7 @@ public class CustomerController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:customer:delete", name = "删除客户")
     @Operation(summary = "删除客户")
     @DeleteMapping("/delete-customer/{id}")
     public ApiResponse<Void> deleteCustomer(@PathVariable Long id) {

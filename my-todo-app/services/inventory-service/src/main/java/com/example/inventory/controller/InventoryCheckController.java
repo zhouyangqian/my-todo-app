@@ -1,10 +1,11 @@
 package com.example.inventory.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
-import com.example.inventory.dto.InventoryCheckCreateRequest;
-import com.example.inventory.dto.InventoryCheckSubmitRequest;
+import com.example.inventory.api.vo.CreateCheckVO;
+import com.example.inventory.api.vo.SubmitCheckVO;
 import com.example.inventory.entity.InventoryCheck;
 import com.example.inventory.service.InventoryCheckService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +25,7 @@ public class InventoryCheckController {
 
     private final InventoryCheckService inventoryCheckService;
 
+    @RequiresPermission(code = "inventory:inventoryCheck:list", name = "查询盘点单列表")
     @Operation(summary = "分页查询盘点单")
     @GetMapping("/get-check-page")
     public ApiResponse<PageResult<InventoryCheck>> getCheckPage(
@@ -37,6 +39,7 @@ public class InventoryCheckController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "inventory:inventoryCheck:detail", name = "查询盘点单详情")
     @Operation(summary = "获取盘点单详情")
     @GetMapping("/get-check/{id}")
     public ApiResponse<InventoryCheck> getCheckDetail(@PathVariable Long id) {
@@ -44,10 +47,11 @@ public class InventoryCheckController {
         return ApiResponse.success(check);
     }
 
+    @RequiresPermission(code = "erp:inventoryCheck:create", name = "创建盘点单")
     @Operation(summary = "创建盘点单")
     @PostMapping("/create-check")
     public ApiResponse<InventoryCheck> createCheck(
-            @Valid @RequestBody InventoryCheckCreateRequest request,
+            @Valid @RequestBody CreateCheckVO request,
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
         InventoryCheck check = new InventoryCheck();
@@ -59,16 +63,18 @@ public class InventoryCheckController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:inventoryCheck:submit", name = "提交盘点结果")
     @Operation(summary = "提交盘点结果")
     @PostMapping("/submit-check/{id}")
     public ApiResponse<Void> submitCheckResult(
             @PathVariable Long id,
-            @Valid @RequestBody InventoryCheckSubmitRequest request,
+            @Valid @RequestBody SubmitCheckVO request,
             @RequestHeader("X-User-Id") Long userId) {
         inventoryCheckService.submitCheckResult(id, request.getItems(), userId);
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:inventoryCheck:cancel", name = "取消盘点单")
     @Operation(summary = "取消盘点单")
     @PostMapping("/cancel-check/{id}")
     public ApiResponse<Void> cancelCheck(@PathVariable Long id) {

@@ -1,10 +1,11 @@
 package com.example.permission.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
-import com.example.permission.dto.AssignPermissionsRequest;
-import com.example.permission.dto.AssignRolesRequest;
+import com.example.permission.api.vo.AssignPermissionsVO;
+import com.example.permission.api.vo.AssignRolesVO;
 import com.example.permission.entity.Role;
 import com.example.permission.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,6 +53,7 @@ public class RoleController {
      * @param roleName 角色名称（可选，用于模糊搜索）
      * @return 角色分页数据
      */
+    @RequiresPermission(code = "system:role:list", name = "查询角色列表")
     @Operation(summary = "Get role list")
     @GetMapping("/get-role-list")
     public ApiResponse<PageResult<Role>> getRoleList(
@@ -70,6 +72,7 @@ public class RoleController {
      * @param id 角色ID（路径参数）
      * @return 角色对象
      */
+    @RequiresPermission(code = "system:role:detail", name = "查询角色详情")
     @Operation(summary = "Get role by ID")
     @GetMapping("/get-role/{id}")
     public ApiResponse<Role> getRole(@PathVariable Long id) {
@@ -89,6 +92,7 @@ public class RoleController {
      * @return 创建成功的角色对象
      */
     @Operation(summary = "Create role")
+    @RequiresPermission(code = "system:role:create", name = "新增角色")
     @PostMapping("/create-role")
     public ApiResponse<Role> createRole(
             @RequestBody Role role,
@@ -111,6 +115,7 @@ public class RoleController {
      * @return 更新后的角色对象
      */
     @Operation(summary = "Update role")
+    @RequiresPermission(code = "system:role:update", name = "更新角色")
     @PutMapping("/update-role/{id}")
     public ApiResponse<Role> updateRole(
             @PathVariable Long id,
@@ -132,6 +137,7 @@ public class RoleController {
      * @return 空响应
      */
     @Operation(summary = "Delete role")
+    @RequiresPermission(code = "system:role:delete", name = "删除角色")
     @DeleteMapping("/delete-role/{id}")
     public ApiResponse<Void> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
@@ -144,6 +150,7 @@ public class RoleController {
      * @param userId 用户ID（路径参数）
      * @return 该用户拥有的角色列表
      */
+    @RequiresPermission(code = "system:role:list", name = "查询角色列表")
     @Operation(summary = "Get roles by user ID")
     @GetMapping("/get-roles-by-user/{userId}")
     public ApiResponse<List<Role>> getRolesByUser(@PathVariable Long userId) {
@@ -164,9 +171,10 @@ public class RoleController {
      * @return 空响应
      */
     @Operation(summary = "Assign roles to user")
+    @RequiresPermission(code = "system:role:assignToUser", name = "分配用户角色")
     @PostMapping("/assign-to-user")
     public ApiResponse<Void> assignRolesToUser(
-            @RequestBody AssignRolesRequest request,
+            @RequestBody AssignRolesVO request,
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
         roleService.assignRolesToUser(request.getUserId(), tenantId, request.getRoleIds(), userId);
@@ -179,6 +187,7 @@ public class RoleController {
      * @param roleId 角色ID（路径参数）
      * @return 该角色关联的权限ID列表
      */
+    @RequiresPermission(code = "system:role:detail", name = "查询角色详情")
     @Operation(summary = "Get permissions by role ID")
     @GetMapping("/get-role-permissions/{roleId}")
     public ApiResponse<List<Long>> getRolePermissions(@PathVariable Long roleId) {
@@ -200,10 +209,11 @@ public class RoleController {
      * @return 空响应
      */
     @Operation(summary = "Assign permissions to role")
+    @RequiresPermission(code = "system:role:assignPerm", name = "分配角色权限")
     @PostMapping("/{roleId}/permissions")
     public ApiResponse<Void> assignPermissions(
             @PathVariable Long roleId,
-            @RequestBody AssignPermissionsRequest request,
+            @RequestBody AssignPermissionsVO request,
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
         roleService.assignPermissionsToRole(roleId, tenantId, request.getPermissionIds(), userId);

@@ -1,6 +1,7 @@
 package com.example.finance.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.finance.entity.*;
@@ -65,6 +66,7 @@ public class FinanceController {
      * @param status     结算状态（可选筛选条件）：0-未结算, 1-部分结算, 2-已结算
      * @return 分页查询结果
      */
+    @RequiresPermission(code = "finance:receivable:list", name = "查询应收账款列表")
     @Operation(summary = "分页查询应收账款")
     @GetMapping("/receivables/get-receivable-page")
     public ApiResponse<PageResult<AccountReceivable>> getReceivablePage(
@@ -86,6 +88,7 @@ public class FinanceController {
      * @param userId     当前操作用户ID（从请求头获取）
      * @return 创建成功的应收账款对象
      */
+    @RequiresPermission(code = "finance:receivable:create", name = "创建应收账款")
     @Operation(summary = "创建应收账款")
     @PostMapping("/receivables/create-receivable")
     public ApiResponse<AccountReceivable> createReceivable(
@@ -105,6 +108,7 @@ public class FinanceController {
      * @param amount 本次收款金额（请求参数）
      * @return 操作结果
      */
+    @RequiresPermission(code = "finance:receivable:receive", name = "应收账款收款")
     @Operation(summary = "应收账款收款")
     @PostMapping("/receivables/receive-payment/{id}")
     public ApiResponse<Void> receivePayment(
@@ -123,6 +127,7 @@ public class FinanceController {
      * @param tenantId 租户ID（从请求头获取）
      * @return 逾期的应收账款列表
      */
+    @RequiresPermission(code = "finance:receivable:list", name = "查询应收账款列表")
     @Operation(summary = "获取逾期应收账款")
     @GetMapping("/receivables/get-overdue-receivables")
     public ApiResponse<List<AccountReceivable>> getOverdueReceivables(
@@ -142,6 +147,7 @@ public class FinanceController {
      * @param status     结算状态（可选筛选条件）：0-未结算, 1-部分结算, 2-已结算
      * @return 分页查询结果
      */
+    @RequiresPermission(code = "finance:payable:list", name = "查询应付账款列表")
     @Operation(summary = "分页查询应付账款")
     @GetMapping("/payables/get-payable-page")
     public ApiResponse<PageResult<AccountPayable>> getPayablePage(
@@ -163,6 +169,7 @@ public class FinanceController {
      * @param userId   当前操作用户ID（从请求头获取）
      * @return 创建成功的应付账款对象
      */
+    @RequiresPermission(code = "finance:payable:create", name = "创建应付账款")
     @Operation(summary = "创建应付账款")
     @PostMapping("/payables/create-payable")
     public ApiResponse<AccountPayable> createPayable(
@@ -182,6 +189,7 @@ public class FinanceController {
      * @param amount 本次付款金额（请求参数）
      * @return 操作结果
      */
+    @RequiresPermission(code = "finance:payable:pay", name = "应付账款付款")
     @Operation(summary = "应付账款付款")
     @PostMapping("/payables/make-payment/{id}")
     public ApiResponse<Void> makePayment(
@@ -200,6 +208,7 @@ public class FinanceController {
      * @param tenantId 租户ID（从请求头获取）
      * @return 逾期的应付账款列表
      */
+    @RequiresPermission(code = "finance:payable:list", name = "查询应付账款列表")
     @Operation(summary = "获取逾期应付账款")
     @GetMapping("/payables/get-overdue-payables")
     public ApiResponse<List<AccountPayable>> getOverduePayables(
@@ -224,6 +233,7 @@ public class FinanceController {
      * @param endDate    交易日期结束范围（可选，格式：yyyy-MM-dd HH:mm:ss）
      * @return 分页查询结果
      */
+    @RequiresPermission(code = "finance:record:list", name = "查询收支记录列表")
     @Operation(summary = "分页查询收支记录")
     @GetMapping("/records/get-record-page")
     public ApiResponse<PageResult<PaymentRecord>> getRecordPage(
@@ -251,6 +261,7 @@ public class FinanceController {
      * @param userId   当前操作用户ID（从请求头获取，同时作为创建人和经手人）
      * @return 创建成功的收支记录对象（含自动生成的单据编号）
      */
+    @RequiresPermission(code = "finance:record:create", name = "创建收支记录")
     @Operation(summary = "创建收支记录")
     @PostMapping("/records/create-record")
     public ApiResponse<PaymentRecord> createRecord(
@@ -275,6 +286,7 @@ public class FinanceController {
      * @param userId 审核人ID（从请求头获取）
      * @return 操作结果
      */
+    @RequiresPermission(code = "finance:record:approve", name = "审核收支记录")
     @Operation(summary = "审核收支记录")
     @PostMapping("/records/approve-record/{id}")
     public ApiResponse<Void> approveRecord(
@@ -294,6 +306,7 @@ public class FinanceController {
      * @param id 收支记录ID（路径参数）
      * @return 操作结果
      */
+    @RequiresPermission(code = "finance:record:cancel", name = "取消收支记录")
     @Operation(summary = "取消收支记录")
     @PostMapping("/records/cancel-record/{id}")
     public ApiResponse<Void> cancelRecord(@PathVariable Long id) {
@@ -313,6 +326,7 @@ public class FinanceController {
      * @param accountType 账户类型（可选）：1-现金账户, 2-银行账户, 3-支付宝, 4-微信
      * @return 分页查询结果
      */
+    @RequiresPermission(code = "finance:bankAccount:list", name = "查询银行账户列表")
     @Operation(summary = "分页查询银行账户")
     @GetMapping("/bank-accounts/get-bank-account-page")
     public ApiResponse<PageResult<BankAccount>> getBankAccountPage(
@@ -335,6 +349,7 @@ public class FinanceController {
      * @param tenantId 租户ID（从请求头获取）
      * @return 所有启用状态的银行账户列表
      */
+    @RequiresPermission(code = "finance:bankAccount:list", name = "查询银行账户列表")
     @Operation(summary = "获取所有银行账户(下拉选择)")
     @GetMapping("/bank-accounts/get-all-bank-accounts")
     public ApiResponse<List<BankAccount>> getAllBankAccounts(
@@ -350,6 +365,7 @@ public class FinanceController {
      * @param userId   当前操作用户ID（从请求头获取）
      * @return 创建成功的银行账户对象
      */
+    @RequiresPermission(code = "finance:bankAccount:create", name = "创建银行账户")
     @Operation(summary = "创建银行账户")
     @PostMapping("/bank-accounts/create-bank-account")
     public ApiResponse<BankAccount> createBankAccount(
@@ -370,6 +386,7 @@ public class FinanceController {
      * @param userId  当前操作用户ID（从请求头获取）
      * @return 更新后的银行账户对象
      */
+    @RequiresPermission(code = "finance:bankAccount:update", name = "更新银行账户")
     @Operation(summary = "更新银行账户")
     @PutMapping("/bank-accounts/update-bank-account/{id}")
     public ApiResponse<BankAccount> updateBankAccount(
@@ -391,6 +408,7 @@ public class FinanceController {
      * @param id 银行账户ID（路径参数）
      * @return 操作结果
      */
+    @RequiresPermission(code = "finance:bankAccount:delete", name = "删除银行账户")
     @Operation(summary = "删除银行账户")
     @DeleteMapping("/bank-accounts/delete-bank-account/{id}")
     public ApiResponse<Void> deleteBankAccount(@PathVariable Long id) {

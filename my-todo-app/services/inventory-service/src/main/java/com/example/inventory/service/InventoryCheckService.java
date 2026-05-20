@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
-import com.example.inventory.dto.InventoryCheckCreateRequest;
-import com.example.inventory.dto.InventoryCheckSubmitRequest;
+import com.example.inventory.api.vo.CreateCheckVO;
+import com.example.inventory.api.vo.SubmitCheckVO;
 import com.example.inventory.entity.Inventory;
 import com.example.inventory.entity.InventoryCheck;
 import com.example.inventory.entity.InventoryCheckItem;
@@ -72,7 +72,7 @@ public class InventoryCheckService extends ServiceImpl<InventoryCheckMapper, Inv
      * 创建盘点单（从库存中加载商品）
      */
     @Transactional
-    public InventoryCheck createCheck(InventoryCheck check, InventoryCheckCreateRequest request,
+    public InventoryCheck createCheck(InventoryCheck check, CreateCheckVO request,
                                        Long tenantId, Long userId) {
         check.setTenantId(tenantId);
         check.setCheckNo(generateCheckNo(tenantId));
@@ -85,10 +85,10 @@ public class InventoryCheckService extends ServiceImpl<InventoryCheckMapper, Inv
         List<Inventory> inventories = inventoryService.getInventoriesByWarehouse(check.getWarehouseId(), tenantId);
 
         // 构建商品信息Map（如果调用方提供了商品信息）
-        Map<Long, InventoryCheckCreateRequest.ProductInfo> productInfoMap = new HashMap<>();
+        Map<Long, CreateCheckVO.ProductInfo> productInfoMap = new HashMap<>();
         if (request.getProducts() != null) {
             productInfoMap = request.getProducts().stream()
-                .collect(Collectors.toMap(InventoryCheckCreateRequest.ProductInfo::getProductId, p -> p));
+                .collect(Collectors.toMap(CreateCheckVO.ProductInfo::getProductId, p -> p));
         }
 
         for (Inventory inv : inventories) {
@@ -98,7 +98,7 @@ public class InventoryCheckService extends ServiceImpl<InventoryCheckMapper, Inv
             item.setProductId(inv.getProductId());
 
             // 优先使用调用方提供的商品信息
-            InventoryCheckCreateRequest.ProductInfo productInfo = productInfoMap.get(inv.getProductId());
+            CreateCheckVO.ProductInfo productInfo = productInfoMap.get(inv.getProductId());
             if (productInfo != null) {
                 item.setProductCode(productInfo.getProductCode());
                 item.setProductName(productInfo.getProductName());
@@ -120,7 +120,7 @@ public class InventoryCheckService extends ServiceImpl<InventoryCheckMapper, Inv
      * 提交盘点结果
      */
     @Transactional
-    public void submitCheckResult(Long checkId, List<InventoryCheckSubmitRequest.CheckItemSubmit> items, Long userId) {
+    public void submitCheckResult(Long checkId, List<SubmitCheckVO.CheckItemSubmit> items, Long userId) {
         InventoryCheck check = getById(checkId);
         if (check == null) {
             throw new BusinessException("盘点单不存在");
@@ -132,7 +132,7 @@ public class InventoryCheckService extends ServiceImpl<InventoryCheckMapper, Inv
         BigDecimal totalProfit = BigDecimal.ZERO;
         BigDecimal totalLoss = BigDecimal.ZERO;
 
-        for (InventoryCheckSubmitRequest.CheckItemSubmit itemSubmit : items) {
+        for (SubmitCheckVO.CheckItemSubmit itemSubmit : items) {
             InventoryCheckItem existing = checkItemMapper.selectById(itemSubmit.getItemId());
             if (existing == null) continue;
 

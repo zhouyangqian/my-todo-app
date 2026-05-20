@@ -16,7 +16,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch"><el-icon><Search /></el-icon>搜索</el-button>
           <el-button @click="handleReset"><el-icon><Refresh /></el-icon>重置</el-button>
-          <el-button type="success" @click="handleCreate"><el-icon><Plus /></el-icon>新增配置</el-button>
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:config:create')"><el-icon><Plus /></el-icon>新增配置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -97,8 +97,8 @@
         <el-table-column prop="remark" label="备注" width="150" show-overflow-tooltip />
         <el-table-column label="操作" fixed="right" width="150">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:config:update')">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:config:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -143,6 +143,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 import { getConfigPage, getConfigsByType, createConfig, updateConfig, deleteConfig, batchUpdateConfigs, getWarehouses } from '@/api/erp'
 
 const searchForm = reactive({ configType: undefined, configName: '' })

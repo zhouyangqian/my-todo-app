@@ -68,8 +68,8 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="260">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleInbound(row)">入库</el-button>
-            <el-button type="warning" link @click="handleOutbound(row)">出库</el-button>
+            <el-button type="primary" link @click="handleInbound(row)" v-if="userStore.hasPermission('erp:inventory:inbound')">入库</el-button>
+            <el-button type="warning" link @click="handleOutbound(row)" v-if="userStore.hasPermission('erp:inventory:outbound')">出库</el-button>
             <el-button type="info" link @click="handleViewLog(row)">日志</el-button>
           </template>
         </el-table-column>
@@ -155,9 +155,11 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Warning } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import { getInventoryPage, inbound, outbound, getWarehouses } from '@/api/erp'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 const searchForm = reactive({
   warehouseId: undefined,

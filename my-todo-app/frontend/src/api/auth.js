@@ -51,3 +51,11 @@ export function changePassword(data) {
 export function resetPassword(data) {
   return post('/auth/reset-password', data)
 }
+
+/**
+ * 管理员踢出用户（强制下线）
+ * @param {number} userId 要踢出的用户ID
+ */
+export function kickUser(userId) {
+  return post(`/auth/kick-user/${userId}`)
+}

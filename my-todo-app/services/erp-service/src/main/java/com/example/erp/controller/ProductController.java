@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Product;
@@ -21,6 +22,7 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @RequiresPermission(code = "erp:product:list", name = "查询商品列表")
     @Operation(summary = "分页查询商品")
     @GetMapping("/get-product-page")
     public ApiResponse<PageResult<Product>> getProductPage(
@@ -36,6 +38,7 @@ public class ProductController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:product:detail", name = "查询商品详情")
     @Operation(summary = "获取商品详情")
     @GetMapping("/get-product/{id}")
     public ApiResponse<Product> getProduct(@PathVariable Long id) {
@@ -47,6 +50,7 @@ public class ProductController {
         return ApiResponse.success(product);
     }
 
+    @RequiresPermission(code = "erp:product:create", name = "新增商品")
     @Operation(summary = "创建商品")
     @PostMapping("/create-product")
     public ApiResponse<Product> createProduct(
@@ -75,6 +79,7 @@ public class ProductController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:product:update", name = "更新商品")
     @Operation(summary = "更新商品")
     @PutMapping("/update-product/{id}")
     public ApiResponse<Product> updateProduct(
@@ -87,6 +92,7 @@ public class ProductController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:product:delete", name = "删除商品")
     @Operation(summary = "删除商品")
     @DeleteMapping("/delete-product/{id}")
     public ApiResponse<Void> deleteProduct(@PathVariable Long id) {
@@ -94,6 +100,7 @@ public class ProductController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:product:detail", name = "查询商品详情")
     @Operation(summary = "根据编码查询商品")
     @GetMapping("/code/{productCode}")
     public ApiResponse<Product> getProductByCode(

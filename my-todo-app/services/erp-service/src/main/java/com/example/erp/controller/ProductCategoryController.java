@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.ProductCategory;
@@ -23,6 +24,7 @@ public class ProductCategoryController {
 
     private final ProductCategoryService productCategoryService;
 
+    @RequiresPermission(code = "erp:productCategory:list", name = "查询分类列表")
     @Operation(summary = "分页查询商品分类")
     @GetMapping("/get-category-page")
     public ApiResponse<PageResult<ProductCategory>> getCategoryPage(
@@ -36,6 +38,7 @@ public class ProductCategoryController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:productCategory:list", name = "查询分类列表")
     @Operation(summary = "获取所有分类(下拉选择)")
     @GetMapping("/get-all-categories")
     public ApiResponse<List<ProductCategory>> getAllCategories(
@@ -44,6 +47,7 @@ public class ProductCategoryController {
         return ApiResponse.success(categories);
     }
 
+    @RequiresPermission(code = "erp:productCategory:detail", name = "查询分类详情")
     @Operation(summary = "获取分类详情")
     @GetMapping("/get-category/{id}")
     public ApiResponse<ProductCategory> getCategory(@PathVariable Long id) {
@@ -51,6 +55,7 @@ public class ProductCategoryController {
         return ApiResponse.success(category);
     }
 
+    @RequiresPermission(code = "erp:productCategory:create", name = "新增分类")
     @Operation(summary = "创建分类")
     @PostMapping("/create-category")
     public ApiResponse<ProductCategory> createCategory(
@@ -63,6 +68,7 @@ public class ProductCategoryController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:productCategory:update", name = "更新分类")
     @Operation(summary = "更新分类")
     @PutMapping("/update-category/{id}")
     public ApiResponse<ProductCategory> updateCategory(
@@ -75,6 +81,7 @@ public class ProductCategoryController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:productCategory:delete", name = "删除分类")
     @Operation(summary = "删除分类")
     @DeleteMapping("/delete-category/{id}")
     public ApiResponse<Void> deleteCategory(@PathVariable Long id) {

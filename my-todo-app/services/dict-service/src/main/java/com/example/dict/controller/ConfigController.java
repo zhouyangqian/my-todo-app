@@ -1,5 +1,6 @@
 package com.example.dict.controller;
 
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.dict.entity.SystemConfig;
 import com.example.dict.service.ConfigService;
@@ -21,6 +22,7 @@ public class ConfigController {
 
     private final ConfigService configService;
 
+    @RequiresPermission(code = "dict:config:detail", name = "查询配置详情")
     @Operation(summary = "获取配置值")
     @GetMapping("/value/{configCode}")
     public ApiResponse<String> getConfigValue(
@@ -30,6 +32,7 @@ public class ConfigController {
         return ApiResponse.success(value);
     }
 
+    @RequiresPermission(code = "dict:config:detail", name = "查询配置详情")
     @Operation(summary = "获取配置详情")
     @GetMapping("/{configCode}")
     public ApiResponse<SystemConfig> getConfig(
@@ -39,6 +42,7 @@ public class ConfigController {
         return ApiResponse.success(config);
     }
 
+    @RequiresPermission(code = "dict:config:list", name = "查询配置列表")
     @Operation(summary = "获取所有配置")
     @GetMapping("/list")
     public ApiResponse<List<SystemConfig>> getAllConfigs(
@@ -47,6 +51,7 @@ public class ConfigController {
         return ApiResponse.success(configs);
     }
 
+    @RequiresPermission(code = "dict:config:update", name = "设置配置值")
     @Operation(summary = "设置配置值")
     @PutMapping("/value/{configCode}")
     public ApiResponse<Void> setConfigValue(
@@ -58,6 +63,7 @@ public class ConfigController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "dict:config:create", name = "创建配置")
     @Operation(summary = "创建配置")
     @PostMapping
     public ApiResponse<SystemConfig> createConfig(
@@ -68,6 +74,7 @@ public class ConfigController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "dict:config:update", name = "更新配置")
     @Operation(summary = "更新配置")
     @PutMapping("/{id}")
     public ApiResponse<SystemConfig> updateConfig(
@@ -81,6 +88,7 @@ public class ConfigController {
         return ApiResponse.success(config);
     }
 
+    @RequiresPermission(code = "dict:config:delete", name = "删除配置")
     @Operation(summary = "删除配置")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteConfig(@PathVariable Long id) {

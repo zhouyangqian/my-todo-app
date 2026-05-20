@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.ErpConfig;
@@ -24,6 +25,7 @@ public class ErpConfigController {
 
     private final ErpConfigService erpConfigService;
 
+    @RequiresPermission(code = "erp:config:list", name = "查询配置列表")
     @Operation(summary = "分页查询配置")
     @GetMapping("/get-config-page")
     public ApiResponse<PageResult<ErpConfig>> getConfigPage(
@@ -37,6 +39,7 @@ public class ErpConfigController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:config:list", name = "查询配置列表")
     @Operation(summary = "根据类型获取配置列表")
     @GetMapping("/get-configs-by-type/{configType}")
     public ApiResponse<List<ErpConfig>> getConfigsByType(
@@ -46,6 +49,7 @@ public class ErpConfigController {
         return ApiResponse.success(configs);
     }
 
+    @RequiresPermission(code = "erp:config:detail", name = "查询配置详情")
     @Operation(summary = "获取配置值")
     @GetMapping("/get-config-value")
     public ApiResponse<String> getConfigValue(
@@ -55,6 +59,7 @@ public class ErpConfigController {
         return ApiResponse.success(value);
     }
 
+    @RequiresPermission(code = "erp:config:create", name = "新增配置")
     @Operation(summary = "创建配置")
     @PostMapping("/create-config")
     public ApiResponse<ErpConfig> createConfig(
@@ -67,6 +72,7 @@ public class ErpConfigController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:config:update", name = "更新配置")
     @Operation(summary = "更新配置")
     @PutMapping("/update-config/{id}")
     public ApiResponse<ErpConfig> updateConfig(
@@ -79,6 +85,7 @@ public class ErpConfigController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:config:delete", name = "删除配置")
     @Operation(summary = "删除配置")
     @DeleteMapping("/delete-config/{id}")
     public ApiResponse<Void> deleteConfig(@PathVariable Long id) {
@@ -86,6 +93,7 @@ public class ErpConfigController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:config:batchUpdate", name = "批量更新配置")
     @Operation(summary = "批量更新配置")
     @PostMapping("/batch-update")
     public ApiResponse<Void> batchUpdateConfigs(

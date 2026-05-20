@@ -1,9 +1,10 @@
 package com.example.permission.controller;
 
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
-import com.example.permission.dto.PermissionCheckRequest;
-import com.example.permission.dto.UserInfo;
-import com.example.permission.dto.UserPermissionResponse;
+import com.example.permission.api.dto.UserInfoDTO;
+import com.example.permission.api.dto.UserPermissionDTO;
+import com.example.permission.api.vo.PermissionCheckVO;
 import com.example.permission.entity.Permission;
 import com.example.permission.service.PermissionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +52,7 @@ public class PermissionController {
      */
     @Operation(summary = "Get current user permissions")
     @GetMapping("/get-current-user-permissions")
-    public ApiResponse<UserPermissionResponse> getCurrentUserPermissions(
+    public ApiResponse<UserPermissionDTO> getCurrentUserPermissions(
             @RequestHeader("X-User-Id") Long userId,
             @RequestHeader("X-Username") String username,
             @RequestHeader(value = "X-Email", required = false) String email,
@@ -65,7 +66,7 @@ public class PermissionController {
         Set<String> roles = permissionService.getUserRoles(userId, tenantId);
 
         // 构建用户信息
-        UserInfo userInfo = new UserInfo();
+        UserInfoDTO userInfo = new UserInfoDTO();
         userInfo.setUserId(userId);
         userInfo.setUsername(username);
         userInfo.setEmail(email);
@@ -75,7 +76,7 @@ public class PermissionController {
         userInfo.setTenantId(tenantId);
 
         // 组装响应对象
-        UserPermissionResponse response = new UserPermissionResponse();
+        UserPermissionDTO response = new UserPermissionDTO();
         response.setUserInfo(userInfo);
         response.setUserId(userId);  // 保留兼容性
         response.setPermissions(permissions);
@@ -95,9 +96,10 @@ public class PermissionController {
      * @param tenantId 租户ID（请求头）
      * @return 包含用户权限编码集合和角色编码集合的响应对象
      */
+    @RequiresPermission(code = "system:permission:list", name = "查询权限列表")
     @Operation(summary = "Get user permissions by id")
     @GetMapping("/get-user-permissions/{userId}")
-    public ApiResponse<UserPermissionResponse> getUserPermissions(
+    public ApiResponse<UserPermissionDTO> getUserPermissions(
             @PathVariable Long userId,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         // 查询用户拥有的所有权限编码
@@ -106,7 +108,7 @@ public class PermissionController {
         Set<String> roles = permissionService.getUserRoles(userId, tenantId);
 
         // 组装响应对象
-        UserPermissionResponse response = new UserPermissionResponse();
+        UserPermissionDTO response = new UserPermissionDTO();
         response.setUserId(userId);
         response.setPermissions(permissions);
         response.setRoles(roles);
@@ -128,7 +130,7 @@ public class PermissionController {
     @Operation(summary = "Check permission")
     @PostMapping("/check-permission")
     public ApiResponse<Boolean> checkPermission(
-            @RequestBody PermissionCheckRequest request,
+            @RequestBody PermissionCheckVO request,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         boolean hasPermission = permissionService.hasPermission(
                 request.getUserId(), tenantId, request.getPermissionCode());
@@ -145,6 +147,7 @@ public class PermissionController {
      * @param tenantId 租户ID（请求头）
      * @return 权限树列表（顶级权限节点列表）
      */
+    @RequiresPermission(code = "system:permission:list", name = "查询权限列表")
     @Operation(summary = "Get permission tree")
     @GetMapping("/get-permission-tree")
     public ApiResponse<List<Permission>> getPermissionTree(
@@ -180,6 +183,7 @@ public class PermissionController {
      * @return 创建成功的权限对象
      */
     @Operation(summary = "Create permission")
+    @RequiresPermission(code = "system:permission:create", name = "新增权限")
     @PostMapping("/create-permission")
     public ApiResponse<Permission> createPermission(@RequestBody Permission permission) {
         permissionService.save(permission);
@@ -194,6 +198,7 @@ public class PermissionController {
      * @return 更新后的权限对象
      */
     @Operation(summary = "Update permission")
+    @RequiresPermission(code = "system:permission:update", name = "更新权限")
     @PutMapping("/update-permission/{id}")
     public ApiResponse<Permission> updatePermission(
             @PathVariable Long id,
@@ -213,6 +218,7 @@ public class PermissionController {
      * @return 空响应
      */
     @Operation(summary = "Delete permission")
+    @RequiresPermission(code = "system:permission:delete", name = "删除权限")
     @DeleteMapping("/delete-permission/{id}")
     public ApiResponse<Void> deletePermission(@PathVariable Long id) {
         permissionService.removeById(id);

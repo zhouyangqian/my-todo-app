@@ -122,3 +122,13 @@ export function getUserRoles(userId) {
 export function assignUserRoles(userId, roleIds) {
   return post('/roles/assign-to-user', { userId, roleIds })
 }
+
+/**
+ * 清除指定用户的权限缓存
+ * 权限或角色变更后调用，确保下次查询获取最新数据
+ * @param {number} userId 用户ID
+ * @returns {Promise}
+ */
+export function clearUserPermissionCache(userId) {
+  return del(`/permissions/clear-user-cache/${userId}`)
+}

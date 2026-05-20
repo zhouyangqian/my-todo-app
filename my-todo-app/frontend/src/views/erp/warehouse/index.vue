@@ -31,7 +31,7 @@
       <template #header>
         <div class="card-header">
           <span>仓库列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-if="userStore.hasPermission('erp:warehouse:create')">
             <el-icon><Plus /></el-icon>
             新增仓库
           </el-button>
@@ -66,11 +66,11 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="220">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="warning" link @click="handleSetDefault(row)" v-if="row.isDefault !== 1">
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:warehouse:update')">编辑</el-button>
+            <el-button type="warning" link @click="handleSetDefault(row)" v-if="row.isDefault !== 1 && userStore.hasPermission('erp:warehouse:setDefault')">
               设为默认
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:warehouse:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -141,6 +141,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getWarehousePage, createWarehouse, updateWarehouse, deleteWarehouse, setDefaultWarehouse } from '@/api/erp'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({
   warehouseName: '',

@@ -20,7 +20,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch"><el-icon><Search /></el-icon>搜索</el-button>
           <el-button @click="handleReset"><el-icon><Refresh /></el-icon>重置</el-button>
-          <el-button type="success" @click="handleCreate"><el-icon><Plus /></el-icon>新增价格</el-button>
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:productPrice:create')"><el-icon><Plus /></el-icon>新增价格</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -48,8 +48,8 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="150">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:productPrice:update')">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:productPrice:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -111,6 +111,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getProductPricePage, createProductPrice, updateProductPrice, deleteProductPrice, getProductPage } from '@/api/erp'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({ productId: undefined, priceType: undefined })
 const pagination = reactive({ page: 1, size: 10, total: 0 })

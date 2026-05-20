@@ -4,11 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
-import com.example.erp.dto.InboundRequest;
-import com.example.erp.dto.PurchaseInboundRequest;
-import com.example.erp.dto.PurchaseOrderCreateRequest;
-import com.example.erp.dto.PurchaseOrderVO;
-import com.example.erp.feign.InventoryServiceClient;
+import com.example.inventory.api.vo.InboundVO;
+import com.example.erp.api.vo.PurchaseInboundVO;
+import com.example.erp.api.vo.CreatePurchaseOrderVO;
+import com.example.erp.api.dto.PurchaseOrderDTO;
+import com.example.erp.api.dto.PurchaseOrderItemDTO;
+import com.example.erp.api.feign.InventoryFeignClient;
 import com.example.erp.entity.*;
 import com.example.erp.mapper.PurchaseOrderItemMapper;
 import com.example.erp.mapper.PurchaseOrderMapper;
@@ -36,12 +37,12 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
     private final SupplierService supplierService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
-    private final InventoryServiceClient inventoryServiceClient;
+    private final InventoryFeignClient inventoryServiceClient;
 
     /**
      * 分页查询采购订单
      */
-    public Page<PurchaseOrderVO> getOrderPage(Long tenantId, int page, int size,
+    public Page<PurchaseOrderDTO> getOrderPage(Long tenantId, int page, int size,
                                                String orderNo, Long supplierId, Integer status) {
         LambdaQueryWrapper<PurchaseOrder> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(PurchaseOrder::getTenantId, tenantId);
@@ -59,7 +60,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         Page<PurchaseOrder> result = page(new Page<>(page, size), wrapper);
         List<PurchaseOrder> orders = result.getRecords();
         if (orders.isEmpty()) {
-            Page<PurchaseOrderVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+            Page<PurchaseOrderDTO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
             voPage.setRecords(Collections.emptyList());
             return voPage;
         }
@@ -79,14 +80,14 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         Map<Long, Warehouse> warehouseMap = warehouseService.listByIds(warehouseIds).stream()
             .collect(Collectors.toMap(Warehouse::getId, w -> w));
 
-        List<PurchaseOrderVO> voList = orders.stream().map(order -> {
-            PurchaseOrderVO vo = convertToVO(order, supplierMap, warehouseMap);
+        List<PurchaseOrderDTO> voList = orders.stream().map(order -> {
+            PurchaseOrderDTO vo = convertToVO(order, supplierMap, warehouseMap);
             List<PurchaseOrderItem> items = itemsMap.getOrDefault(order.getId(), Collections.emptyList());
             vo.setItems(items.stream().map(this::convertItemToVO).collect(Collectors.toList()));
             return vo;
         }).collect(Collectors.toList());
 
-        Page<PurchaseOrderVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        Page<PurchaseOrderDTO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
         voPage.setRecords(voList);
         return voPage;
     }
@@ -94,7 +95,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
     /**
      * 获取订单详情（含明细）
      */
-    public PurchaseOrderVO getOrderDetail(Long orderId) {
+    public PurchaseOrderDTO getOrderDetail(Long orderId) {
         PurchaseOrder order = getById(orderId);
         if (order == null) {
             throw new BusinessException("订单不存在");
@@ -107,7 +108,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         Warehouse warehouse = warehouseService.getById(order.getWarehouseId());
         if (warehouse != null) warehouseMap.put(warehouse.getId(), warehouse);
 
-        PurchaseOrderVO vo = convertToVO(order, supplierMap, warehouseMap);
+        PurchaseOrderDTO vo = convertToVO(order, supplierMap, warehouseMap);
 
         List<PurchaseOrderItem> items = purchaseOrderItemMapper.selectList(
             new LambdaQueryWrapper<PurchaseOrderItem>()
@@ -121,7 +122,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
      * 创建采购订单（含明细）
      */
     @Transactional
-    public PurchaseOrder createOrder(PurchaseOrderCreateRequest request, Long tenantId, Long userId) {
+    public PurchaseOrder createOrder(CreatePurchaseOrderVO request, Long tenantId, Long userId) {
         // 校验供应商
         Supplier supplier = supplierService.getById(request.getSupplierId());
         if (supplier == null) {
@@ -140,7 +141,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         // 校验商品并缓存，避免重复查询
         Map<Long, Product> productCache = new HashMap<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
-        for (PurchaseOrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
+        for (CreatePurchaseOrderVO.OrderItemRequest itemReq : request.getItems()) {
             Product product = productService.getById(itemReq.getProductId());
             if (product == null || product.getStatus() == 0) {
                 throw new BusinessException("商品不存在或已停用: " + itemReq.getProductId());
@@ -167,7 +168,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         save(order);
 
         // 创建订单明细（使用缓存的商品数据）
-        for (PurchaseOrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
+        for (CreatePurchaseOrderVO.OrderItemRequest itemReq : request.getItems()) {
             Product product = productCache.get(itemReq.getProductId());
             PurchaseOrderItem item = buildOrderItem(order, product, itemReq);
             purchaseOrderItemMapper.insert(item);
@@ -181,7 +182,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
      * 更新采购订单（仅草稿状态可编辑）
      */
     @Transactional
-    public PurchaseOrder updateOrder(Long orderId, PurchaseOrderCreateRequest request, Long userId) {
+    public PurchaseOrder updateOrder(Long orderId, CreatePurchaseOrderVO request, Long userId) {
         PurchaseOrder order = getById(orderId);
         if (order == null) {
             throw new BusinessException("订单不存在");
@@ -199,7 +200,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         // 校验商品并缓存
         Map<Long, Product> productCache = new HashMap<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
-        for (PurchaseOrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
+        for (CreatePurchaseOrderVO.OrderItemRequest itemReq : request.getItems()) {
             Product product = productService.getById(itemReq.getProductId());
             if (product == null || product.getStatus() == 0) {
                 throw new BusinessException("商品不存在或已停用: " + itemReq.getProductId());
@@ -297,7 +298,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
      * @param userId    操作人ID
      */
     @Transactional
-    public void inbound(Long orderId, PurchaseInboundRequest request, Long tenantId, Long userId) {
+    public void inbound(Long orderId, PurchaseInboundVO request, Long tenantId, Long userId) {
         PurchaseOrder order = getById(orderId);
         if (order == null) {
             throw new BusinessException("订单不存在");
@@ -316,7 +317,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
 
         boolean allReceived = true;
 
-        for (PurchaseInboundRequest.InboundItemRequest itemReq : request.getItems()) {
+        for (PurchaseInboundVO.InboundItemRequest itemReq : request.getItems()) {
             PurchaseOrderItem item = itemMap.get(itemReq.getItemId());
             if (item == null) {
                 throw new BusinessException("订单明细不存在: " + itemReq.getItemId());
@@ -337,7 +338,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
 
             // 调用库存服务入库
             String bizNo = "PO-IN-" + order.getOrderNo();
-            InboundRequest inboundReq = new InboundRequest();
+            InboundVO inboundReq = new InboundVO();
             inboundReq.setWarehouseId(order.getWarehouseId());
             inboundReq.setProductId(item.getProductId());
             inboundReq.setQuantity(itemReq.getQuantity());
@@ -383,7 +384,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
     /**
      * 计算行金额 = 数量 * 单价 - 折扣
      */
-    private BigDecimal calculateLineAmount(PurchaseOrderCreateRequest.OrderItemRequest itemReq) {
+    private BigDecimal calculateLineAmount(CreatePurchaseOrderVO.OrderItemRequest itemReq) {
         BigDecimal discount = itemReq.getDiscountAmount() != null ? itemReq.getDiscountAmount() : BigDecimal.ZERO;
         return itemReq.getQuantity().multiply(itemReq.getPrice()).subtract(discount);
     }
@@ -392,7 +393,7 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
      * 构建订单明细实体
      */
     private PurchaseOrderItem buildOrderItem(PurchaseOrder order, Product product,
-                                              PurchaseOrderCreateRequest.OrderItemRequest itemReq) {
+                                              CreatePurchaseOrderVO.OrderItemRequest itemReq) {
         PurchaseOrderItem item = new PurchaseOrderItem();
         item.setTenantId(order.getTenantId());
         item.setOrderId(order.getId());
@@ -414,10 +415,10 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
     /**
      * 转换订单为VO（使用预加载的关联数据）
      */
-    private PurchaseOrderVO convertToVO(PurchaseOrder order,
+    private PurchaseOrderDTO convertToVO(PurchaseOrder order,
                                          Map<Long, Supplier> supplierMap,
                                          Map<Long, Warehouse> warehouseMap) {
-        PurchaseOrderVO vo = new PurchaseOrderVO();
+        PurchaseOrderDTO vo = new PurchaseOrderDTO();
         BeanUtils.copyProperties(order, vo);
         vo.setOrderStatusText(getOrderStatusText(order.getOrderStatus()));
 
@@ -434,8 +435,8 @@ public class PurchaseOrderService extends ServiceImpl<PurchaseOrderMapper, Purch
         return vo;
     }
 
-    private PurchaseOrderVO.PurchaseOrderItemVO convertItemToVO(PurchaseOrderItem item) {
-        PurchaseOrderVO.PurchaseOrderItemVO vo = new PurchaseOrderVO.PurchaseOrderItemVO();
+    private PurchaseOrderItemDTO convertItemToVO(PurchaseOrderItem item) {
+        PurchaseOrderItemDTO vo = new PurchaseOrderItemDTO();
         BeanUtils.copyProperties(item, vo);
         vo.setReceivableQuantity(item.getQuantity().subtract(item.getReceivedQuantity()));
         return vo;

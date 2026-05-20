@@ -166,6 +166,43 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- Service API Modules -->
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>auth-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>user-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>permission-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>erp-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>finance-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>dict-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>inventory-service-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- Common Modules -->
             <dependency>
                 <groupId>com.example</groupId>
@@ -195,6 +232,11 @@
             <dependency>
                 <groupId>com.example</groupId>
                 <artifactId>common-feign</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>common-permission</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

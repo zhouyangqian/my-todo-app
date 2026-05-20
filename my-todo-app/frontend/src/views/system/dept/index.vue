@@ -5,7 +5,7 @@
       <template #header>
         <div class="card-header">
           <span>部门管理</span>
-          <el-button type="primary" @click="handleAdd(null)">
+          <el-button v-if="userStore.hasPermission('system:dept:create')" type="primary" @click="handleAdd(null)">
             <el-icon><Plus /></el-icon>
             新增部门
           </el-button>
@@ -36,13 +36,13 @@
         <el-table-column prop="createdAt" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="220">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleAdd(row)">
+            <el-button v-if="userStore.hasPermission('system:dept:create')" type="primary" link @click="handleAdd(row)">
               添加子部门
             </el-button>
-            <el-button type="warning" link @click="handleEdit(row)">
+            <el-button v-if="userStore.hasPermission('system:dept:update')" type="warning" link @click="handleEdit(row)">
               编辑
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">
+            <el-button v-if="userStore.hasPermission('system:dept:delete')" type="danger" link @click="handleDelete(row)">
               删除
             </el-button>
           </template>
@@ -104,9 +104,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { getDeptTree, createDept, updateDept, deleteDept } from '@/api/system'
+
+const userStore = useUserStore()
 
 const deptTree = ref([])
 const loading = ref(false)

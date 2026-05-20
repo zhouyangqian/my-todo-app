@@ -28,7 +28,7 @@
       <template #header>
         <div class="card-header">
           <span>系统配置列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button v-if="userStore.hasPermission('dict:config:create')" type="primary" @click="handleAdd">
             <el-icon><Plus /></el-icon>
             新增配置
           </el-button>
@@ -55,10 +55,10 @@
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" fixed="right" width="180">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)" :disabled="row.isSystem === 1">
+            <el-button v-if="userStore.hasPermission('dict:config:update')" type="primary" link @click="handleEdit(row)" :disabled="row.isSystem === 1">
               编辑
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)" :disabled="row.isSystem === 1">
+            <el-button v-if="userStore.hasPermission('dict:config:delete')" type="danger" link @click="handleDelete(row)" :disabled="row.isSystem === 1">
               删除
             </el-button>
           </template>
@@ -140,6 +140,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getConfigList, createConfig, updateConfig, deleteConfig } from '@/api/dict'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({
   configName: '',

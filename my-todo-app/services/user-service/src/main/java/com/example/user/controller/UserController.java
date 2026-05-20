@@ -1,6 +1,7 @@
 package com.example.user.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.user.entity.User;
@@ -50,6 +51,7 @@ public class UserController {
      * @param status   用户状态（可选），0-禁用，1-启用
      * @return 分页包装的用户列表数据
      */
+    @RequiresPermission(code = "system:user:list", name = "查询用户列表")
     @Operation(summary = "分页查询用户")
     @GetMapping("/get-user-page")
     public ApiResponse<PageResult<User>> getUserPage(
@@ -73,6 +75,7 @@ public class UserController {
      * @param id 用户ID，通过URL路径传入
      * @return 用户详细信息
      */
+    @RequiresPermission(code = "system:user:detail", name = "查询用户详情")
     @Operation(summary = "获取用户详情")
     @GetMapping("/get-user/{id}")
     public ApiResponse<User> getUser(@PathVariable Long id) {
@@ -94,6 +97,7 @@ public class UserController {
      * @return 创建成功后的用户信息（含自动生成的ID）
      */
     @Operation(summary = "创建用户")
+    @RequiresPermission(code = "system:user:create", name = "新增用户")
     @PostMapping("/create-user")
     public ApiResponse<User> createUser(
             @RequestBody User user,
@@ -121,6 +125,7 @@ public class UserController {
      * @return 更新后的用户完整信息
      */
     @Operation(summary = "更新用户")
+    @RequiresPermission(code = "system:user:update", name = "更新用户")
     @PutMapping("/update-user/{id}")
     public ApiResponse<User> updateUser(
             @PathVariable Long id,
@@ -146,6 +151,7 @@ public class UserController {
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "删除用户")
+    @RequiresPermission(code = "system:user:delete", name = "删除用户")
     @DeleteMapping("/delete-user/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable Long id) {
         // 调用服务层执行软删除
@@ -163,6 +169,7 @@ public class UserController {
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "启用用户")
+    @RequiresPermission(code = "system:user:enable", name = "启用用户")
     @PostMapping("/enable-user/{id}")
     public ApiResponse<Void> enableUser(@PathVariable Long id) {
         // 将用户状态设置为1（启用）
@@ -180,6 +187,7 @@ public class UserController {
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "禁用用户")
+    @RequiresPermission(code = "system:user:disable", name = "禁用用户")
     @PostMapping("/disable-user/{id}")
     public ApiResponse<Void> disableUser(@PathVariable Long id) {
         // 将用户状态设置为0（禁用）
@@ -196,6 +204,7 @@ public class UserController {
      * @param id 用户ID，通过URL路径传入
      * @return 该用户的所有收货地址列表
      */
+    @RequiresPermission(code = "system:user:detail", name = "查询用户详情")
     @Operation(summary = "获取用户地址列表")
     @GetMapping("/{id}/addresses")
     public ApiResponse<List<UserAddress>> getUserAddresses(@PathVariable Long id) {

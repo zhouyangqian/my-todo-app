@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Warehouse;
@@ -23,6 +24,7 @@ public class WarehouseController {
 
     private final WarehouseService warehouseService;
 
+    @RequiresPermission(code = "erp:warehouse:list", name = "查询仓库列表")
     @Operation(summary = "分页查询仓库")
     @GetMapping("/get-warehouse-page")
     public ApiResponse<PageResult<Warehouse>> getWarehousePage(
@@ -36,6 +38,7 @@ public class WarehouseController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:warehouse:list", name = "查询仓库列表")
     @Operation(summary = "获取所有仓库(下拉选择)")
     @GetMapping("/get-all-warehouses")
     public ApiResponse<List<Warehouse>> getAllWarehouses(
@@ -44,6 +47,7 @@ public class WarehouseController {
         return ApiResponse.success(warehouses);
     }
 
+    @RequiresPermission(code = "erp:warehouse:list", name = "查询仓库列表")
     @Operation(summary = "获取默认仓库")
     @GetMapping("/get-default-warehouse")
     public ApiResponse<Warehouse> getDefaultWarehouse(
@@ -52,6 +56,7 @@ public class WarehouseController {
         return ApiResponse.success(warehouse);
     }
 
+    @RequiresPermission(code = "erp:warehouse:detail", name = "查询仓库详情")
     @Operation(summary = "获取仓库详情")
     @GetMapping("/get-warehouse/{id}")
     public ApiResponse<Warehouse> getWarehouse(@PathVariable Long id) {
@@ -59,6 +64,7 @@ public class WarehouseController {
         return ApiResponse.success(warehouse);
     }
 
+    @RequiresPermission(code = "erp:warehouse:create", name = "新增仓库")
     @Operation(summary = "创建仓库")
     @PostMapping("/create-warehouse")
     public ApiResponse<Warehouse> createWarehouse(
@@ -71,6 +77,7 @@ public class WarehouseController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:warehouse:update", name = "更新仓库")
     @Operation(summary = "更新仓库")
     @PutMapping("/update-warehouse/{id}")
     public ApiResponse<Warehouse> updateWarehouse(
@@ -83,6 +90,7 @@ public class WarehouseController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:warehouse:delete", name = "删除仓库")
     @Operation(summary = "删除仓库")
     @DeleteMapping("/delete-warehouse/{id}")
     public ApiResponse<Void> deleteWarehouse(@PathVariable Long id) {

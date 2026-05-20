@@ -5,7 +5,7 @@
       <template #header>
         <div class="card-header">
           <span>权限管理</span>
-          <el-button type="primary" @click="handleAdd(null)">
+          <el-button v-if="userStore.hasPermission('system:permission:create')" type="primary" @click="handleAdd(null)">
             <el-icon><Plus /></el-icon>
             新增权限
           </el-button>
@@ -42,13 +42,13 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="220">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleAdd(row)">
+            <el-button v-if="userStore.hasPermission('system:permission:create')" type="primary" link @click="handleAdd(row)">
               添加子权限
             </el-button>
-            <el-button type="warning" link @click="handleEdit(row)">
+            <el-button v-if="userStore.hasPermission('system:permission:update')" type="warning" link @click="handleEdit(row)">
               编辑
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">
+            <el-button v-if="userStore.hasPermission('system:permission:delete')" type="danger" link @click="handleDelete(row)">
               删除
             </el-button>
           </template>
@@ -117,9 +117,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { getPermissionTree, createPermission, updatePermission, deletePermission } from '@/api/permission'
+
+const userStore = useUserStore()
 
 const permissionTree = ref([])
 const loading = ref(false)

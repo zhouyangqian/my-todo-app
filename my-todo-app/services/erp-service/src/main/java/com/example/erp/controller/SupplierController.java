@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.Supplier;
@@ -21,6 +22,7 @@ public class SupplierController {
 
     private final SupplierService supplierService;
 
+    @RequiresPermission(code = "erp:supplier:list", name = "查询供应商列表")
     @Operation(summary = "分页查询供应商")
     @GetMapping("/get-supplier-page")
     public ApiResponse<PageResult<Supplier>> getSupplierPage(
@@ -34,6 +36,7 @@ public class SupplierController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:supplier:detail", name = "查询供应商详情")
     @Operation(summary = "获取供应商详情")
     @GetMapping("/get-supplier/{id}")
     public ApiResponse<Supplier> getSupplier(@PathVariable Long id) {
@@ -41,6 +44,7 @@ public class SupplierController {
         return ApiResponse.success(supplier);
     }
 
+    @RequiresPermission(code = "erp:supplier:create", name = "新增供应商")
     @Operation(summary = "创建供应商")
     @PostMapping("/create-supplier")
     public ApiResponse<Supplier> createSupplier(
@@ -53,6 +57,7 @@ public class SupplierController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:supplier:update", name = "更新供应商")
     @Operation(summary = "更新供应商")
     @PutMapping("/update-supplier/{id}")
     public ApiResponse<Supplier> updateSupplier(
@@ -65,6 +70,7 @@ public class SupplierController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:supplier:delete", name = "删除供应商")
     @Operation(summary = "删除供应商")
     @DeleteMapping("/delete-supplier/{id}")
     public ApiResponse<Void> deleteSupplier(@PathVariable Long id) {

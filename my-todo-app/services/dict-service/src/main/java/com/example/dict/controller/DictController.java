@@ -1,6 +1,7 @@
 package com.example.dict.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.dict.entity.DictItem;
@@ -26,6 +27,7 @@ public class DictController {
 
     // ==================== 字典类型 ====================
 
+    @RequiresPermission(code = "dict:type:list", name = "查询字典类型列表")
     @Operation(summary = "分页查询字典类型")
     @GetMapping("/types/get-dict-type-page")
     public ApiResponse<PageResult<DictType>> getDictTypePage(
@@ -38,6 +40,7 @@ public class DictController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "dict:type:detail", name = "查询字典类型详情")
     @Operation(summary = "获取字典类型详情")
     @GetMapping("/types/get-dict-type/{id}")
     public ApiResponse<DictType> getDictType(@PathVariable Long id) {
@@ -45,6 +48,7 @@ public class DictController {
         return ApiResponse.success(dictType);
     }
 
+    @RequiresPermission(code = "dict:type:create", name = "创建字典类型")
     @Operation(summary = "创建字典类型")
     @PostMapping("/types/create-dict-type")
     public ApiResponse<DictType> createDictType(
@@ -55,6 +59,7 @@ public class DictController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "dict:type:update", name = "更新字典类型")
     @Operation(summary = "更新字典类型")
     @PutMapping("/types/update-dict-type/{id}")
     public ApiResponse<DictType> updateDictType(
@@ -67,6 +72,7 @@ public class DictController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "dict:type:delete", name = "删除字典类型")
     @Operation(summary = "删除字典类型")
     @DeleteMapping("/types/delete-dict-type/{id}")
     public ApiResponse<Void> deleteDictType(
@@ -78,6 +84,7 @@ public class DictController {
 
     // ==================== 字典项 ====================
 
+    @RequiresPermission(code = "dict:item:list", name = "查询字典项列表")
     @Operation(summary = "根据字典编码获取字典项")
     @GetMapping("/items/code/{dictCode}")
     public ApiResponse<List<DictItem>> getDictItemsByCode(
@@ -87,6 +94,7 @@ public class DictController {
         return ApiResponse.success(items);
     }
 
+    @RequiresPermission(code = "dict:item:list", name = "查询字典项列表")
     @Operation(summary = "根据字典类型ID获取字典项")
     @GetMapping("/items/type/{typeId}")
     public ApiResponse<List<DictItem>> getDictItemsByTypeId(@PathVariable Long typeId) {
@@ -94,6 +102,7 @@ public class DictController {
         return ApiResponse.success(items);
     }
 
+    @RequiresPermission(code = "dict:type:create", name = "添加字典项")
     @Operation(summary = "添加字典项")
     @PostMapping("/items/add-dict-item")
     public ApiResponse<DictItem> addDictItem(
@@ -104,6 +113,7 @@ public class DictController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "dict:type:update", name = "更新字典项")
     @Operation(summary = "更新字典项")
     @PutMapping("/items/update-dict-item/{id}")
     public ApiResponse<DictItem> updateDictItem(
@@ -116,6 +126,7 @@ public class DictController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "dict:type:delete", name = "删除字典项")
     @Operation(summary = "删除字典项")
     @DeleteMapping("/items/delete-dict-item/{id}")
     public ApiResponse<Void> deleteDictItem(

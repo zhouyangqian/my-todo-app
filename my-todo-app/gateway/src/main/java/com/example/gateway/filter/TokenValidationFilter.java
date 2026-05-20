@@ -60,7 +60,7 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
     /**
      * 过滤器核心逻辑
      * <p>
-     * 1. 认证相关端点（/api/auth/）跳过验证
+     * 1. 公开端点（登录、注册、刷新令牌、健康检查）跳过验证
      * 2. 检查 Authorization 请求头是否存在
      * 3. 解析并验证 JWT 令牌
      * 4. 将用户信息注入请求头，传递给下游服务
@@ -73,8 +73,8 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
 
         log.debug("处理请求路径: {}", path);
 
-        // 认证相关端点和健康检查端点跳过 Token 验证
-        if (path.startsWith("/api/auth/") || path.equals("/actuator/health")) {
+        // 公开端点跳过 Token 验证（只跳过明确的公开端点，而不是整个 /api/auth/ 路径）
+        if (isPublicEndpoint(path)) {
             log.debug("跳过 Token 验证: {}", path);
             return chain.filter(exchange);
         }
@@ -115,6 +115,26 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
             log.error("无效令牌: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             return unauthorized(exchange, "无效的令牌");
         }
+    }
+
+    /**
+     * 判断是否为公开端点
+     * <p>
+     * 只有明确列出的公开端点才跳过 Token 验证，其他所有请求都需要认证。
+     * 这比之前按路径前缀判断更安全、更精确。
+     * </p>
+     *
+     * @param path 请求路径
+     * @return true-公开端点，false-需要认证
+     */
+    private boolean isPublicEndpoint(String path) {
+        // 认证相关的公开端点（登录、注册、刷新令牌、健康检查）
+        return path.equals("/api/auth/login")
+                || path.equals("/api/auth/register")
+                || path.equals("/api/auth/refresh")
+                || path.equals("/api/auth/health")
+                || path.equals("/actuator/health")
+                || path.equals("/actuator/info");
     }
 
     /**

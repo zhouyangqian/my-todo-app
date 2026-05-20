@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.ProductPrice;
@@ -23,6 +24,7 @@ public class ProductPriceController {
 
     private final ProductPriceService productPriceService;
 
+    @RequiresPermission(code = "erp:productPrice:list", name = "查询价格列表")
     @Operation(summary = "分页查询商品价格")
     @GetMapping("/get-price-page")
     public ApiResponse<PageResult<ProductPrice>> getPricePage(
@@ -36,6 +38,7 @@ public class ProductPriceController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:productPrice:list", name = "查询价格列表")
     @Operation(summary = "获取商品的所有价格")
     @GetMapping("/get-prices-by-product/{productId}")
     public ApiResponse<List<ProductPrice>> getPricesByProduct(
@@ -45,6 +48,7 @@ public class ProductPriceController {
         return ApiResponse.success(prices);
     }
 
+    @RequiresPermission(code = "erp:productPrice:create", name = "新增价格")
     @Operation(summary = "创建价格")
     @PostMapping("/create-price")
     public ApiResponse<ProductPrice> createPrice(
@@ -57,6 +61,7 @@ public class ProductPriceController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:productPrice:update", name = "更新价格")
     @Operation(summary = "更新价格")
     @PutMapping("/update-price/{id}")
     public ApiResponse<ProductPrice> updatePrice(
@@ -69,6 +74,7 @@ public class ProductPriceController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:productPrice:delete", name = "删除价格")
     @Operation(summary = "删除价格")
     @DeleteMapping("/delete-price/{id}")
     public ApiResponse<Void> deletePrice(@PathVariable Long id) {

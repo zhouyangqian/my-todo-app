@@ -17,6 +17,22 @@
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
+            <artifactId>erp-service-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-permission</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>inventory-service-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>finance-service-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.example</groupId>
             <artifactId>common-web</artifactId>
         </dependency>
         <dependency>

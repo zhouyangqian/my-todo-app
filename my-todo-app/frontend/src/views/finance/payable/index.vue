@@ -37,7 +37,7 @@
               <el-icon><Warning /></el-icon>
               查看逾期
             </el-button>
-            <el-button type="primary" @click="handleAdd">
+            <el-button type="primary" @click="handleAdd" v-if="userStore.hasPermission('finance:payable:create')">
               <el-icon><Plus /></el-icon>
               新增应付
             </el-button>
@@ -75,11 +75,11 @@
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="220">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handlePay(row)" :disabled="row.status === 2">
+            <el-button type="primary" link @click="handlePay(row)" :disabled="row.status === 2" v-if="userStore.hasPermission('finance:payable:pay')">
               付款
             </el-button>
             <el-button type="info" link @click="handleView(row)">详情</el-button>
-            <el-button type="danger" link @click="handleDelete(row)" :disabled="row.status !== 0">
+            <el-button type="danger" link @click="handleDelete(row)" :disabled="row.status !== 0" v-if="userStore.hasPermission('finance:payable:delete')">
               删除
             </el-button>
           </template>
@@ -201,6 +201,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Warning } from '@element-plus/icons-vue'
 import { getPayablePage, createPayable, makePayment, getOverduePayables } from '@/api/finance'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 // ===== 搜索相关 =====
 const searchForm = reactive({

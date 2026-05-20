@@ -48,7 +48,7 @@
       <template #header>
         <div class="card-header">
           <span>收支记录列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-if="userStore.hasPermission('finance:record:create')">
             <el-icon><Plus /></el-icon>
             新增记录
           </el-button>
@@ -89,10 +89,10 @@
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="200">
           <template #default="{ row }">
-            <el-button type="success" link @click="handleApprove(row)" :disabled="row.status !== 0">
+            <el-button type="success" link @click="handleApprove(row)" :disabled="row.status !== 0" v-if="userStore.hasPermission('finance:record:approve')">
               审核
             </el-button>
-            <el-button type="danger" link @click="handleCancel(row)" :disabled="row.status === 2">
+            <el-button type="danger" link @click="handleCancel(row)" :disabled="row.status === 2" v-if="userStore.hasPermission('finance:record:cancel')">
               取消
             </el-button>
           </template>
@@ -176,6 +176,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getPaymentRecordPage, createPaymentRecord, approveRecord, cancelRecord } from '@/api/finance'
 import { getAllBankAccounts } from '@/api/finance'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 // ===== 搜索相关 =====
 const searchForm = reactive({

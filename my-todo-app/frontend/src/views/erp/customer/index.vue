@@ -31,7 +31,7 @@
       <template #header>
         <div class="card-header">
           <span>客户列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-if="userStore.hasPermission('erp:customer:create')">
             <el-icon><Plus /></el-icon>
             新增客户
           </el-button>
@@ -55,8 +55,8 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="180">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:customer:update')">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:customer:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -123,6 +123,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getCustomerPage, createCustomer, updateCustomer, deleteCustomer } from '@/api/erp'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({
   customerName: '',

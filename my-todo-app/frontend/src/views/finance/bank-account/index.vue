@@ -33,7 +33,7 @@
       <template #header>
         <div class="card-header">
           <span>银行账户列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-if="userStore.hasPermission('finance:bankAccount:create')">
             <el-icon><Plus /></el-icon>
             新增账户
           </el-button>
@@ -67,9 +67,9 @@
         <el-table-column prop="remark" label="备注" min-width="150" />
         <el-table-column label="操作" fixed="right" width="200">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="info" link @click="handleAdjust(row)">调账</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('finance:bankAccount:update')">编辑</el-button>
+            <el-button type="info" link @click="handleAdjust(row)" v-if="userStore.hasPermission('finance:bankAccount:update')">调账</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('finance:bankAccount:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -173,6 +173,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getBankAccountPage, createBankAccount, updateBankAccount, deleteBankAccount } from '@/api/finance'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 // ===== 搜索相关 =====
 const searchForm = reactive({

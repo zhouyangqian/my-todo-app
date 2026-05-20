@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.ProductPromotion;
@@ -23,6 +24,7 @@ public class ProductPromotionController {
 
     private final ProductPromotionService productPromotionService;
 
+    @RequiresPermission(code = "erp:productPromotion:list", name = "查询促销活动列表")
     @Operation(summary = "分页查询促销活动")
     @GetMapping("/get-promotion-page")
     public ApiResponse<PageResult<ProductPromotion>> getPromotionPage(
@@ -39,6 +41,7 @@ public class ProductPromotionController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:productPromotion:list", name = "查询促销活动列表")
     @Operation(summary = "获取商品的有效促销活动")
     @GetMapping("/get-active-promotions/{productId}")
     public ApiResponse<List<ProductPromotion>> getActivePromotions(
@@ -48,6 +51,7 @@ public class ProductPromotionController {
         return ApiResponse.success(promotions);
     }
 
+    @RequiresPermission(code = "erp:productPromotion:create", name = "新增促销活动")
     @Operation(summary = "创建促销活动")
     @PostMapping("/create-promotion")
     public ApiResponse<ProductPromotion> createPromotion(
@@ -60,6 +64,7 @@ public class ProductPromotionController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:productPromotion:update", name = "更新促销活动")
     @Operation(summary = "更新促销活动")
     @PutMapping("/update-promotion/{id}")
     public ApiResponse<ProductPromotion> updatePromotion(
@@ -72,6 +77,7 @@ public class ProductPromotionController {
         return ApiResponse.success(updated);
     }
 
+    @RequiresPermission(code = "erp:productPromotion:delete", name = "删除促销活动")
     @Operation(summary = "删除促销活动")
     @DeleteMapping("/delete-promotion/{id}")
     public ApiResponse<Void> deletePromotion(@PathVariable Long id) {
@@ -79,6 +85,7 @@ public class ProductPromotionController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:productPromotion:enable", name = "启用促销活动")
     @Operation(summary = "启用促销活动")
     @PostMapping("/enable-promotion/{id}")
     public ApiResponse<Void> enablePromotion(@PathVariable Long id) {
@@ -86,6 +93,7 @@ public class ProductPromotionController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:productPromotion:disable", name = "停用促销活动")
     @Operation(summary = "停用促销活动")
     @PostMapping("/disable-promotion/{id}")
     public ApiResponse<Void> disablePromotion(@PathVariable Long id) {

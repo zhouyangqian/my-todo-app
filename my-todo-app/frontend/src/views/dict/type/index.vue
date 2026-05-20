@@ -28,7 +28,7 @@
       <template #header>
         <div class="card-header">
           <span>字典类型列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button v-if="userStore.hasPermission('dict:type:create')" type="primary" @click="handleAdd">
             <el-icon><Plus /></el-icon>
             新增字典
           </el-button>
@@ -53,10 +53,10 @@
             <el-button type="primary" link @click="handleViewItems(row)">
               字典项
             </el-button>
-            <el-button type="warning" link @click="handleEdit(row)">
+            <el-button v-if="userStore.hasPermission('dict:type:update')" type="warning" link @click="handleEdit(row)">
               编辑
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">
+            <el-button v-if="userStore.hasPermission('dict:type:delete')" type="danger" link @click="handleDelete(row)">
               删除
             </el-button>
           </template>
@@ -113,7 +113,7 @@
       width="800px"
     >
       <div class="items-header">
-        <el-button type="primary" size="small" @click="handleAddItem">
+        <el-button v-if="userStore.hasPermission('dict:type:create')" type="primary" size="small" @click="handleAddItem">
           <el-icon><Plus /></el-icon>
           新增字典项
         </el-button>
@@ -132,8 +132,8 @@
         <el-table-column prop="remark" label="备注" min-width="150" />
         <el-table-column label="操作" width="150">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEditItem(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDeleteItem(row)">删除</el-button>
+            <el-button v-if="userStore.hasPermission('dict:type:update')" type="primary" link @click="handleEditItem(row)">编辑</el-button>
+            <el-button v-if="userStore.hasPermission('dict:type:delete')" type="danger" link @click="handleDeleteItem(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -179,6 +179,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getDictTypePage, createDictType, updateDictType, deleteDictType } from '@/api/dict'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({
   dictName: '',

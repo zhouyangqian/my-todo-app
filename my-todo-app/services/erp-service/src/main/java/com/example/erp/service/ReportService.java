@@ -1,7 +1,14 @@
 package com.example.erp.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.erp.dto.*;
+import com.example.erp.api.dto.DashboardDTO;
+import com.example.erp.api.dto.SalesReportDTO;
+import com.example.erp.api.dto.PurchaseReportDTO;
+import com.example.erp.api.dto.InventoryReportDTO;
+import com.example.erp.api.feign.InventoryFeignClient;
+import com.example.common.core.result.ApiResponse;
+import com.example.common.core.result.PageResult;
+import com.example.inventory.api.dto.InventoryDTO;
 import com.example.erp.entity.*;
 import com.example.erp.mapper.*;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +36,7 @@ public class ReportService {
     private final SalesOrderItemMapper salesOrderItemMapper;
     private final PurchaseOrderMapper purchaseOrderMapper;
     private final PurchaseOrderItemMapper purchaseOrderItemMapper;
-    private final InventoryMapper inventoryMapper;
+    private final InventoryFeignClient inventoryFeignClient;
     private final CustomerMapper customerMapper;
     private final SupplierMapper supplierMapper;
     private final ProductMapper productMapper;
@@ -38,8 +45,8 @@ public class ReportService {
     /**
      * 获取Dashboard统计数据
      */
-    public DashboardVO getDashboardData(Long tenantId) {
-        DashboardVO vo = new DashboardVO();
+    public DashboardDTO getDashboardData(Long tenantId) {
+        DashboardDTO vo = new DashboardDTO();
 
         // 今日和本月时间范围
         LocalDate today = LocalDate.now();
@@ -90,20 +97,14 @@ public class ReportService {
             .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // 库存商品种类数
-        Long inventoryCount = inventoryMapper.selectCount(
-            new LambdaQueryWrapper<Inventory>()
-                .eq(Inventory::getTenantId, tenantId)
-                .gt(Inventory::getQuantity, 0)
-        );
-        vo.setInventoryProductCount(inventoryCount.intValue());
+        ApiResponse<PageResult<InventoryDTO>> inventoryResp = inventoryFeignClient.getInventoryPage(tenantId, 1, 1000, null, null);
+        List<InventoryDTO> allInventory = (inventoryResp.getData() != null && inventoryResp.getData().getRecords() != null)
+            ? inventoryResp.getData().getRecords() : Collections.emptyList();
+        vo.setInventoryProductCount((int) allInventory.stream().filter(i -> i.getQuantity() != null && i.getQuantity().compareTo(BigDecimal.ZERO) > 0).count());
 
         // 库存预警商品数
-        Long alertCount = inventoryMapper.selectCount(
-            new LambdaQueryWrapper<Inventory>()
-                .eq(Inventory::getTenantId, tenantId)
-                .apply("quantity < stock_min AND stock_min > 0")
-        );
-        vo.setAlertProductCount(alertCount.intValue());
+        ApiResponse<List<InventoryDTO>> alertResp = inventoryFeignClient.getAlertInventories(tenantId, null);
+        vo.setAlertProductCount(alertResp.getData() != null ? alertResp.getData().size() : 0);
 
         // 待审核采购订单数
         Long pendingPO = purchaseOrderMapper.selectCount(
@@ -139,8 +140,8 @@ public class ReportService {
     /**
      * 获取销售报表
      */
-    public SalesReportVO getSalesReport(Long tenantId, String startDate, String endDate) {
-        SalesReportVO vo = new SalesReportVO();
+    public SalesReportDTO getSalesReport(Long tenantId, String startDate, String endDate) {
+        SalesReportDTO vo = new SalesReportDTO();
         LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
         LocalDateTime end = LocalDate.parse(endDate).atTime(LocalTime.MAX);
 
@@ -154,7 +155,7 @@ public class ReportService {
         );
 
         // 汇总
-        SalesReportVO.Summary summary = new SalesReportVO.Summary();
+        SalesReportDTO.Summary summary = new SalesReportDTO.Summary();
         summary.setTotalAmount(orders.stream().map(SalesOrder::getTotalAmount)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
         summary.setTotalOrders(orders.size());
@@ -176,10 +177,10 @@ public class ReportService {
         );
         Map<Long, List<SalesOrderItem>> productGroups = items.stream()
             .collect(Collectors.groupingBy(SalesOrderItem::getProductId));
-        List<SalesReportVO.ProductStat> productStats = new ArrayList<>();
+        List<SalesReportDTO.ProductStat> productStats = new ArrayList<>();
         int totalQty = 0;
         for (Map.Entry<Long, List<SalesOrderItem>> entry : productGroups.entrySet()) {
-            SalesReportVO.ProductStat stat = new SalesReportVO.ProductStat();
+            SalesReportDTO.ProductStat stat = new SalesReportDTO.ProductStat();
             stat.setProductId(entry.getKey());
             SalesOrderItem first = entry.getValue().get(0);
             stat.setProductName(first.getProductName());
@@ -204,9 +205,9 @@ public class ReportService {
         Set<Long> customerIds = customerGroups.keySet();
         Map<Long, Customer> customerMap = customerMapper.selectBatchIds(customerIds).stream()
             .collect(Collectors.toMap(Customer::getId, c -> c));
-        List<SalesReportVO.CustomerStat> customerStats = new ArrayList<>();
+        List<SalesReportDTO.CustomerStat> customerStats = new ArrayList<>();
         for (Map.Entry<Long, List<SalesOrder>> entry : customerGroups.entrySet()) {
-            SalesReportVO.CustomerStat stat = new SalesReportVO.CustomerStat();
+            SalesReportDTO.CustomerStat stat = new SalesReportDTO.CustomerStat();
             stat.setCustomerId(entry.getKey());
             Customer c = customerMap.get(entry.getKey());
             stat.setCustomerName(c != null ? c.getCustomerName() : "未知");
@@ -221,16 +222,16 @@ public class ReportService {
         // 按日期统计
         Map<String, List<SalesOrder>> dateGroups = orders.stream()
             .collect(Collectors.groupingBy(o -> o.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-        List<SalesReportVO.DailyStat> dailyStats = new ArrayList<>();
+        List<SalesReportDTO.DailyStat> dailyStats = new ArrayList<>();
         for (Map.Entry<String, List<SalesOrder>> entry : dateGroups.entrySet()) {
-            SalesReportVO.DailyStat stat = new SalesReportVO.DailyStat();
+            SalesReportDTO.DailyStat stat = new SalesReportDTO.DailyStat();
             stat.setDate(entry.getKey());
             stat.setOrderCount(entry.getValue().size());
             stat.setAmount(entry.getValue().stream().map(SalesOrder::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
             dailyStats.add(stat);
         }
-        dailyStats.sort(Comparator.comparing(SalesReportVO.DailyStat::getDate));
+        dailyStats.sort(Comparator.comparing(SalesReportDTO.DailyStat::getDate));
         vo.setDailyStats(dailyStats);
 
         return vo;
@@ -239,8 +240,8 @@ public class ReportService {
     /**
      * 获取采购报表
      */
-    public PurchaseReportVO getPurchaseReport(Long tenantId, String startDate, String endDate) {
-        PurchaseReportVO vo = new PurchaseReportVO();
+    public PurchaseReportDTO getPurchaseReport(Long tenantId, String startDate, String endDate) {
+        PurchaseReportDTO vo = new PurchaseReportDTO();
         LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
         LocalDateTime end = LocalDate.parse(endDate).atTime(LocalTime.MAX);
 
@@ -252,7 +253,7 @@ public class ReportService {
                 .ne(PurchaseOrder::getOrderStatus, 5)
         );
 
-        PurchaseReportVO.Summary summary = new PurchaseReportVO.Summary();
+        PurchaseReportDTO.Summary summary = new PurchaseReportDTO.Summary();
         summary.setTotalAmount(orders.stream().map(PurchaseOrder::getTotalAmount)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
         summary.setTotalOrders(orders.size());
@@ -274,10 +275,10 @@ public class ReportService {
         );
         Map<Long, List<PurchaseOrderItem>> productGroups = items.stream()
             .collect(Collectors.groupingBy(PurchaseOrderItem::getProductId));
-        List<PurchaseReportVO.ProductStat> productStats = new ArrayList<>();
+        List<PurchaseReportDTO.ProductStat> productStats = new ArrayList<>();
         int totalQty = 0;
         for (Map.Entry<Long, List<PurchaseOrderItem>> entry : productGroups.entrySet()) {
-            PurchaseReportVO.ProductStat stat = new PurchaseReportVO.ProductStat();
+            PurchaseReportDTO.ProductStat stat = new PurchaseReportDTO.ProductStat();
             stat.setProductId(entry.getKey());
             PurchaseOrderItem first = entry.getValue().get(0);
             stat.setProductName(first.getProductName());
@@ -302,9 +303,9 @@ public class ReportService {
         Set<Long> supplierIds = supplierGroups.keySet();
         Map<Long, Supplier> supplierMap = supplierMapper.selectBatchIds(supplierIds).stream()
             .collect(Collectors.toMap(Supplier::getId, s -> s));
-        List<PurchaseReportVO.SupplierStat> supplierStats = new ArrayList<>();
+        List<PurchaseReportDTO.SupplierStat> supplierStats = new ArrayList<>();
         for (Map.Entry<Long, List<PurchaseOrder>> entry : supplierGroups.entrySet()) {
-            PurchaseReportVO.SupplierStat stat = new PurchaseReportVO.SupplierStat();
+            PurchaseReportDTO.SupplierStat stat = new PurchaseReportDTO.SupplierStat();
             stat.setSupplierId(entry.getKey());
             Supplier s = supplierMap.get(entry.getKey());
             stat.setSupplierName(s != null ? s.getSupplierName() : "未知");
@@ -319,16 +320,16 @@ public class ReportService {
         // 按日期统计
         Map<String, List<PurchaseOrder>> dateGroups = orders.stream()
             .collect(Collectors.groupingBy(o -> o.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
-        List<PurchaseReportVO.DailyStat> dailyStats = new ArrayList<>();
+        List<PurchaseReportDTO.DailyStat> dailyStats = new ArrayList<>();
         for (Map.Entry<String, List<PurchaseOrder>> entry : dateGroups.entrySet()) {
-            PurchaseReportVO.DailyStat stat = new PurchaseReportVO.DailyStat();
+            PurchaseReportDTO.DailyStat stat = new PurchaseReportDTO.DailyStat();
             stat.setDate(entry.getKey());
             stat.setOrderCount(entry.getValue().size());
             stat.setAmount(entry.getValue().stream().map(PurchaseOrder::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
             dailyStats.add(stat);
         }
-        dailyStats.sort(Comparator.comparing(PurchaseReportVO.DailyStat::getDate));
+        dailyStats.sort(Comparator.comparing(PurchaseReportDTO.DailyStat::getDate));
         vo.setDailyStats(dailyStats);
 
         return vo;
@@ -337,20 +338,17 @@ public class ReportService {
     /**
      * 获取库存报表
      */
-    public InventoryReportVO getInventoryReport(Long tenantId, Long warehouseId) {
-        InventoryReportVO vo = new InventoryReportVO();
+    public InventoryReportDTO getInventoryReport(Long tenantId, Long warehouseId) {
+        InventoryReportDTO vo = new InventoryReportDTO();
 
-        LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Inventory::getTenantId, tenantId);
-        if (warehouseId != null) {
-            wrapper.eq(Inventory::getWarehouseId, warehouseId);
-        }
-        List<Inventory> inventories = inventoryMapper.selectList(wrapper);
+        ApiResponse<PageResult<InventoryDTO>> resp = inventoryFeignClient.getInventoryPage(tenantId, 1, 1000, warehouseId, null);
+        List<InventoryDTO> inventories = (resp.getData() != null && resp.getData().getRecords() != null)
+            ? resp.getData().getRecords() : Collections.emptyList();
 
         // 汇总
-        InventoryReportVO.Summary summary = new InventoryReportVO.Summary();
+        InventoryReportDTO.Summary summary = new InventoryReportDTO.Summary();
         summary.setTotalProducts(inventories.size());
-        summary.setTotalQuantity(inventories.stream().map(Inventory::getQuantity)
+        summary.setTotalQuantity(inventories.stream().map(InventoryDTO::getQuantity)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
         summary.setTotalValue(inventories.stream()
             .map(i -> i.getQuantity().multiply(i.getCostPrice() != null ? i.getCostPrice() : BigDecimal.ZERO))
@@ -362,23 +360,14 @@ public class ReportService {
         vo.setSummary(summary);
 
         // 库存明细
-        Set<Long> warehouseIds = inventories.stream().map(Inventory::getWarehouseId).collect(Collectors.toSet());
-        Set<Long> productIds = inventories.stream().map(Inventory::getProductId).collect(Collectors.toSet());
-        Map<Long, Warehouse> warehouseMap = warehouseMapper.selectBatchIds(warehouseIds).stream()
-            .collect(Collectors.toMap(Warehouse::getId, w -> w));
-        Map<Long, Product> productMap = productMapper.selectBatchIds(productIds).stream()
-            .collect(Collectors.toMap(Product::getId, p -> p));
-
-        List<InventoryReportVO.InventoryDetail> details = new ArrayList<>();
-        for (Inventory inv : inventories) {
-            InventoryReportVO.InventoryDetail detail = new InventoryReportVO.InventoryDetail();
+        List<InventoryReportDTO.InventoryDetail> details = new ArrayList<>();
+        for (InventoryDTO inv : inventories) {
+            InventoryReportDTO.InventoryDetail detail = new InventoryReportDTO.InventoryDetail();
             detail.setWarehouseId(inv.getWarehouseId());
             detail.setProductId(inv.getProductId());
-            Warehouse w = warehouseMap.get(inv.getWarehouseId());
-            detail.setWarehouseName(w != null ? w.getWarehouseName() : "");
-            Product p = productMap.get(inv.getProductId());
-            detail.setProductName(p != null ? p.getProductName() : "");
-            detail.setProductCode(p != null ? p.getProductCode() : "");
+            detail.setWarehouseName(inv.getWarehouseName());
+            detail.setProductName(inv.getProductName());
+            detail.setProductCode(inv.getProductSku());
             detail.setQuantity(inv.getQuantity());
             detail.setCostPrice(inv.getCostPrice());
             detail.setTotalValue(inv.getQuantity().multiply(
@@ -390,8 +379,8 @@ public class ReportService {
         vo.setDetails(details);
 
         // 库龄分析（简化版，按库存金额分段）
-        List<InventoryReportVO.AgingStat> agingStats = new ArrayList<>();
-        InventoryReportVO.AgingStat stat1 = new InventoryReportVO.AgingStat();
+        List<InventoryReportDTO.AgingStat> agingStats = new ArrayList<>();
+        InventoryReportDTO.AgingStat stat1 = new InventoryReportDTO.AgingStat();
         stat1.setAgingRange("0-30天");
         stat1.setProductCount(inventories.size());
         stat1.setQuantity(summary.getTotalQuantity());
@@ -404,8 +393,8 @@ public class ReportService {
 
     // 私有方法
 
-    private List<DashboardVO.TrendData> getSalesTrend(Long tenantId, int days) {
-        List<DashboardVO.TrendData> trend = new ArrayList<>();
+    private List<DashboardDTO.TrendData> getSalesTrend(Long tenantId, int days) {
+        List<DashboardDTO.TrendData> trend = new ArrayList<>();
         LocalDate date = LocalDate.now().minusDays(days - 1);
         for (int i = 0; i < days; i++) {
             LocalDateTime dayStart = date.atStartOfDay();
@@ -417,7 +406,7 @@ public class ReportService {
                     .le(SalesOrder::getCreatedAt, dayEnd)
                     .ne(SalesOrder::getOrderStatus, 5)
             );
-            DashboardVO.TrendData data = new DashboardVO.TrendData();
+            DashboardDTO.TrendData data = new DashboardDTO.TrendData();
             data.setDate(date.format(DateTimeFormatter.ofPattern("MM-dd")));
             data.setAmount(orders.stream().map(SalesOrder::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
@@ -427,8 +416,8 @@ public class ReportService {
         return trend;
     }
 
-    private List<DashboardVO.TrendData> getPurchaseTrend(Long tenantId, int days) {
-        List<DashboardVO.TrendData> trend = new ArrayList<>();
+    private List<DashboardDTO.TrendData> getPurchaseTrend(Long tenantId, int days) {
+        List<DashboardDTO.TrendData> trend = new ArrayList<>();
         LocalDate date = LocalDate.now().minusDays(days - 1);
         for (int i = 0; i < days; i++) {
             LocalDateTime dayStart = date.atStartOfDay();
@@ -440,7 +429,7 @@ public class ReportService {
                     .le(PurchaseOrder::getCreatedAt, dayEnd)
                     .ne(PurchaseOrder::getOrderStatus, 5)
             );
-            DashboardVO.TrendData data = new DashboardVO.TrendData();
+            DashboardDTO.TrendData data = new DashboardDTO.TrendData();
             data.setDate(date.format(DateTimeFormatter.ofPattern("MM-dd")));
             data.setAmount(orders.stream().map(PurchaseOrder::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
@@ -450,7 +439,7 @@ public class ReportService {
         return trend;
     }
 
-    private List<DashboardVO.RankingData> getTopProducts(Long tenantId, int limit) {
+    private List<DashboardDTO.RankingData> getTopProducts(Long tenantId, int limit) {
         // 查询近30天的销售明细
         LocalDateTime start = LocalDate.now().minusDays(30).atStartOfDay();
         List<SalesOrder> orders = salesOrderMapper.selectList(
@@ -469,9 +458,9 @@ public class ReportService {
 
         Map<Long, List<SalesOrderItem>> groups = items.stream()
             .collect(Collectors.groupingBy(SalesOrderItem::getProductId));
-        List<DashboardVO.RankingData> rankings = new ArrayList<>();
+        List<DashboardDTO.RankingData> rankings = new ArrayList<>();
         for (Map.Entry<Long, List<SalesOrderItem>> entry : groups.entrySet()) {
-            DashboardVO.RankingData data = new DashboardVO.RankingData();
+            DashboardDTO.RankingData data = new DashboardDTO.RankingData();
             SalesOrderItem first = entry.getValue().get(0);
             data.setName(first.getProductName());
             data.setQuantity(entry.getValue().stream().mapToInt(i -> i.getQuantity().intValue()).sum());
@@ -483,7 +472,7 @@ public class ReportService {
         return rankings.stream().limit(limit).collect(Collectors.toList());
     }
 
-    private List<DashboardVO.RankingData> getTopCustomers(Long tenantId, int limit) {
+    private List<DashboardDTO.RankingData> getTopCustomers(Long tenantId, int limit) {
         LocalDateTime start = LocalDate.now().minusDays(30).atStartOfDay();
         List<SalesOrder> orders = salesOrderMapper.selectList(
             new LambdaQueryWrapper<SalesOrder>()
@@ -499,9 +488,9 @@ public class ReportService {
         Map<Long, Customer> customerMap = customerMapper.selectBatchIds(customerIds).stream()
             .collect(Collectors.toMap(Customer::getId, c -> c));
 
-        List<DashboardVO.RankingData> rankings = new ArrayList<>();
+        List<DashboardDTO.RankingData> rankings = new ArrayList<>();
         for (Map.Entry<Long, List<SalesOrder>> entry : groups.entrySet()) {
-            DashboardVO.RankingData data = new DashboardVO.RankingData();
+            DashboardDTO.RankingData data = new DashboardDTO.RankingData();
             Customer c = customerMap.get(entry.getKey());
             data.setName(c != null ? c.getCustomerName() : "未知");
             data.setQuantity(entry.getValue().size());

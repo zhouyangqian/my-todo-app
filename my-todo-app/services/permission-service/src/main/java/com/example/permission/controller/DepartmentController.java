@@ -1,5 +1,6 @@
 package com.example.permission.controller;
 
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.permission.entity.Department;
 import com.example.permission.service.DepartmentService;
@@ -41,6 +42,7 @@ public class DepartmentController {
      * @param tenantId 租户ID（请求头）
      * @return 部门树列表（顶级部门节点列表）
      */
+    @RequiresPermission(code = "system:dept:list", name = "查询部门列表")
     @Operation(summary = "Get department tree")
     @GetMapping("/get-department-tree")
     public ApiResponse<List<Department>> getDepartmentTree(
@@ -59,6 +61,7 @@ public class DepartmentController {
      * @return 创建成功的部门对象
      */
     @Operation(summary = "Create department")
+    @RequiresPermission(code = "system:dept:create", name = "新增部门")
     @PostMapping("/create-department")
     public ApiResponse<Department> createDepartment(@RequestBody Department department) {
         Department created = departmentService.createDepartment(department);
@@ -76,6 +79,7 @@ public class DepartmentController {
      * @return 更新后的部门对象
      */
     @Operation(summary = "Update department")
+    @RequiresPermission(code = "system:dept:update", name = "更新部门")
     @PutMapping("/update-department/{id}")
     public ApiResponse<Department> updateDepartment(
             @PathVariable Long id,
@@ -96,6 +100,7 @@ public class DepartmentController {
      * @return 空响应
      */
     @Operation(summary = "Delete department")
+    @RequiresPermission(code = "system:dept:delete", name = "删除部门")
     @DeleteMapping("/delete-department/{id}")
     public ApiResponse<Void> deleteDepartment(
             @PathVariable Long id,

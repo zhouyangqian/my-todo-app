@@ -150,6 +150,21 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
+   * 刷新当前用户的权限和角色
+   * 在权限变更（分配角色、分配权限）后调用，实现前端权限的实时生效
+   */
+  async function refreshPermissions() {
+    try {
+      const res = await getUserInfo()
+      const data = res.data || res
+      permissions.value = data.permissions || []
+      roles.value = data.roles || []
+    } catch (error) {
+      console.error('刷新权限失败:', error)
+    }
+  }
+
+  /**
    * 检查当前用户是否拥有指定角色
    * @param role 角色编码（如 admin）
    */
@@ -170,6 +185,7 @@ export const useUserStore = defineStore('user', () => {
     logoutAction,
     clearAuth,
     hasPermission,
-    hasRole
+    hasRole,
+    refreshPermissions
   }
 })

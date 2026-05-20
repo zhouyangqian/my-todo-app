@@ -36,7 +36,7 @@
             <el-icon><Refresh /></el-icon>
             重置
           </el-button>
-          <el-button type="success" @click="handleCreate">
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:purchaseOrder:create')">
             <el-icon><Plus /></el-icon>
             新建订单
           </el-button>
@@ -70,11 +70,11 @@
         <el-table-column label="操作" fixed="right" width="320">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看</el-button>
-            <el-button v-if="row.orderStatus === 0" type="warning" link @click="handleEdit(row)">编辑</el-button>
-            <el-button v-if="row.orderStatus === 0" type="success" link @click="handleSubmit(row)">提交</el-button>
-            <el-button v-if="row.orderStatus === 1" type="success" link @click="handleApprove(row)">审核</el-button>
-            <el-button v-if="row.orderStatus === 2" type="primary" link @click="handleInbound(row)">入库</el-button>
-            <el-button v-if="row.orderStatus < 3" type="danger" link @click="handleCancel(row)">取消</el-button>
+            <el-button v-if="row.orderStatus === 0 && userStore.hasPermission('erp:purchaseOrder:update')" type="warning" link @click="handleEdit(row)">编辑</el-button>
+            <el-button v-if="row.orderStatus === 0 && userStore.hasPermission('erp:purchaseOrder:submit')" type="success" link @click="handleSubmit(row)">提交</el-button>
+            <el-button v-if="row.orderStatus === 1 && userStore.hasPermission('erp:purchaseOrder:approve')" type="success" link @click="handleApprove(row)">审核</el-button>
+            <el-button v-if="row.orderStatus === 2 && userStore.hasPermission('erp:inventory:inbound')" type="primary" link @click="handleInbound(row)">入库</el-button>
+            <el-button v-if="row.orderStatus < 3 && userStore.hasPermission('erp:purchaseOrder:cancel')" type="danger" link @click="handleCancel(row)">取消</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -272,6 +272,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 import {
   getPurchaseOrderPage,
   getPurchaseOrderDetail,

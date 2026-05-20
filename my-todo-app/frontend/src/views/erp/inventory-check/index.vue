@@ -19,7 +19,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch"><el-icon><Search /></el-icon>搜索</el-button>
           <el-button @click="handleReset"><el-icon><Refresh /></el-icon>重置</el-button>
-          <el-button type="success" @click="handleCreate"><el-icon><Plus /></el-icon>新建盘点</el-button>
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:inventoryCheck:create')"><el-icon><Plus /></el-icon>新建盘点</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -45,8 +45,8 @@
         <el-table-column label="操作" fixed="right" width="200">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看</el-button>
-            <el-button v-if="row.checkStatus === 0 || row.checkStatus === 1" type="success" link @click="handleEdit(row)">录入结果</el-button>
-            <el-button v-if="row.checkStatus < 2" type="danger" link @click="handleCancel(row)">取消</el-button>
+            <el-button v-if="(row.checkStatus === 0 || row.checkStatus === 1) && userStore.hasPermission('erp:inventoryCheck:submit')" type="success" link @click="handleEdit(row)">录入结果</el-button>
+            <el-button v-if="row.checkStatus < 2 && userStore.hasPermission('erp:inventoryCheck:cancel')" type="danger" link @click="handleCancel(row)">取消</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -150,6 +150,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 import { getInventoryCheckPage, getInventoryCheckDetail, createInventoryCheck, submitInventoryCheck, cancelInventoryCheck, getWarehouses } from '@/api/erp'
 
 const searchForm = reactive({ warehouseId: undefined, checkStatus: undefined })

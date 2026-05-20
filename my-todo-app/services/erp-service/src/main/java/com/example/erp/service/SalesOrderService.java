@@ -4,8 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
-import com.example.erp.dto.SalesOrderCreateRequest;
-import com.example.erp.dto.SalesOrderVO;
+import com.example.erp.api.vo.CreateSalesOrderVO;
+import com.example.erp.api.dto.SalesOrderDTO;
+import com.example.erp.api.dto.SalesOrderItemDTO;
 import com.example.erp.entity.Customer;
 import com.example.erp.entity.Product;
 import com.example.erp.entity.SalesOrder;
@@ -59,7 +60,7 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
      * @param status    订单状态（可选）
      * @return 销售订单分页数据
      */
-    public Page<SalesOrderVO> getOrderPage(Long tenantId, int page, int size,
+    public Page<SalesOrderDTO> getOrderPage(Long tenantId, int page, int size,
                                             String orderNo, Long customerId, Integer status) {
         LambdaQueryWrapper<SalesOrder> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SalesOrder::getTenantId, tenantId)
@@ -78,9 +79,9 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
         Page<SalesOrder> result = page(new Page<>(page, size), wrapper);
 
         // 转换为 VO
-        Page<SalesOrderVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
-        List<SalesOrderVO> voList = result.getRecords().stream().map(order -> {
-            SalesOrderVO vo = convertToVO(order);
+        Page<SalesOrderDTO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        List<SalesOrderDTO> voList = result.getRecords().stream().map(order -> {
+            SalesOrderDTO vo = convertToVO(order);
             // 获取订单明细数量
             List<SalesOrderItem> items = salesOrderItemMapper.selectList(
                 new LambdaQueryWrapper<SalesOrderItem>()
@@ -100,12 +101,12 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
      * @param orderId 订单ID
      * @return 订单VO对象
      */
-    public SalesOrderVO getOrderDetail(Long orderId) {
+    public SalesOrderDTO getOrderDetail(Long orderId) {
         SalesOrder order = getById(orderId);
         if (order == null) {
             throw new BusinessException("订单不存在");
         }
-        SalesOrderVO vo = convertToVO(order);
+        SalesOrderDTO vo = convertToVO(order);
 
         // 获取订单明细
         List<SalesOrderItem> items = salesOrderItemMapper.selectList(
@@ -125,7 +126,7 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
      * @return 创建的订单
      */
     @Transactional
-    public SalesOrder createOrder(SalesOrderCreateRequest request, Long userId) {
+    public SalesOrder createOrder(CreateSalesOrderVO request, Long userId) {
         // 校验客户
         Customer customer = customerService.getById(request.getCustomerId());
         if (customer == null || customer.getDeleted() == 1) {
@@ -140,7 +141,7 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
 
         // 校验商品并计算总金额
         BigDecimal totalAmount = BigDecimal.ZERO;
-        for (SalesOrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
+        for (CreateSalesOrderVO.OrderItemRequest itemReq : request.getItems()) {
             Product product = productService.getById(itemReq.getProductId());
             if (product == null || product.getStatus() == 0) {
                 throw new BusinessException("商品不存在或已停用: " + itemReq.getProductId());
@@ -169,7 +170,7 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
         save(order);
 
         // 创建订单明细
-        for (SalesOrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
+        for (CreateSalesOrderVO.OrderItemRequest itemReq : request.getItems()) {
             Product product = productService.getById(itemReq.getProductId());
             SalesOrderItem item = new SalesOrderItem();
             item.setTenantId(customer.getTenantId());
@@ -203,7 +204,7 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
      * @return 更新后的订单
      */
     @Transactional
-    public SalesOrder updateOrder(Long orderId, SalesOrderCreateRequest request, Long userId) {
+    public SalesOrder updateOrder(Long orderId, CreateSalesOrderVO request, Long userId) {
         SalesOrder order = getById(orderId);
         if (order == null) {
             throw new BusinessException("订单不存在");
@@ -220,7 +221,7 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
 
         // 重新计算并创建明细
         BigDecimal totalAmount = BigDecimal.ZERO;
-        for (SalesOrderCreateRequest.OrderItemRequest itemReq : request.getItems()) {
+        for (CreateSalesOrderVO.OrderItemRequest itemReq : request.getItems()) {
             Product product = productService.getById(itemReq.getProductId());
             if (product == null || product.getStatus() == 0) {
                 throw new BusinessException("商品不存在或已停用: " + itemReq.getProductId());
@@ -349,8 +350,8 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
     /**
      * 转换订单为VO
      */
-    private SalesOrderVO convertToVO(SalesOrder order) {
-        SalesOrderVO vo = new SalesOrderVO();
+    private SalesOrderDTO convertToVO(SalesOrder order) {
+        SalesOrderDTO vo = new SalesOrderDTO();
         BeanUtils.copyProperties(order, vo);
         vo.setOrderStatusText(getOrderStatusText(order.getOrderStatus()));
 
@@ -372,8 +373,8 @@ public class SalesOrderService extends ServiceImpl<SalesOrderMapper, SalesOrder>
     /**
      * 转换订单明细为VO
      */
-    private SalesOrderVO.SalesOrderItemVO convertItemToVO(SalesOrderItem item) {
-        SalesOrderVO.SalesOrderItemVO vo = new SalesOrderVO.SalesOrderItemVO();
+    private SalesOrderItemDTO convertItemToVO(SalesOrderItem item) {
+        SalesOrderItemDTO vo = new SalesOrderItemDTO();
         BeanUtils.copyProperties(item, vo);
         // 计算可发货数量 = 订单数量 - 已发货数量
         vo.setShippableQuantity(item.getQuantity().subtract(item.getDeliveredQuantity()));

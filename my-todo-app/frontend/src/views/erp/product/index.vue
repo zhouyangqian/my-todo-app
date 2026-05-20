@@ -37,7 +37,7 @@
       <template #header>
         <div class="card-header">
           <span>商品列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-if="userStore.hasPermission('erp:product:create')">
             <el-icon><Plus /></el-icon>
             新增商品
           </el-button>
@@ -71,8 +71,8 @@
         <el-table-column prop="createdAt" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="150">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:product:update')">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:product:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -203,6 +203,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Lightning } from '@element-plus/icons-vue'
 import { getProductPage, getProduct, createProduct, updateProduct, deleteProduct } from '@/api/erp'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 // 搜索表单
 const searchForm = reactive({

@@ -1,7 +1,11 @@
 package com.example.erp.controller;
 
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
-import com.example.erp.dto.*;
+import com.example.erp.api.dto.DashboardDTO;
+import com.example.erp.api.dto.SalesReportDTO;
+import com.example.erp.api.dto.PurchaseReportDTO;
+import com.example.erp.api.dto.InventoryReportDTO;
 import com.example.erp.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,40 +23,44 @@ public class ReportController {
 
     private final ReportService reportService;
 
+    @RequiresPermission(code = "erp:report:dashboard", name = "查看Dashboard统计")
     @Operation(summary = "获取Dashboard统计数据")
     @GetMapping("/dashboard")
-    public ApiResponse<DashboardVO> getDashboard(
+    public ApiResponse<DashboardDTO> getDashboard(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
-        DashboardVO data = reportService.getDashboardData(tenantId);
+        DashboardDTO data = reportService.getDashboardData(tenantId);
         return ApiResponse.success(data);
     }
 
+    @RequiresPermission(code = "erp:report:sales", name = "查看销售报表")
     @Operation(summary = "获取销售报表")
     @GetMapping("/sales")
-    public ApiResponse<SalesReportVO> getSalesReport(
+    public ApiResponse<SalesReportDTO> getSalesReport(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam String startDate,
             @RequestParam String endDate) {
-        SalesReportVO report = reportService.getSalesReport(tenantId, startDate, endDate);
+        SalesReportDTO report = reportService.getSalesReport(tenantId, startDate, endDate);
         return ApiResponse.success(report);
     }
 
+    @RequiresPermission(code = "erp:report:purchase", name = "查看采购报表")
     @Operation(summary = "获取采购报表")
     @GetMapping("/purchase")
-    public ApiResponse<PurchaseReportVO> getPurchaseReport(
+    public ApiResponse<PurchaseReportDTO> getPurchaseReport(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam String startDate,
             @RequestParam String endDate) {
-        PurchaseReportVO report = reportService.getPurchaseReport(tenantId, startDate, endDate);
+        PurchaseReportDTO report = reportService.getPurchaseReport(tenantId, startDate, endDate);
         return ApiResponse.success(report);
     }
 
+    @RequiresPermission(code = "erp:report:inventory", name = "查看库存报表")
     @Operation(summary = "获取库存报表")
     @GetMapping("/inventory")
-    public ApiResponse<InventoryReportVO> getInventoryReport(
+    public ApiResponse<InventoryReportDTO> getInventoryReport(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(required = false) Long warehouseId) {
-        InventoryReportVO report = reportService.getInventoryReport(tenantId, warehouseId);
+        InventoryReportDTO report = reportService.getInventoryReport(tenantId, warehouseId);
         return ApiResponse.success(report);
     }
 }

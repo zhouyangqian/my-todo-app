@@ -37,7 +37,7 @@
       <template #header>
         <div class="card-header">
           <span>用户列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button v-if="userStore.hasPermission('system:user:create')" type="primary" @click="handleAdd">
             <el-icon><Plus /></el-icon>
             新增用户
           </el-button>
@@ -57,19 +57,35 @@
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="180" />
-        <el-table-column label="操作" fixed="right" width="320">
+        <el-table-column label="操作" fixed="right" width="380">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="success" link @click="handleResetPassword(row)">设置密码</el-button>
-            <el-button type="warning" link @click="handleAssignRole(row)">分配角色</el-button>
+            <el-button v-if="userStore.hasPermission('system:user:update')" type="primary" link @click="handleEdit(row)">编辑</el-button>
             <el-button
+              v-if="userStore.hasPermission('user:reset-password') || userStore.hasRole('admin')"
+              type="success"
+              link
+              @click="handleResetPassword(row)"
+            >
+              设置密码
+            </el-button>
+            <el-button v-if="userStore.hasPermission('system:user:assignToUser')" type="warning" link @click="handleAssignRole(row)">分配角色</el-button>
+            <el-button
+              v-if="userStore.hasPermission('system:user:enable')"
               :type="row.status === 1 ? 'warning' : 'success'"
               link
               @click="handleToggleStatus(row)"
             >
               {{ row.status === 1 ? '禁用' : '启用' }}
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="userStore.hasPermission('system:user:delete')" type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button
+              v-if="userStore.hasPermission('system:user:kick')"
+              type="danger"
+              link
+              @click="handleKick(row)"
+            >
+              踢出
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -190,8 +206,12 @@ import { pinyin } from 'pinyin-pro'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUser } from '@/api/user'
-import { getRoleList, getUserRoles, assignUserRoles } from '@/api/permission'
-import { resetPassword } from '@/api/auth'
+import { getRoleList, getUserRoles, assignUserRoles, clearUserPermissionCache } from '@/api/permission'
+import { resetPassword, kickUser } from '@/api/auth'
+import { useUserStore } from '@/stores/user'
+
+// 用户状态管理
+const userStore = useUserStore()
 
 // ===== 搜索相关 =====
 
@@ -437,6 +457,24 @@ const handleDelete = async (row) => {
 }
 
 /**
+ * 踢出用户（强制下线，需二次确认）
+ * @param row 当前行的用户数据
+ */
+const handleKick = async (row) => {
+  await ElMessageBox.confirm(`确定要将用户「${row.username}」强制下线吗？该用户的所有设备将被踢出。`, '踢出确认', {
+    type: 'warning',
+    confirmButtonText: '确定踢出',
+    cancelButtonText: '取消'
+  })
+  try {
+    await kickUser(row.id)
+    ElMessage.success('已将用户踢出')
+  } catch (error) {
+    ElMessage.error('踢出失败')
+  }
+}
+
+/**
  * 打开设置密码对话框
  * 默认密码规则：姓名全拼 + 用户总数
  * @param {Object} row 当前行用户数据
@@ -525,6 +563,12 @@ const handleSaveRoles = async () => {
     await assignUserRoles(currentUserId.value, checkedRoleIds.value)
     ElMessage.success('保存成功')
     roleDialogVisible.value = false
+    // 清除目标用户的权限缓存，确保下次请求获取最新数据
+    await clearUserPermissionCache(currentUserId.value)
+    // 如果修改的是自己的角色，刷新当前用户的权限
+    if (String(currentUserId.value) === String(userStore.userInfo?.userId)) {
+      await userStore.refreshPermissions()
+    }
   } catch (error) {
     ElMessage.error('保存失败')
   } finally {

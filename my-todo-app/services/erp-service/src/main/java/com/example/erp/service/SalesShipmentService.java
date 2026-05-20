@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
-import com.example.erp.dto.AccountReceivableCreateRequest;
-import com.example.erp.dto.SalesOrderVO;
-import com.example.erp.dto.SalesShipmentCreateRequest;
-import com.example.erp.dto.SalesShipmentVO;
+import com.example.erp.api.vo.CreateReceivableVO;
+import com.example.erp.api.dto.SalesOrderDTO;
+import com.example.erp.api.dto.SalesOrderItemDTO;
+import com.example.erp.api.dto.SalesShipmentItemDTO;
+import com.example.erp.api.vo.CreateShipmentVO;
+import com.example.erp.api.dto.SalesShipmentDTO;
 import com.example.erp.entity.Customer;
 import com.example.erp.entity.Product;
 import com.example.erp.entity.SalesOrder;
@@ -15,9 +17,9 @@ import com.example.erp.entity.SalesOrderItem;
 import com.example.erp.entity.SalesShipment;
 import com.example.erp.entity.SalesShipmentItem;
 import com.example.erp.entity.Warehouse;
-import com.example.erp.dto.OutboundRequest;
-import com.example.erp.feign.FinanceServiceClient;
-import com.example.erp.feign.InventoryServiceClient;
+import com.example.inventory.api.vo.OutboundVO;
+import com.example.erp.api.feign.FinanceFeignClient;
+import com.example.erp.api.feign.InventoryFeignClient;
 import com.example.erp.mapper.SalesOrderItemMapper;
 import com.example.erp.mapper.SalesOrderMapper;
 import com.example.erp.mapper.SalesShipmentItemMapper;
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
  * <p>
  * 关键业务逻辑：
  * - 审核出库单时调用 InventoryService.outbound() 扣减库存
- * - 审核出库单时调用 FinanceServiceClient.createReceivable() 生成应收账款
+ * - 审核出库单时调用 FinanceFeignClient.createReceivable() 生成应收账款
  * - 更新销售订单明细的已发货数量和金额
  * - 更新销售订单的已发货总数和金额
  * - 全部发货完成后更新订单状态为"已出库"
@@ -66,9 +68,9 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
     private final CustomerService customerService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
-    private final InventoryServiceClient inventoryServiceClient;
+    private final InventoryFeignClient inventoryServiceClient;
     private final SalesOrderService salesOrderService;
-    private final FinanceServiceClient financeServiceClient;
+    private final FinanceFeignClient financeServiceClient;
 
     /**
      * 分页查询出库单列表
@@ -81,7 +83,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
      * @param status     出库状态（可选）
      * @return 出库单分页数据
      */
-    public Page<SalesShipmentVO> getShipmentPage(Long tenantId, int page, int size,
+    public Page<SalesShipmentDTO> getShipmentPage(Long tenantId, int page, int size,
                                                   String shipmentNo, Long orderId, Integer status) {
         LambdaQueryWrapper<SalesShipment> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SalesShipment::getTenantId, tenantId)
@@ -100,9 +102,9 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
         Page<SalesShipment> result = page(new Page<>(page, size), wrapper);
 
         // 转换为 VO
-        Page<SalesShipmentVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
-        List<SalesShipmentVO> voList = result.getRecords().stream().map(shipment -> {
-            SalesShipmentVO vo = convertToVO(shipment);
+        Page<SalesShipmentDTO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        List<SalesShipmentDTO> voList = result.getRecords().stream().map(shipment -> {
+            SalesShipmentDTO vo = convertToVO(shipment);
             // 获取出库明细
             List<SalesShipmentItem> items = salesShipmentItemMapper.selectList(
                 new LambdaQueryWrapper<SalesShipmentItem>()
@@ -122,12 +124,12 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
      * @param shipmentId 出库单ID
      * @return 出库单VO对象
      */
-    public SalesShipmentVO getShipmentDetail(Long shipmentId) {
+    public SalesShipmentDTO getShipmentDetail(Long shipmentId) {
         SalesShipment shipment = getById(shipmentId);
         if (shipment == null) {
             throw new BusinessException("出库单不存在");
         }
-        SalesShipmentVO vo = convertToVO(shipment);
+        SalesShipmentDTO vo = convertToVO(shipment);
 
         // 获取出库明细
         List<SalesShipmentItem> items = salesShipmentItemMapper.selectList(
@@ -145,7 +147,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
      * @param orderId 订单ID
      * @return 可发货的订单明细列表
      */
-    public List<SalesOrderVO.SalesOrderItemVO> getShippableItems(Long orderId) {
+    public List<SalesOrderItemDTO> getShippableItems(Long orderId) {
         SalesOrder order = salesOrderMapper.selectById(orderId);
         if (order == null) {
             throw new BusinessException("订单不存在");
@@ -166,7 +168,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
         return items.stream()
             .filter(item -> item.getQuantity().compareTo(item.getDeliveredQuantity()) > 0)
             .map(item -> {
-                SalesOrderVO.SalesOrderItemVO vo = new SalesOrderVO.SalesOrderItemVO();
+                SalesOrderItemDTO vo = new SalesOrderItemDTO();
                 BeanUtils.copyProperties(item, vo);
                 vo.setShippableQuantity(item.getQuantity().subtract(item.getDeliveredQuantity()));
                 return vo;
@@ -182,7 +184,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
      * @return 创建的出库单
      */
     @Transactional
-    public SalesShipment createShipment(SalesShipmentCreateRequest request, Long userId) {
+    public SalesShipment createShipment(CreateShipmentVO request, Long userId) {
         // 校验订单
         SalesOrder order = salesOrderMapper.selectById(request.getOrderId());
         if (order == null) {
@@ -201,7 +203,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
 
         // 计算出库总金额
         BigDecimal totalAmount = BigDecimal.ZERO;
-        for (SalesShipmentCreateRequest.ShipmentItemRequest itemReq : request.getItems()) {
+        for (CreateShipmentVO.ShipmentItemRequest itemReq : request.getItems()) {
             SalesOrderItem orderItem = salesOrderItemMapper.selectById(itemReq.getOrderItemId());
             if (orderItem == null || !orderItem.getOrderId().equals(order.getId())) {
                 throw new BusinessException("订单明细不存在或不属于该订单");
@@ -233,7 +235,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
         save(shipment);
 
         // 创建出库明细
-        for (SalesShipmentCreateRequest.ShipmentItemRequest itemReq : request.getItems()) {
+        for (CreateShipmentVO.ShipmentItemRequest itemReq : request.getItems()) {
             SalesOrderItem orderItem = salesOrderItemMapper.selectById(itemReq.getOrderItemId());
             Product product = productService.getById(orderItem.getProductId());
 
@@ -302,7 +304,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
 
         // 1. 扣减库存
         for (SalesShipmentItem item : shipmentItems) {
-            OutboundRequest outboundReq = new OutboundRequest();
+            OutboundVO outboundReq = new OutboundVO();
             outboundReq.setWarehouseId(shipment.getWarehouseId());
             outboundReq.setProductId(item.getProductId());
             outboundReq.setQuantity(item.getQuantity());
@@ -313,7 +315,7 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
         }
 
         // 2. 创建应收账款
-        AccountReceivableCreateRequest receivableRequest = new AccountReceivableCreateRequest();
+        CreateReceivableVO receivableRequest = new CreateReceivableVO();
         receivableRequest.setTenantId(shipment.getTenantId());
         receivableRequest.setBizNo(shipment.getShipmentNo());
         receivableRequest.setCustomerId(shipment.getCustomerId());
@@ -424,8 +426,8 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
     /**
      * 转换出库单为VO
      */
-    private SalesShipmentVO convertToVO(SalesShipment shipment) {
-        SalesShipmentVO vo = new SalesShipmentVO();
+    private SalesShipmentDTO convertToVO(SalesShipment shipment) {
+        SalesShipmentDTO vo = new SalesShipmentDTO();
         BeanUtils.copyProperties(shipment, vo);
         vo.setShipmentStatusText(getShipmentStatusText(shipment.getShipmentStatus()));
 
@@ -447,8 +449,8 @@ public class SalesShipmentService extends ServiceImpl<SalesShipmentMapper, Sales
     /**
      * 转换出库明细为VO
      */
-    private SalesShipmentVO.SalesShipmentItemVO convertItemToVO(SalesShipmentItem item) {
-        SalesShipmentVO.SalesShipmentItemVO vo = new SalesShipmentVO.SalesShipmentItemVO();
+    private SalesShipmentItemDTO convertItemToVO(SalesShipmentItem item) {
+        SalesShipmentItemDTO vo = new SalesShipmentItemDTO();
         BeanUtils.copyProperties(item, vo);
         return vo;
     }

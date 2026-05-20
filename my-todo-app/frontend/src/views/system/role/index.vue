@@ -37,7 +37,7 @@
       <template #header>
         <div class="card-header">
           <span>角色列表</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button v-if="userStore.hasPermission('system:role:create')" type="primary" @click="handleAdd">
             <el-icon><Plus /></el-icon>
             新增角色
           </el-button>
@@ -59,11 +59,11 @@
         <el-table-column prop="createdAt" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="250">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="warning" link @click="handleAssignPermission(row)">
+            <el-button v-if="userStore.hasPermission('system:role:update')" type="primary" link @click="handleEdit(row)">编辑</el-button>
+            <el-button v-if="userStore.hasPermission('system:role:assignPerm')" type="warning" link @click="handleAssignPermission(row)">
               分配权限
             </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button v-if="userStore.hasPermission('system:role:delete')" type="danger" link @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -139,7 +139,6 @@
         node-key="id"
         default-expand-all
         :default-checked-keys="checkedPermissionIds"
-        check-strictly
       />
       <template #footer>
         <el-button @click="permissionDialogVisible = false">取消</el-button>
@@ -154,6 +153,7 @@
 <script setup>
 // 角色管理页面逻辑：角色的增删改查、权限树加载与分配
 import { ref, reactive, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import {
@@ -163,8 +163,12 @@ import {
   deleteRole,
   getPermissionTree,
   getRolePermissions,
-  assignRolePermissions
+  assignRolePermissions,
+  clearUserPermissionCache
 } from '@/api/permission'
+
+// 用户状态管理
+const userStore = useUserStore()
 
 // ===== 搜索相关 =====
 
@@ -405,11 +409,17 @@ const handleSavePermission = async () => {
   if (!currentRoleId.value || !treeRef.value) return
   permissionLoading.value = true
   try {
-    // 获取所有被勾选的权限节点ID（不包括半选的父节点）
+    // 获取所有被勾选的权限节点ID + 半选状态的父节点ID
     const checkedKeys = treeRef.value.getCheckedKeys(false)
-    await assignRolePermissions(currentRoleId.value, checkedKeys)
+    const halfCheckedKeys = treeRef.value.getHalfCheckedKeys()
+    const allKeys = [...checkedKeys, ...halfCheckedKeys]
+    await assignRolePermissions(currentRoleId.value, allKeys)
     ElMessage.success('保存成功')
     permissionDialogVisible.value = false
+    // 清除当前用户的权限缓存，确保下次请求获取最新数据
+    await clearUserPermissionCache(userStore.userInfo?.userId)
+    // 刷新当前用户的权限（角色权限变更后需要重新加载）
+    await userStore.refreshPermissions()
   } catch (error) {
     ElMessage.error('保存失败')
   } finally {

@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.common.core.exception.BusinessException;
-import com.example.erp.dto.InboundRequest;
+import com.example.inventory.api.vo.InboundVO;
 import com.example.erp.entity.*;
-import com.example.erp.feign.InventoryServiceClient;
+import com.example.erp.api.feign.InventoryFeignClient;
 import com.example.erp.mapper.SalesReturnItemMapper;
 import com.example.erp.mapper.SalesReturnMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class SalesReturnService extends ServiceImpl<SalesReturnMapper, SalesRetu
     private final SalesReturnItemMapper returnItemMapper;
     private final CustomerService customerService;
     private final WarehouseService warehouseService;
-    private final InventoryServiceClient inventoryServiceClient;
+    private final InventoryFeignClient inventoryServiceClient;
 
     /**
      * 分页查询销售退货单
@@ -139,7 +139,7 @@ public class SalesReturnService extends ServiceImpl<SalesReturnMapper, SalesRetu
         );
         for (SalesReturnItem item : items) {
             String bizNo = "SR-" + salesReturn.getReturnNo();
-            InboundRequest inboundReq = new InboundRequest();
+            InboundVO inboundReq = new InboundVO();
             inboundReq.setWarehouseId(salesReturn.getWarehouseId());
             inboundReq.setProductId(item.getProductId());
             inboundReq.setQuantity(item.getQuantity());

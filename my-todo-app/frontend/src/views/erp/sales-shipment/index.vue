@@ -27,7 +27,7 @@
             <el-icon><Refresh /></el-icon>
             重置
           </el-button>
-          <el-button type="success" @click="handleCreate">
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:salesShipment:create')">
             <el-icon><Plus /></el-icon>
             新建出库单
           </el-button>
@@ -58,8 +58,8 @@
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看</el-button>
             <el-button v-if="row.shipmentStatus === 0" type="warning" link @click="handleEdit(row)">编辑</el-button>
-            <el-button v-if="row.shipmentStatus < 2" type="success" link @click="handleApprove(row)">审核出库</el-button>
-            <el-button v-if="row.shipmentStatus < 2" type="danger" link @click="handleCancel(row)">取消</el-button>
+            <el-button v-if="row.shipmentStatus < 2 && userStore.hasPermission('erp:salesShipment:approve')" type="success" link @click="handleApprove(row)">审核出库</el-button>
+            <el-button v-if="row.shipmentStatus < 2 && userStore.hasPermission('erp:salesShipment:cancel')" type="danger" link @click="handleCancel(row)">取消</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -176,6 +176,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 import {
   getSalesShipmentPage,
   getSalesShipmentDetail,

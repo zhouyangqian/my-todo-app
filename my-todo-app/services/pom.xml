@@ -16,6 +16,15 @@
     <description>Microservices modules</description>
 
     <modules>
+        <!-- API 模块（接口契约：DTO、VO、Feign） -->
+        <module>auth-service-api</module>
+        <module>user-service-api</module>
+        <module>permission-service-api</module>
+        <module>erp-service-api</module>
+        <module>finance-service-api</module>
+        <module>dict-service-api</module>
+        <module>inventory-service-api</module>
+        <!-- 服务模块（业务实现） -->
         <module>auth-service</module>
         <module>user-service</module>
         <module>permission-service</module>

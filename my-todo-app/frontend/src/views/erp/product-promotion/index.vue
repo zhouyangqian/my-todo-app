@@ -24,7 +24,7 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch"><el-icon><Search /></el-icon>搜索</el-button>
           <el-button @click="handleReset"><el-icon><Refresh /></el-icon>重置</el-button>
-          <el-button type="success" @click="handleCreate"><el-icon><Plus /></el-icon>新增促销</el-button>
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:productPromotion:create')"><el-icon><Plus /></el-icon>新增促销</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -64,10 +64,10 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="200">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button v-if="row.status === 0 || row.status === 2" type="success" link @click="handleEnable(row)">启用</el-button>
-            <el-button v-if="row.status === 1" type="warning" link @click="handleDisable(row)">停用</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:productPromotion:update')">编辑</el-button>
+            <el-button v-if="(row.status === 0 || row.status === 2) && userStore.hasPermission('erp:productPromotion:enable')" type="success" link @click="handleEnable(row)">启用</el-button>
+            <el-button v-if="row.status === 1 && userStore.hasPermission('erp:productPromotion:enable')" type="warning" link @click="handleDisable(row)">停用</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:productPromotion:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -154,6 +154,9 @@ import {
   deleteProductPromotion, enableProductPromotion, disableProductPromotion,
   getProductPage
 } from '@/api/erp'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({ promotionName: '', promotionType: undefined, status: undefined })
 const pagination = reactive({ page: 1, size: 10, total: 0 })

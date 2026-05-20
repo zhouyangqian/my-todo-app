@@ -1,6 +1,10 @@
 package com.example.auth.service;
 
-import com.example.auth.dto.*;
+import com.example.auth.api.dto.LoginDTO;
+import com.example.auth.api.vo.ChangePasswordVO;
+import com.example.auth.api.vo.LoginVO;
+import com.example.auth.api.vo.RefreshTokenVO;
+import com.example.auth.api.vo.RegisterVO;
 import com.example.auth.entity.LoginLog;
 import com.example.auth.entity.LoginSession;
 import com.example.auth.entity.RefreshToken;
@@ -66,7 +70,7 @@ public class AuthService {
      * @return 登录响应（令牌和用户信息）
      */
     @Transactional
-    public LoginResponse login(LoginRequest request, String ipAddress) {
+    public LoginDTO login(LoginVO request, String ipAddress) {
         // 根据用户名和租户ID查询用户
         User user = userMapper.selectOne(
             new LambdaQueryWrapper<User>()
@@ -170,12 +174,12 @@ public class AuthService {
         loginLogMapper.insert(loginLog);
 
         // 构造登录响应
-        return LoginResponse.builder()
+        return LoginDTO.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
                 .expiresIn(jwtTokenProvider.getJwtProperties().getAccessTokenExpiration() / 1000)
-                .userInfo(LoginResponse.UserInfo.builder()
+                .userInfo(LoginDTO.UserInfo.builder()
                         .userId(user.getId())
                         .username(user.getUsername())
                         .email(user.getEmail())
@@ -197,7 +201,7 @@ public class AuthService {
      * @return 新的登录响应
      */
     @Transactional
-    public LoginResponse refreshToken(RefreshTokenRequest request) {
+    public LoginDTO refreshToken(RefreshTokenVO request) {
         // 验证刷新令牌格式
         if (!jwtTokenProvider.validateToken(request.getRefreshToken())) {
             throw new BusinessException(2009, "无效的刷新令牌");
@@ -251,12 +255,12 @@ public class AuthService {
         newToken.setRevoked(0);
         refreshTokenMapper.insert(newToken);
 
-        return LoginResponse.builder()
+        return LoginDTO.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .tokenType("Bearer")
                 .expiresIn(jwtTokenProvider.getJwtProperties().getAccessTokenExpiration() / 1000)
-                .userInfo(LoginResponse.UserInfo.builder()
+                .userInfo(LoginDTO.UserInfo.builder()
                         .userId(user.getId())
                         .username(user.getUsername())
                         .email(user.getEmail())
@@ -326,7 +330,7 @@ public class AuthService {
      * @return 新创建的用户ID
      */
     @Transactional
-    public Long register(RegisterRequest request) {
+    public Long register(RegisterVO request) {
         // 校验两次密码是否一致
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new BusinessException(400, "两次输入的密码不一致");
@@ -381,7 +385,7 @@ public class AuthService {
      * @param request 修改密码请求
      */
     @Transactional
-    public void changePassword(Long userId, ChangePasswordRequest request) {
+    public void changePassword(Long userId, ChangePasswordVO request) {
         // 校验新密码和确认密码是否一致
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new BusinessException(400, "两次输入的密码不一致");

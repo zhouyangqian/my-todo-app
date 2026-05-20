@@ -1,6 +1,7 @@
 package com.example.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.erp.entity.SalesReturn;
@@ -21,6 +22,7 @@ public class SalesReturnController {
 
     private final SalesReturnService salesReturnService;
 
+    @RequiresPermission(code = "erp:salesReturn:list", name = "查询销售退货单列表")
     @Operation(summary = "分页查询销售退货单")
     @GetMapping("/get-return-page")
     public ApiResponse<PageResult<SalesReturn>> getReturnPage(
@@ -34,6 +36,7 @@ public class SalesReturnController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:salesReturn:detail", name = "查询销售退货单详情")
     @Operation(summary = "获取退货单详情")
     @GetMapping("/get-return/{id}")
     public ApiResponse<SalesReturn> getReturnDetail(@PathVariable Long id) {
@@ -41,6 +44,7 @@ public class SalesReturnController {
         return ApiResponse.success(salesReturn);
     }
 
+    @RequiresPermission(code = "erp:salesReturn:create", name = "创建销售退货单")
     @Operation(summary = "创建销售退货单")
     @PostMapping("/create-return")
     public ApiResponse<SalesReturn> createReturn(
@@ -51,6 +55,7 @@ public class SalesReturnController {
         return ApiResponse.success(created);
     }
 
+    @RequiresPermission(code = "erp:salesReturn:submit", name = "提交销售退货审核")
     @Operation(summary = "提交审核")
     @PostMapping("/submit-for-approval/{id}")
     public ApiResponse<Void> submitForApproval(@PathVariable Long id) {
@@ -58,6 +63,7 @@ public class SalesReturnController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:salesReturn:approve", name = "审核销售退货单")
     @Operation(summary = "审核退货单")
     @PostMapping("/approve-return/{id}")
     public ApiResponse<Void> approveReturn(
@@ -67,6 +73,7 @@ public class SalesReturnController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "erp:salesReturn:cancel", name = "取消销售退货单")
     @Operation(summary = "取消退货单")
     @PostMapping("/cancel-return/{id}")
     public ApiResponse<Void> cancelReturn(@PathVariable Long id) {

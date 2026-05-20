@@ -22,7 +22,7 @@
             <el-icon><Refresh /></el-icon>
             重置
           </el-button>
-          <el-button type="success" @click="handleCreate">
+          <el-button type="success" @click="handleCreate" v-if="userStore.hasPermission('erp:productCategory:create')">
             <el-icon><Plus /></el-icon>
             新建分类
           </el-button>
@@ -52,8 +52,8 @@
         <el-table-column prop="remark" label="备注" min-width="150" show-overflow-tooltip />
         <el-table-column label="操作" fixed="right" width="180">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-if="userStore.hasPermission('erp:productCategory:update')">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-if="userStore.hasPermission('erp:productCategory:delete')">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -128,6 +128,9 @@ import {
   updateProductCategory,
   deleteProductCategory
 } from '@/api/erp'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
 
 const searchForm = reactive({
   categoryName: '',
