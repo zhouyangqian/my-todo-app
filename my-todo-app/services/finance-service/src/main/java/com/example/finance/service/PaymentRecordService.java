@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -182,5 +184,27 @@ public class PaymentRecordService extends ServiceImpl<PaymentRecordMapper, Payme
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String random = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         return prefix + dateStr + random;
+    }
+
+    /**
+     * 按日期范围查询已审核的收支记录（用于报表生成）
+     *
+     * @param tenantId   租户ID
+     * @param recordType 收支类型: 1-收入, 2-支出
+     * @param startDate  开始日期
+     * @param endDate    结束日期
+     * @return 符合条件的已审核收支记录列表
+     */
+    public List<PaymentRecord> getByDateRange(Long tenantId, Integer recordType,
+                                               LocalDate startDate, LocalDate endDate) {
+        LambdaQueryWrapper<PaymentRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PaymentRecord::getTenantId, tenantId)
+               .eq(PaymentRecord::getDeleted, 0)
+               .eq(PaymentRecord::getStatus, 1) // 已审核
+               .eq(recordType != null, PaymentRecord::getRecordType, recordType)
+               .ge(PaymentRecord::getTransactionDate, startDate.atStartOfDay())
+               .le(PaymentRecord::getTransactionDate, endDate.atTime(23, 59, 59))
+               .orderByDesc(PaymentRecord::getTransactionDate);
+        return list(wrapper);
     }
 }

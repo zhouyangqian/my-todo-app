@@ -219,4 +219,27 @@ public class RoleController {
         roleService.assignPermissionsToRole(roleId, tenantId, request.getPermissionIds(), userId);
         return ApiResponse.success();
     }
+
+    @RequiresPermission(code = "system:role:detail", name = "查询角色继承权限")
+    @Operation(summary = "获取角色的继承权限（含父角色权限）")
+    @GetMapping("/get-inherited-permissions/{roleId}")
+    public ApiResponse<List<Long>> getInheritedPermissions(@PathVariable Long roleId) {
+        return ApiResponse.success(roleService.getInheritedPermissionIds(roleId));
+    }
+
+    @RequiresPermission(code = "system:role:detail", name = "查询角色继承链")
+    @Operation(summary = "获取角色的继承链")
+    @GetMapping("/get-inheritance-chain/{roleId}")
+    public ApiResponse<List<Role>> getInheritanceChain(@PathVariable Long roleId) {
+        return ApiResponse.success(roleService.getInheritanceChain(roleId));
+    }
+
+    @RequiresPermission(code = "system:role:checkInheritance", name = "检测循环继承")
+    @Operation(summary = "检测角色继承是否会导致循环")
+    @GetMapping("/check-circular-inheritance")
+    public ApiResponse<Boolean> checkCircularInheritance(
+            @RequestParam Long roleId,
+            @RequestParam Long parentId) {
+        return ApiResponse.success(roleService.hasCircularInheritance(roleId, parentId));
+    }
 }

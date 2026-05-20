@@ -163,3 +163,153 @@ export function updateBankAccount(id, data) {
 export function deleteBankAccount(id) {
   return del(`/finance/bank-accounts/delete-bank-account/${id}`)
 }
+
+// ============ 发票管理 API ============
+
+/**
+ * 分页查询发票列表
+ * @param {Object} params 分页参数和筛选条件（发票类型、方向、状态）
+ * @returns {Promise}
+ */
+export function getInvoicePage(params) {
+  return get('/finance/invoices/get-invoice-page', params)
+}
+
+/**
+ * 获取发票详情
+ * @param {string} id 发票ID
+ * @returns {Promise}
+ */
+export function getInvoice(id) {
+  return get(`/finance/invoices/get-invoice/${id}`)
+}
+
+/**
+ * 创建发票
+ * @param {Object} data 发票信息
+ * @returns {Promise}
+ */
+export function createInvoice(data) {
+  return post('/finance/invoices/create-invoice', data)
+}
+
+/**
+ * 更新发票
+ * @param {string} id 发票ID
+ * @param {Object} data 发票信息
+ * @returns {Promise}
+ */
+export function updateInvoice(id, data) {
+  return put(`/finance/invoices/update-invoice/${id}`, data)
+}
+
+/**
+ * 删除发票
+ * @param {string} id 发票ID
+ * @returns {Promise}
+ */
+export function deleteInvoice(id) {
+  return del(`/finance/invoices/delete-invoice/${id}`)
+}
+
+/**
+ * 作废发票
+ * @param {string} id 发票ID
+ * @returns {Promise}
+ */
+export function voidInvoice(id) {
+  return post(`/finance/invoices/void-invoice/${id}`)
+}
+
+/**
+ * 获取发票统计信息
+ * @returns {Promise}
+ */
+export function getInvoiceStatistics() {
+  return get('/finance/invoices/get-statistics')
+}
+
+// ============ 成本核算 API ============
+
+/**
+ * 分页查询成本配置列表
+ * @param {Object} params 分页参数
+ * @returns {Promise}
+ */
+export function getCostConfigPage(params) {
+  return get('/finance/cost/get-config-page', params)
+}
+
+/**
+ * 设置商品成本核算方法
+ * @param {Object} params productId, costMethod
+ * @returns {Promise}
+ */
+export function setCostMethod(params) {
+  return post('/finance/cost/set-cost-method', params)
+}
+
+/**
+ * 计算商品出库成本
+ * @param {Object} params productId, quantity, warehouseId
+ * @returns {Promise}
+ */
+export function calculateOutboundCost(params) {
+  return get('/finance/cost/calculate-outbound-cost', params)
+}
+
+/**
+ * 分页查询成本历史
+ * @param {Object} params 分页参数和筛选条件
+ * @returns {Promise}
+ */
+export function getCostHistoryPage(params) {
+  return get('/finance/cost/get-cost-history-page', params)
+}
+
+// ============ 财务报表 API ============
+
+/**
+ * 生成利润表
+ * @param {Object} params startDate, endDate
+ * @returns {Promise}
+ */
+export function generateIncomeStatement(params) {
+  return post('/finance/reports/generate-income-statement', params)
+}
+
+/**
+ * 生成资产负债表
+ * @param {Object} params asOfDate
+ * @returns {Promise}
+ */
+export function generateBalanceSheet(params) {
+  return post('/finance/reports/generate-balance-sheet', params)
+}
+
+/**
+ * 生成现金流量表
+ * @param {Object} params startDate, endDate
+ * @returns {Promise}
+ */
+export function generateCashFlow(params) {
+  return post('/finance/reports/generate-cash-flow', params)
+}
+
+/**
+ * 获取报表列表
+ * @param {Object} params reportType (可选)
+ * @returns {Promise}
+ */
+export function getReportList(params) {
+  return get('/finance/reports/get-report-list', params)
+}
+
+/**
+ * 锁定报表
+ * @param {string} id 报表ID
+ * @returns {Promise}
+ */
+export function lockReport(id) {
+  return post(`/finance/reports/lock-report/${id}`)
+}

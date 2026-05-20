@@ -249,6 +249,24 @@ public class InventoryService extends ServiceImpl<InventoryMapper, Inventory> {
         return inventoryFlowMapper.selectPage(new Page<>(page, size), wrapper);
     }
 
+    /**
+     * 库存调拨：将商品从一个仓库转移到另一个仓库
+     */
+    @Transactional
+    public void transfer(Long fromWarehouseId, Long toWarehouseId, Long productId,
+                          BigDecimal quantity, String transferNo, Long tenantId, Long operatorId) {
+        // 从源仓库出库
+        outbound(fromWarehouseId, productId, quantity, 8, transferNo, null, tenantId, operatorId);
+        // 入库到目标仓库
+        Inventory sourceInventory = getInventory(fromWarehouseId, productId);
+        inbound(toWarehouseId, productId, quantity,
+                sourceInventory != null ? sourceInventory.getCostPrice() : null,
+                null, 8, transferNo, null, tenantId, operatorId);
+
+        log.info("库存调拨成功: 商品={}, 从仓库={}, 到仓库={}, 数量={}, 单号={}",
+                productId, fromWarehouseId, toWarehouseId, quantity, transferNo);
+    }
+
     public List<Inventory> getAlertInventories(Long tenantId, Long warehouseId) {
         LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Inventory::getTenantId, tenantId)

@@ -153,6 +153,19 @@ public class InventoryController {
         return ApiResponse.success(pageResult);
     }
 
+    @RequiresPermission(code = "erp:inventory:transfer", name = "库存调拨")
+    @Operation(summary = "库存调拨")
+    @PostMapping("/transfer")
+    public ApiResponse<Void> transfer(
+            @Valid @RequestBody StockTransferVO request,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestHeader("X-User-Id") Long userId) {
+        inventoryService.transfer(request.getFromWarehouseId(), request.getToWarehouseId(),
+                request.getProductId(), request.getQuantity(),
+                request.getTransferNo(), tenantId, userId);
+        return ApiResponse.success();
+    }
+
     @RequiresPermission(code = "inventory:inventory:list", name = "查询库存列表")
     @Operation(summary = "获取库存预警列表")
     @GetMapping("/get-alert-inventories")

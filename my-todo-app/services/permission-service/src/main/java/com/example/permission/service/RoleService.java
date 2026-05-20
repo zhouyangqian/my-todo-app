@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -254,5 +254,93 @@ public class RoleService extends ServiceImpl<RoleMapper, Role> {
                     .eq(RolePermission::getRoleId, roleId)
             );
         }
+    }
+
+    // ==================== 角色继承相关 ====================
+
+    /** 最大继承层级 */
+    private static final int MAX_INHERITANCE_DEPTH = 5;
+
+    /**
+     * 检测角色继承是否会导致循环继承
+     *
+     * @param roleId   当前角色ID
+     * @param parentId 要设置的父角色ID
+     * @return true-存在循环，false-无循环
+     */
+    public boolean hasCircularInheritance(Long roleId, Long parentId) {
+        if (parentId == null || parentId == 0L) {
+            return false;
+        }
+        Set<Long> visited = new HashSet<>();
+        visited.add(roleId);
+        Long current = parentId;
+        int depth = 0;
+
+        while (current != null && current != 0L) {
+            if (visited.contains(current)) {
+                return true;
+            }
+            visited.add(current);
+            depth++;
+            if (depth > MAX_INHERITANCE_DEPTH) {
+                return true;
+            }
+            Role parent = getById(current);
+            current = parent != null ? parent.getParentId() : null;
+        }
+        return false;
+    }
+
+    /**
+     * 获取角色的所有继承权限（包含父角色的权限）
+     * <p>
+     * 递归向上查找父角色，合并所有层级的权限ID。
+     * 最多递归5层，防止无限循环。
+     * </p>
+     *
+     * @param roleId 角色ID
+     * @return 合并后的权限ID列表（去重）
+     */
+    public List<Long> getInheritedPermissionIds(Long roleId) {
+        Set<Long> allPermissions = new LinkedHashSet<>();
+        collectInheritedPermissions(roleId, allPermissions, 0);
+        return new ArrayList<>(allPermissions);
+    }
+
+    private void collectInheritedPermissions(Long roleId, Set<Long> permissions, int depth) {
+        if (roleId == null || depth > MAX_INHERITANCE_DEPTH) {
+            return;
+        }
+        // 收集当前角色的权限
+        List<Long> rolePerms = getPermissionIdsByRoleId(roleId);
+        permissions.addAll(rolePerms);
+
+        // 递归收集父角色权限
+        Role role = getById(roleId);
+        if (role != null && role.getParentId() != null && role.getParentId() != 0L) {
+            collectInheritedPermissions(role.getParentId(), permissions, depth + 1);
+        }
+    }
+
+    /**
+     * 获取角色的继承链（从当前角色到顶级角色）
+     *
+     * @param roleId 角色ID
+     * @return 继承链列表，按层级从子到父排序
+     */
+    public List<Role> getInheritanceChain(Long roleId) {
+        List<Role> chain = new ArrayList<>();
+        Set<Long> visited = new HashSet<>();
+        Long currentId = roleId;
+
+        while (currentId != null && currentId != 0L && !visited.contains(currentId)) {
+            visited.add(currentId);
+            Role role = getById(currentId);
+            if (role == null) break;
+            chain.add(role);
+            currentId = role.getParentId();
+        }
+        return chain;
     }
 }
