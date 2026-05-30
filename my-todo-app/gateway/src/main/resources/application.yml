@@ -99,6 +99,12 @@ rate-limit:
     limit: 500
     period: 60
 
+# API Key 认证配置
+gateway:
+  api-key:
+    enabled: true
+    default-key: ${API_KEY_DEFAULT:dev-test-api-key-2024}
+
 # 健康检查配置
 health-check:
   enabled: true

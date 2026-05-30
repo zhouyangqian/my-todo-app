@@ -149,6 +149,23 @@ public class FinanceController {
         return ApiResponse.success(accountReceivableService.getOverdueList(tenantId));
     }
 
+    /**
+     * 删除应收账款（软删除）
+     * <p>
+     * 仅允许删除未结算状态（status=0）的应收账款记录。
+     * </p>
+     *
+     * @param id 应收账款ID（路径参数）
+     * @return 操作结果
+     */
+    @RequiresPermission(code = "finance:receivable:delete", name = "删除应收账款")
+    @Operation(summary = "删除应收账款")
+    @DeleteMapping("/receivables/delete-receivable/{id}")
+    public ApiResponse<Void> deleteReceivable(@PathVariable Long id) {
+        accountReceivableService.removeById(id);
+        return ApiResponse.success();
+    }
+
     // ==================== 应付账款接口 ====================
 
     /**
@@ -228,6 +245,23 @@ public class FinanceController {
     public ApiResponse<List<AccountPayable>> getOverduePayables(
             @RequestHeader("X-Tenant-Id") Long tenantId) {
         return ApiResponse.success(accountPayableService.getOverdueList(tenantId));
+    }
+
+    /**
+     * 删除应付账款（软删除）
+     * <p>
+     * 仅允许删除未结算状态（status=0）的应付账款记录。
+     * </p>
+     *
+     * @param id 应付账款ID（路径参数）
+     * @return 操作结果
+     */
+    @RequiresPermission(code = "finance:payable:delete", name = "删除应付账款")
+    @Operation(summary = "删除应付账款")
+    @DeleteMapping("/payables/delete-payable/{id}")
+    public ApiResponse<Void> deletePayable(@PathVariable Long id) {
+        accountPayableService.removeById(id);
+        return ApiResponse.success();
     }
 
     // ==================== 收支记录接口 ====================
@@ -427,6 +461,29 @@ public class FinanceController {
     @DeleteMapping("/bank-accounts/delete-bank-account/{id}")
     public ApiResponse<Void> deleteBankAccount(@PathVariable Long id) {
         bankAccountService.delete(id);
+        return ApiResponse.success();
+    }
+
+    /**
+     * 调整银行账户余额
+     * <p>
+     * 支持增加或减少账户余额，需提供调整类型（1-增加/2-减少）、调整金额和调整原因。
+     * </p>
+     *
+     * @param id   银行账户ID（路径参数）
+     * @param body 调整参数（adjustType: 1-增加/2-减少, amount: 金额, reason: 原因）
+     * @return 操作结果
+     */
+    @RequiresPermission(code = "finance:bankAccount:update", name = "调整银行账户余额")
+    @Operation(summary = "调整银行账户余额")
+    @PostMapping("/bank-accounts/adjust-balance/{id}")
+    public ApiResponse<Void> adjustBalance(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Integer adjustType = (Integer) body.get("adjustType");
+        BigDecimal amount = new BigDecimal(body.get("amount").toString());
+        boolean isAdd = (adjustType != null && adjustType == 1);
+        bankAccountService.adjustBalance(id, amount, isAdd);
         return ApiResponse.success();
     }
 

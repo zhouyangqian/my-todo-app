@@ -568,6 +568,14 @@ export function deleteProductPrice(id) {
 
 // ============ 报表统计 API ============
 
+/**
+ * 获取工作台统计数据
+ * @returns {Promise}
+ */
+export function getDashboardStats() {
+  return get('/erp/dashboard/stats')
+}
+
 export function getDashboard() {
   return get('/erp/reports/dashboard')
 }

@@ -7,6 +7,8 @@ import com.example.erp.api.vo.CreatePurchaseOrderVO;
 import com.example.erp.api.vo.PurchaseInboundVO;
 import com.example.erp.entity.PurchaseOrder;
 
+import java.math.BigDecimal;
+
 /**
  * 采购订单服务接口
  */
@@ -28,4 +30,8 @@ public interface PurchaseOrderService extends IService<PurchaseOrder> {
     void cancelOrder(Long orderId, Long userId);
 
     void inbound(Long orderId, PurchaseInboundVO request, Long tenantId, Long userId);
+
+    long countByStatus(Long tenantId, Integer status);
+
+    BigDecimal sumTotalAmount(Long tenantId);
 }

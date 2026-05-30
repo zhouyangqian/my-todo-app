@@ -45,6 +45,13 @@ export function changePassword(data) {
 }
 
 /**
+ * 获取当前用户档案信息
+ */
+export function getProfile() {
+  return get('/auth/profile')
+}
+
+/**
  * 管理员重置用户密码（无需旧密码）
  * @param {Object} data 包含 userId 和 newPassword
  */

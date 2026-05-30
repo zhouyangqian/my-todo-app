@@ -322,6 +322,27 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
         log.info("采购入库成功: 订单号={}, 全部入库={}", order.getOrderNo(), allReceived);
     }
 
+    @Override
+    public long countByStatus(Long tenantId, Integer status) {
+        return lambdaQuery()
+            .eq(PurchaseOrder::getTenantId, tenantId)
+            .eq(PurchaseOrder::getOrderStatus, status)
+            .eq(PurchaseOrder::getDeleted, 0)
+            .count();
+    }
+
+    @Override
+    public BigDecimal sumTotalAmount(Long tenantId) {
+        List<PurchaseOrder> list = lambdaQuery()
+            .eq(PurchaseOrder::getTenantId, tenantId)
+            .ne(PurchaseOrder::getOrderStatus, 5) // 排除已取消
+            .eq(PurchaseOrder::getDeleted, 0)
+            .list();
+        return list.stream()
+            .map(PurchaseOrder::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private String generateOrderNo(Long tenantId) {
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "PO" + dateStr;

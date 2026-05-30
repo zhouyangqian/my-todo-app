@@ -4,15 +4,23 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
+import com.example.user.cache.UserCache;
+import com.example.user.dto.UserCreateDTO;
+import com.example.user.dto.UserUpdateDTO;
+import com.example.user.dto.UserVO;
+import com.example.user.entity.Role;
 import com.example.user.entity.User;
 import com.example.user.entity.UserAddress;
+import com.example.user.service.RoleService;
 import com.example.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户管理控制器
@@ -35,6 +43,12 @@ public class UserController {
     /** 用户业务逻辑服务，处理用户相关的核心业务 */
     private final UserService userService;
 
+    /** 角色服务，用于查询用户角色信息 */
+    private final RoleService roleService;
+
+    /** 用户缓存组件 */
+    private final UserCache userCache;
+
     /**
      * 分页查询用户列表
      * <p>
@@ -54,7 +68,7 @@ public class UserController {
     @RequiresPermission(code = "system:user:list", name = "查询用户列表")
     @Operation(summary = "分页查询用户")
     @GetMapping("/get-user-page")
-    public ApiResponse<PageResult<User>> getUserPage(
+    public ApiResponse<PageResult<UserVO>> getUserPage(
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -64,13 +78,19 @@ public class UserController {
             @RequestParam(required = false) Integer status) {
         // 调用服务层执行分页查询
         Page<User> result = userService.getUserPage(tenantId, page, size, username, realName, deptId, status);
-        // 转换为 PageResult 返回
-        PageResult<User> pageResult = PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        // 转换为 UserVO 分页结果
+        List<UserVO> voList = result.getRecords().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+        PageResult<UserVO> pageResult = PageResult.of(voList, result.getTotal(), result.getCurrent(), result.getSize());
         return ApiResponse.success(pageResult);
     }
 
     /**
      * 根据用户ID获取用户详情
+     * <p>
+     * 优先从缓存获取，缓存未命中则查询数据库并回填缓存。
+     * </p>
      *
      * @param id 用户ID，通过URL路径传入
      * @return 用户详细信息
@@ -78,10 +98,23 @@ public class UserController {
     @RequiresPermission(code = "system:user:detail", name = "查询用户详情")
     @Operation(summary = "获取用户详情")
     @GetMapping("/get-user/{id}")
-    public ApiResponse<User> getUser(@PathVariable Long id) {
-        // 根据主键查询用户信息
+    public ApiResponse<UserVO> getUser(
+            @PathVariable Long id,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        // 优先从缓存获取
+        UserVO cached = userCache.get(tenantId, id);
+        if (cached != null) {
+            return ApiResponse.success(cached);
+        }
+        // 缓存未命中，查询数据库
         User user = userService.getUserById(id);
-        return ApiResponse.success(user);
+        if (user == null) {
+            return ApiResponse.success(null);
+        }
+        UserVO vo = convertToVO(user);
+        // 回填缓存
+        userCache.put(tenantId, vo);
+        return ApiResponse.success(vo);
     }
 
     /**
@@ -91,7 +124,7 @@ public class UserController {
      * 保证数据归属和审计信息的完整性。
      * </p>
      *
-     * @param user     用户信息，通过请求体以JSON格式传入
+     * @param dto      创建用户请求数据
      * @param tenantId 租户ID，从请求头中获取，用于多租户数据隔离
      * @param userId   当前操作用户ID，从请求头中获取，记录创建人
      * @return 创建成功后的用户信息（含自动生成的ID）
@@ -99,17 +132,28 @@ public class UserController {
     @Operation(summary = "创建用户")
     @RequiresPermission(code = "system:user:create", name = "新增用户")
     @PostMapping("/create-user")
-    public ApiResponse<User> createUser(
-            @RequestBody User user,
+    public ApiResponse<UserVO> createUser(
+            @RequestBody @Valid UserCreateDTO dto,
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
+        // DTO 转 Entity
+        User user = new User();
+        user.setUserName(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setRealName(dto.getRealName());
+        user.setDeptId(dto.getDepartmentId());
         // 设置租户ID，确保用户归属于当前租户
         user.setTenantId(tenantId);
         // 设置创建人ID，用于审计追踪
         user.setCreatedBy(userId);
         // 调用服务层创建用户（会校验用户名唯一性）
         User created = userService.createUser(user);
-        return ApiResponse.success(created);
+        // 如果 DTO 中包含角色列表，自动分配角色
+        if (dto.getRoleIdList() != null && !dto.getRoleIdList().isEmpty()) {
+            roleService.assignRolesToUser(created.getId(), dto.getRoleIdList(), tenantId);
+        }
+        return ApiResponse.success(convertToVO(created));
     }
 
     /**
@@ -120,24 +164,35 @@ public class UserController {
      * </p>
      *
      * @param id     要更新的用户ID，通过URL路径传入
-     * @param user   更新后的用户信息，通过请求体以JSON格式传入
+     * @param dto    更新用户请求数据
+     * @param tenantId 租户ID
      * @param userId 当前操作用户ID，从请求头中获取，记录更新人
      * @return 更新后的用户完整信息
      */
     @Operation(summary = "更新用户")
     @RequiresPermission(code = "system:user:update", name = "更新用户")
     @PutMapping("/update-user/{id}")
-    public ApiResponse<User> updateUser(
+    public ApiResponse<UserVO> updateUser(
             @PathVariable Long id,
-            @RequestBody User user,
+            @RequestBody @Valid UserUpdateDTO dto,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader(value = "X-User-Id", required = false) Long userId) {
-        // 将路径中的ID设置到用户对象，确保更新的是目标用户
+        // DTO 转 Entity
+        User user = new User();
         user.setId(id);
-        // 设置更新人ID，用于审计追踪（如果请求头中没有则使用默认值）
+        user.setEmail(dto.getEmail());
+        user.setPhone(dto.getPhone());
+        user.setRealName(dto.getRealName());
+        user.setAvatar(dto.getAvatar());
+        user.setDeptId(dto.getDepartmentId());
+        user.setStatus(dto.getStatus());
+        // 设置更新人ID，用于审计追踪
         user.setUpdatedBy(userId != null ? userId : 1L);
         // 调用服务层执行更新操作
         User updated = userService.updateUser(user);
-        return ApiResponse.success(updated);
+        // 清除缓存
+        userCache.evict(tenantId, id);
+        return ApiResponse.success(convertToVO(updated));
     }
 
     /**
@@ -147,59 +202,61 @@ public class UserController {
      * 已删除的用户在查询时会被自动过滤。
      * </p>
      *
-     * @param id 要删除的用户ID，通过URL路径传入
+     * @param id       要删除的用户ID，通过URL路径传入
+     * @param tenantId 租户ID
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "删除用户")
     @RequiresPermission(code = "system:user:delete", name = "删除用户")
     @DeleteMapping("/delete-user/{id}")
-    public ApiResponse<Void> deleteUser(@PathVariable Long id) {
+    public ApiResponse<Void> deleteUser(
+            @PathVariable Long id,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         // 调用服务层执行软删除
         userService.deleteUser(id);
+        // 清除缓存
+        userCache.evict(tenantId, id);
         return ApiResponse.success();
     }
 
     /**
      * 启用用户
-     * <p>
-     * 将用户状态设置为1（启用），启用后用户可以正常登录和使用系统。
-     * </p>
      *
-     * @param id 要启用的用户ID，通过URL路径传入
+     * @param id       要启用的用户ID
+     * @param tenantId 租户ID
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "启用用户")
     @RequiresPermission(code = "system:user:enable", name = "启用用户")
     @PostMapping("/enable-user/{id}")
-    public ApiResponse<Void> enableUser(@PathVariable Long id) {
-        // 将用户状态设置为1（启用）
+    public ApiResponse<Void> enableUser(
+            @PathVariable Long id,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         userService.updateUserStatus(id, 1);
+        userCache.evict(tenantId, id);
         return ApiResponse.success();
     }
 
     /**
      * 禁用用户
-     * <p>
-     * 将用户状态设置为0（禁用），禁用后用户无法登录和访问系统资源。
-     * </p>
      *
-     * @param id 要禁用的用户ID，通过URL路径传入
+     * @param id       要禁用的用户ID
+     * @param tenantId 租户ID
      * @return 空响应体，表示操作成功
      */
     @Operation(summary = "禁用用户")
     @RequiresPermission(code = "system:user:disable", name = "禁用用户")
     @PostMapping("/disable-user/{id}")
-    public ApiResponse<Void> disableUser(@PathVariable Long id) {
-        // 将用户状态设置为0（禁用）
+    public ApiResponse<Void> disableUser(
+            @PathVariable Long id,
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
         userService.updateUserStatus(id, 0);
+        userCache.evict(tenantId, id);
         return ApiResponse.success();
     }
 
     /**
      * 获取指定用户的地址列表
-     * <p>
-     * 查询某个用户下所有未删除的收货地址，默认地址排在最前面。
-     * </p>
      *
      * @param id 用户ID，通过URL路径传入
      * @return 该用户的所有收货地址列表
@@ -208,22 +265,17 @@ public class UserController {
     @Operation(summary = "获取用户地址列表")
     @GetMapping("/{id}/addresses")
     public ApiResponse<List<UserAddress>> getUserAddresses(@PathVariable Long id) {
-        // 查询该用户的所有有效地址
         List<UserAddress> addresses = userService.getUserAddresses(id);
         return ApiResponse.success(addresses);
     }
 
     /**
      * 为指定用户新增收货地址
-     * <p>
-     * 自动填充用户ID和租户ID，如果该地址被设置为默认地址，
-     * 服务层会自动取消该用户的其他默认地址。
-     * </p>
      *
-     * @param id       用户ID，通过URL路径传入
-     * @param address  地址信息，通过请求体以JSON格式传入
-     * @param tenantId 租户ID，从请求头中获取，用于多租户数据隔离
-     * @return 新增成功后的地址信息（含自动生成的ID）
+     * @param id       用户ID
+     * @param address  地址信息
+     * @param tenantId 租户ID
+     * @return 新增成功后的地址信息
      */
     @Operation(summary = "添加用户地址")
     @PostMapping("/{id}/addresses")
@@ -231,33 +283,59 @@ public class UserController {
             @PathVariable Long id,
             @RequestBody UserAddress address,
             @RequestHeader("X-Tenant-Id") Long tenantId) {
-        // 设置地址归属的用户ID
         address.setUserId(id);
-        // 设置租户ID，确保数据隔离
         address.setTenantId(tenantId);
-        // 调用服务层新增地址（如果为默认地址会自动处理其他地址的默认状态）
         UserAddress created = userService.addAddress(address);
         return ApiResponse.success(created);
     }
 
     /**
      * 设置默认收货地址
-     * <p>
-     * 将指定地址设置为默认地址，同时自动取消该用户下其他地址的默认状态，
-     * 确保每个用户只有一个默认收货地址。
-     * </p>
      *
-     * @param id        用户ID，通过URL路径传入
-     * @param addressId 要设为默认的地址ID，通过URL路径传入
-     * @return 空响应体，表示操作成功
+     * @param id        用户ID
+     * @param addressId 要设为默认的地址ID
+     * @return 空响应体
      */
     @Operation(summary = "设置默认地址")
     @PostMapping("/{id}/addresses/{addressId}/default")
     public ApiResponse<Void> setDefaultAddress(
             @PathVariable Long id,
             @PathVariable Long addressId) {
-        // 调用服务层设置默认地址（会先取消已有的默认地址）
         userService.setDefaultAddress(id, addressId);
         return ApiResponse.success();
+    }
+
+    /**
+     * 将 User Entity 转换为 UserVO
+     */
+    private UserVO convertToVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO vo = new UserVO();
+        vo.setId(user.getId());
+        vo.setTenantId(user.getTenantId());
+        vo.setUsername(user.getUserName());
+        vo.setEmail(user.getEmail());
+        vo.setPhone(user.getPhone());
+        vo.setRealName(user.getRealName());
+        vo.setAvatar(user.getAvatar());
+        vo.setDepartmentId(user.getDeptId());
+        vo.setStatus(user.getStatus());
+        vo.setCreatedBy(user.getCreatedBy());
+        vo.setCreatedAt(user.getCreatedAt());
+        vo.setUpdatedBy(user.getUpdatedBy());
+        vo.setUpdatedAt(user.getUpdatedAt());
+        // 查询用户角色名称列表
+        try {
+            List<Role> roles = roleService.getRolesByUserId(user.getId());
+            vo.setRoleNames(roles.stream()
+                    .map(Role::getRoleName)
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            // 角色查询失败不影响主流程
+            vo.setRoleNames(List.of());
+        }
+        return vo;
     }
 }

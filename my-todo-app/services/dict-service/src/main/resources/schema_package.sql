@@ -38,3 +38,15 @@ CREATE TABLE IF NOT EXISTS marketing_activity (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS activity_participation (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    activity_id BIGINT NOT NULL COMMENT '活动ID',
+    tenant_id BIGINT NOT NULL COMMENT '租户ID',
+    status INT NOT NULL DEFAULT 1 COMMENT '0=已取消 1=已参与',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_activity_id (activity_id),
+    INDEX idx_tenant_id (tenant_id),
+    UNIQUE INDEX uk_activity_tenant (activity_id, tenant_id)
+);

@@ -263,6 +263,27 @@ public class SalesOrderServiceImpl extends ServiceImpl<SalesOrderMapper, SalesOr
         log.info("取消销售订单: {}", order.getOrderNo());
     }
 
+    @Override
+    public long countByStatus(Long tenantId, Integer status) {
+        return lambdaQuery()
+            .eq(SalesOrder::getTenantId, tenantId)
+            .eq(SalesOrder::getOrderStatus, status)
+            .eq(SalesOrder::getDeleted, 0)
+            .count();
+    }
+
+    @Override
+    public BigDecimal sumTotalAmount(Long tenantId) {
+        List<SalesOrder> list = lambdaQuery()
+            .eq(SalesOrder::getTenantId, tenantId)
+            .ne(SalesOrder::getOrderStatus, 5) // 排除已取消
+            .eq(SalesOrder::getDeleted, 0)
+            .list();
+        return list.stream()
+            .map(SalesOrder::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private String generateOrderNo(Long tenantId) {
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "SO" + dateStr;

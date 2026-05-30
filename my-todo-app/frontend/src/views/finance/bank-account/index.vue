@@ -172,7 +172,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
-import { getBankAccountPage, createBankAccount, updateBankAccount, deleteBankAccount } from '@/api/finance'
+import { getBankAccountPage, createBankAccount, updateBankAccount, deleteBankAccount, adjustBalance } from '@/api/finance'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -328,7 +328,7 @@ const handleAdjustSubmit = async () => {
     if (!valid) return
     adjustLoading.value = true
     try {
-      // await adjustBalance(currentRow.value.id, adjustForm)
+      await adjustBalance(currentRow.value.id, adjustForm)
       ElMessage.success('调账成功')
       adjustDialogVisible.value = false
       loadData()

@@ -1,6 +1,6 @@
 <!-- views/login/index.vue - 登录页面
   提供用户名密码输入表单，调用用户 Store 执行登录操作
-  包含表单验证、验证码、加载状态、回车提交等功能
+  包含表单验证、验证码（登录失败3次后显示）、加载状态、回车提交等功能
 -->
 <template>
   <div class="login-container">
@@ -33,26 +33,14 @@
             @keyup.enter="handleLogin"
           />
         </el-form-item>
-        <!-- 验证码输入框和图片 -->
-        <el-form-item prop="captchaValue">
-          <div class="captcha-row">
-            <el-input
-              v-model="loginForm.captchaValue"
-              placeholder="验证码"
-              prefix-icon="Key"
-              size="large"
-              class="captcha-input"
-              @keyup.enter="handleLogin"
-            />
-            <img
-              v-if="captchaImage"
-              :src="captchaImage"
-              alt="验证码"
-              class="captcha-img"
-              @click="refreshCaptcha"
-              title="点击刷新验证码"
-            />
-          </div>
+        <!-- 验证码：登录失败次数 >= 3 时显示 -->
+        <el-form-item v-if="showCaptcha" prop="captchaValue">
+          <Captcha
+            ref="captchaRef"
+            @update:captcha-key="loginForm.captchaKey = $event"
+            @update:captcha-code="loginForm.captchaValue = $event"
+            @enter="handleLogin"
+          />
         </el-form-item>
         <!-- 登录按钮 -->
         <el-form-item>
@@ -81,19 +69,24 @@
 
 <script setup>
 // 登录页面逻辑：表单数据绑定、验证规则、验证码、登录提交处理
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { getCaptcha } from '@/api/auth'
+import Captcha from '@/components/Captcha.vue'
 
 // 用户状态管理实例，用于调用登录方法
 const userStore = useUserStore()
 
 // 登录表单引用，用于触发表单验证
 const loginFormRef = ref()
+// 验证码组件引用
+const captchaRef = ref()
 // 登录按钮加载状态，防止重复提交
 const loading = ref(false)
-// 验证码图片（Base64）
-const captchaImage = ref('')
+// 登录失败次数
+const failCount = ref(0)
+
+// 是否显示验证码（失败次数 >= 3 时显示）
+const showCaptcha = computed(() => failCount.value >= 3)
 
 // 登录表单数据（预填充默认账号，方便开发调试）
 const loginForm = reactive({
@@ -103,34 +96,25 @@ const loginForm = reactive({
   captchaValue: ''
 })
 
-// 表单验证规则
-const loginRules = {
-  userName: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
-  ],
-  captchaValue: [
-    { required: true, message: '请输入验证码', trigger: 'blur' }
-  ]
-}
-
-/**
- * 获取验证码
- * 调用后端接口获取验证码Key和图片
- */
-const refreshCaptcha = async () => {
-  try {
-    const data = await getCaptcha()
-    captchaImage.value = data.captchaImage
-    loginForm.captchaKey = data.captchaKey
-    loginForm.captchaValue = ''
-  } catch (error) {
-    console.error('获取验证码失败:', error)
+// 表单验证规则（根据是否显示验证码动态决定）
+const loginRules = computed(() => {
+  const rules = {
+    userName: [
+      { required: true, message: '请输入用户名', trigger: 'blur' }
+    ],
+    password: [
+      { required: true, message: '请输入密码', trigger: 'blur' },
+      { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+    ]
   }
-}
+  // 验证码显示时才添加验证规则
+  if (showCaptcha.value) {
+    rules.captchaValue = [
+      { required: true, message: '请输入验证码', trigger: 'blur' }
+    ]
+  }
+  return rules
+})
 
 /**
  * 处理登录操作
@@ -150,19 +134,18 @@ const handleLogin = async () => {
         await userStore.loginAction(loginForm.userName, loginForm.password, loginForm.captchaKey, loginForm.captchaValue)
       } catch (error) {
         console.error('Login failed:', error)
-        // 登录失败刷新验证码
-        refreshCaptcha()
+        // 登录失败，累加失败次数
+        failCount.value++
+        // 验证码已显示时，登录失败后刷新验证码
+        if (showCaptcha.value && captchaRef.value) {
+          captchaRef.value.refresh()
+        }
       } finally {
         loading.value = false
       }
     }
   })
 }
-
-// 页面加载时获取验证码
-onMounted(() => {
-  refreshCaptcha()
-})
 </script>
 
 <style lang="scss" scoped>
@@ -200,25 +183,6 @@ onMounted(() => {
     .login-form {
       .login-btn {
         width: 100%;
-      }
-
-      .captcha-row {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        gap: 10px;
-
-        .captcha-input {
-          flex: 1;
-        }
-
-        .captcha-img {
-          height: 40px;
-          cursor: pointer;
-          border: 1px solid #dcdfe6;
-          border-radius: 4px;
-          flex-shrink: 0;
-        }
       }
     }
 

@@ -200,7 +200,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Warning } from '@element-plus/icons-vue'
-import { getReceivablePage, createReceivable, receivePayment, getOverdueReceivables } from '@/api/finance'
+import { getReceivablePage, createReceivable, receivePayment, getOverdueReceivables, deleteReceivable } from '@/api/finance'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -375,7 +375,7 @@ const handleReceiveSubmit = async () => {
 const handleDelete = async (row) => {
   await ElMessageBox.confirm('确定要删除该应收账款吗?', '提示', { type: 'warning' })
   try {
-    // await deleteReceivable(row.id)
+    await deleteReceivable(row.id)
     ElMessage.success('删除成功')
     loadData()
   } catch (error) {

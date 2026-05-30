@@ -212,6 +212,18 @@ public class CircuitBreakerService {
     }
 
     /**
+     * 重置服务的断路器状态
+     *
+     * @param serviceId 服务标识
+     */
+    public void reset(String serviceId) {
+        CircuitBreakerState removed = breakerMap.remove(serviceId);
+        if (removed != null) {
+            log.info("断路器已重置: {}", serviceId);
+        }
+    }
+
+    /**
      * 获取或创建服务的断路器状态
      */
     private CircuitBreakerState getOrCreate(String serviceId) {

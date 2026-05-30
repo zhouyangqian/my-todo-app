@@ -6,10 +6,14 @@ import com.example.finance.entity.FinReport;
 import com.example.finance.service.FinanceReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -73,5 +77,43 @@ public class FinanceReportController {
             @RequestHeader("X-User-Id") Long userId) {
         reportService.lockReport(id, userId);
         return ApiResponse.success();
+    }
+
+    @RequiresPermission(code = "finance:report:export", name = "导出财务报表")
+    @Operation(summary = "导出报表到Excel")
+    @GetMapping("/{id}/export/excel")
+    public void exportExcel(@PathVariable Long id, HttpServletResponse response) throws IOException {
+        FinReport report = reportService.getById(id);
+        if (report == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("报表不存在");
+            return;
+        }
+
+        String fileName = URLEncoder.encode(
+                "财务报表-" + report.getReportPeriod(), StandardCharsets.UTF_8);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+
+        reportService.exportToExcel(id, response.getOutputStream());
+    }
+
+    @RequiresPermission(code = "finance:report:export", name = "导出财务报表")
+    @Operation(summary = "导出报表到PDF")
+    @GetMapping("/{id}/export/pdf")
+    public void exportPdf(@PathVariable Long id, HttpServletResponse response) throws IOException {
+        FinReport report = reportService.getById(id);
+        if (report == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("报表不存在");
+            return;
+        }
+
+        String fileName = URLEncoder.encode(
+                "财务报表-" + report.getReportPeriod(), StandardCharsets.UTF_8);
+        response.setContentType("text/plain; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".txt");
+
+        reportService.exportToPdf(id, response.getOutputStream());
     }
 }

@@ -3,12 +3,16 @@ package com.example.dict.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
+import com.example.dict.entity.ActivityParticipation;
 import com.example.dict.entity.MarketingActivity;
 import com.example.dict.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 活动管理控制器
@@ -56,6 +60,30 @@ public class ActivityController {
     @DeleteMapping("/delete/{id}")
     public ApiResponse<Void> deleteActivity(@PathVariable Long id) {
         activityService.deleteActivity(id);
+        return ApiResponse.success();
+    }
+
+    // ==================== 活动参与管理 ====================
+
+    @Operation(summary = "获取活动参与记录")
+    @GetMapping("/{id}/participations")
+    public ApiResponse<List<ActivityParticipation>> getParticipations(@PathVariable Long id) {
+        return ApiResponse.success(activityService.getParticipations(id));
+    }
+
+    @Operation(summary = "加入活动")
+    @PostMapping("/{id}/join")
+    public ApiResponse<ActivityParticipation> joinActivity(
+            @PathVariable Long id,
+            @RequestBody Map<String, Long> body) {
+        Long tenantId = body.get("tenantId");
+        return ApiResponse.success(activityService.joinActivity(id, tenantId));
+    }
+
+    @Operation(summary = "取消参与")
+    @DeleteMapping("/participations/{participationId}/cancel")
+    public ApiResponse<Void> cancelParticipation(@PathVariable Long participationId) {
+        activityService.cancelParticipation(participationId);
         return ApiResponse.success();
     }
 }

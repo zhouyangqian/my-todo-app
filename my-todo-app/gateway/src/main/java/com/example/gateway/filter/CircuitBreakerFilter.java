@@ -1,6 +1,9 @@
 package com.example.gateway.filter;
 
 import com.example.gateway.service.CircuitBreakerService;
+import com.example.gateway.service.DegradationServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -15,12 +18,13 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * 断路器全局过滤器
  * <p>
  * 在 TokenValidation 之后执行（order=-90），根据目标服务的断路器状态
- * 决定是否放行请求。OPEN 状态返回 503 + 降级响应；
+ * 决定是否放行请求。OPEN 状态返回 503 + 降级响应（优先使用 DegradationService 配置）；
  * 请求完成后根据响应状态码记录成功/失败。
  * </p>
  */
@@ -29,9 +33,15 @@ import java.nio.charset.StandardCharsets;
 public class CircuitBreakerFilter implements GlobalFilter, Ordered {
 
     private final CircuitBreakerService circuitBreakerService;
+    private final DegradationServiceImpl degradationService;
+    private final ObjectMapper objectMapper;
 
-    public CircuitBreakerFilter(CircuitBreakerService circuitBreakerService) {
+    public CircuitBreakerFilter(CircuitBreakerService circuitBreakerService,
+                                DegradationServiceImpl degradationService,
+                                ObjectMapper objectMapper) {
         this.circuitBreakerService = circuitBreakerService;
+        this.degradationService = degradationService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -69,6 +79,10 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
 
     /**
      * 返回 503 服务不可用的降级响应
+     * <p>
+     * 优先使用 DegradationService 配置的自定义降级响应，
+     * 没有配置时使用默认 503 降级响应。
+     * </p>
      *
      * @param exchange  ServerWebExchange
      * @param serviceId 服务标识
@@ -78,10 +92,17 @@ public class CircuitBreakerFilter implements GlobalFilter, Ordered {
         exchange.getResponse().setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        String body = String.format(
-                "{\"code\":503,\"message\":\"服务[%s]暂时不可用，请稍后重试\",\"data\":null,\"timestamp\":%d}",
-                serviceId, System.currentTimeMillis()
-        );
+        Map<String, Object> fallbackResponse = degradationService.getFallbackResponse(serviceId);
+        String body;
+        try {
+            body = objectMapper.writeValueAsString(fallbackResponse);
+        } catch (JsonProcessingException e) {
+            log.error("序列化降级响应失败", e);
+            body = String.format(
+                    "{\"code\":503,\"message\":\"服务[%s]暂时不可用，请稍后重试\",\"data\":null,\"timestamp\":%d}",
+                    serviceId, System.currentTimeMillis()
+            );
+        }
 
         DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
         return exchange.getResponse().writeWith(Mono.just(buffer));

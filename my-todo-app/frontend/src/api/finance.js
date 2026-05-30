@@ -41,6 +41,15 @@ export function receivePayment(id, amount) {
   return post(`/finance/receivables/receive-payment/${id}`, { amount })
 }
 
+/**
+ * 删除应收账款
+ * @param {string} id 应收账款ID
+ * @returns {Promise}
+ */
+export function deleteReceivable(id) {
+  return del(`/finance/receivables/delete-receivable/${id}`)
+}
+
 // ============ 应付账款 API ============
 
 /**
@@ -77,6 +86,15 @@ export function createPayable(data) {
  */
 export function makePayment(id, amount) {
   return post(`/finance/payables/make-payment/${id}`, { amount })
+}
+
+/**
+ * 删除应付账款
+ * @param {string} id 应付账款ID
+ * @returns {Promise}
+ */
+export function deletePayable(id) {
+  return del(`/finance/payables/delete-payable/${id}`)
 }
 
 // ============ 收支记录 API ============
@@ -162,6 +180,16 @@ export function updateBankAccount(id, data) {
  */
 export function deleteBankAccount(id) {
   return del(`/finance/bank-accounts/delete-bank-account/${id}`)
+}
+
+/**
+ * 调整银行账户余额
+ * @param {string} id 银行账户ID
+ * @param {Object} data 调整信息（adjustType, amount, reason）
+ * @returns {Promise}
+ */
+export function adjustBalance(id, data) {
+  return post(`/finance/bank-accounts/adjust-balance/${id}`, data)
 }
 
 // ============ 发票管理 API ============

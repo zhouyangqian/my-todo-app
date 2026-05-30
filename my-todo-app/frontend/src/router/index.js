@@ -4,7 +4,24 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 import NProgress from 'nprogress'
+import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+
+/**
+ * 检查 JWT Token 是否已过期
+ * 通过解码 Token 的 payload 部分，检查 exp 字段是否小于当前时间
+ * @param {string} token JWT Token
+ * @returns {boolean} true 表示已过期
+ */
+function isTokenExpired(token) {
+  if (!token) return true
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
 
 // 路由配置表 - 扁平化结构，避免嵌套路由的复杂性
 const routes = [
@@ -128,6 +145,12 @@ const routes = [
         name: 'TenantManage',
         component: () => import('@/views/system/tenant/index.vue'),
         meta: { title: '租户管理', icon: 'OfficeBuilding' }
+      },
+      {
+        path: 'system/profile',
+        name: 'Profile',
+        component: () => import('@/views/system/profile/index.vue'),
+        meta: { title: '个人中心', icon: 'User', requiresAuth: true }
       },
       // 字典管理
       {
@@ -377,6 +400,15 @@ router.beforeEach(async (to, from, next) => {
 
   const userStore = useUserStore()
   const token = userStore.token
+
+  // Token 过期检查：主动在前端检测 Token 是否已过期，避免发送无效请求
+  if (token && isTokenExpired(token)) {
+    ElMessage.warning('登录已过期，请重新登录')
+    userStore.clearAuth()
+    next('/login')
+    NProgress.done()
+    return
+  }
 
   if (to.meta.requiresAuth !== false && !token) {
     next('/login')

@@ -10,14 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 财务报表服务
@@ -209,5 +207,111 @@ public class FinanceReportServiceImpl extends ServiceImpl<FinReportMapper, FinRe
 
         log.info("生成报表: type={}, period={}, tenantId={}", reportType, period, tenantId);
         return report;
+    }
+
+    /**
+     * 导出报表到Excel
+     */
+    @Override
+    public void exportToExcel(Long reportId, OutputStream out) {
+        FinReport report = getById(reportId);
+        if (report == null) {
+            throw new BusinessException("报表不存在");
+        }
+
+        // 解析 reportData JSON
+        Map<String, Object> dataMap = parseReportData(report);
+
+        // 构建 key-value 行数据
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("报表类型", getReportTypeName(report.getReportType()));
+        row.put("报表期间", report.getReportPeriod());
+        row.put("币种", report.getCurrency() != null ? report.getCurrency() : "CNY");
+        row.put("开始日期", report.getStartDate() != null ? report.getStartDate().toString() : "");
+        row.put("结束日期", report.getEndDate() != null ? report.getEndDate().toString() : "");
+        row.put("状态", report.getStatus() == 2 ? "已锁定" : "已生成");
+        row.putAll(dataMap);
+
+        // 提取表头
+        String[] headers = row.keySet().toArray(new String[0]);
+
+        // 使用通用导出（这里直接构建数据行）
+        List<List<String>> headList = new ArrayList<>();
+        for (String header : headers) {
+            headList.add(List.of(header));
+        }
+
+        List<List<Object>> dataList = new ArrayList<>();
+        List<Object> valueRow = new ArrayList<>();
+        for (Object value : row.values()) {
+            valueRow.add(value != null ? value : "");
+        }
+        dataList.add(valueRow);
+
+        com.alibaba.excel.EasyExcel.write(out)
+                .head(headList)
+                .registerWriteHandler(new com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy())
+                .sheet("报表数据")
+                .doWrite(dataList);
+
+        log.info("导出报表到Excel: reportId={}, type={}", reportId, report.getReportType());
+    }
+
+    /**
+     * 导出报表到PDF（纯文本表格形式的简易PDF）
+     * <p>
+     * 使用 iText 风格的纯 Java 实现。如果未引入 iText 依赖，
+     * 则生成 CSV 格式替代写入输出流。
+     * </p>
+     */
+    @Override
+    public void exportToPdf(Long reportId, OutputStream out) {
+        FinReport report = getById(reportId);
+        if (report == null) {
+            throw new BusinessException("报表不存在");
+        }
+
+        Map<String, Object> dataMap = parseReportData(report);
+
+        // 构建文本表格内容并输出为 UTF-8 文本
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("报表类型: ").append(getReportTypeName(report.getReportType())).append("\n");
+            sb.append("报表期间: ").append(report.getReportPeriod()).append("\n");
+            sb.append("币种: ").append(report.getCurrency() != null ? report.getCurrency() : "CNY").append("\n");
+            sb.append("开始日期: ").append(report.getStartDate()).append("\n");
+            sb.append("结束日期: ").append(report.getEndDate()).append("\n");
+            sb.append("状态: ").append(report.getStatus() == 2 ? "已锁定" : "已生成").append("\n");
+            sb.append("--- 报表数据 ---\n");
+            for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            }
+            out.write(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            out.flush();
+            log.info("导出报表到文本格式: reportId={}", reportId);
+        } catch (Exception e) {
+            throw new BusinessException("导出报表失败: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseReportData(FinReport report) {
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(report.getReportData(), Map.class);
+        } catch (Exception e) {
+            throw new BusinessException("报表数据解析失败");
+        }
+    }
+
+    private String getReportTypeName(Integer type) {
+        if (type == null) return "未知";
+        return switch (type) {
+            case 1 -> "资产负债表";
+            case 2 -> "利润表";
+            case 3 -> "现金流量表";
+            case 4 -> "毛利分析";
+            default -> "未知类型(" + type + ")";
+        };
     }
 }

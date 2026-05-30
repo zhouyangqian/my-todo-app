@@ -7,6 +7,7 @@ import com.example.finance.entity.Bill;
 import com.example.finance.entity.BillInvoice;
 import com.example.finance.entity.Invoice;
 import com.example.finance.entity.PaymentRecord;
+import com.example.finance.interceptor.BudgetControlInterceptor;
 import com.example.finance.mapper.BillInvoiceMapper;
 import com.example.finance.mapper.BillMapper;
 import com.example.finance.mapper.InvoiceMapper;
@@ -44,6 +45,7 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     private final BillInvoiceMapper billInvoiceMapper;
     private final InvoiceMapper invoiceMapper;
     private final PaymentRecordMapper paymentRecordMapper;
+    private final BudgetControlInterceptor budgetControlInterceptor;
 
     /** 状态常量 */
     private static final int STATUS_DRAFT = 0;
@@ -72,6 +74,13 @@ public class BillServiceImpl extends ServiceImpl<BillMapper, Bill> implements Bi
     @Override
     @Transactional
     public Bill createBill(Bill bill) {
+        // 应付账单检查预算
+        if (bill.getBillType() != null && bill.getBillType() == BILL_TYPE_PAYABLE
+                && bill.getAmount() != null && bill.getTenantId() != null) {
+            budgetControlInterceptor.checkBudgetBeforePayment(
+                    bill.getTenantId(), null, bill.getAmount());
+        }
+
         bill.setBillNo(generateBillNo(bill.getBillType()));
         if (bill.getDirection() == null) {
             bill.setDirection(1);

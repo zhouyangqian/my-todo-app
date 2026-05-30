@@ -1,5 +1,5 @@
 // utils/request.js - HTTP 请求封装模块
-// 基于 axios 封装统一的请求方法，包含请求/响应拦截器、Token 自动注入、错误处理等
+// 基于 axios 封装统一的请求方法，包含请求/响应拦截器、Token 自动注入、错误处理、Token 自动刷新等
 
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
@@ -14,6 +14,19 @@ const service = axios.create({
     'Content-Type': 'application/json'  // 默认请求体格式为 JSON
   }
 })
+
+// Token 刷新状态管理（防止并发请求同时触发刷新）
+let isRefreshing = false
+let refreshSubscribers = []
+
+function onRefreshed(newToken) {
+  refreshSubscribers.forEach(cb => cb(newToken))
+  refreshSubscribers = []
+}
+
+function addRefreshSubscriber(cb) {
+  refreshSubscribers.push(cb)
+}
 
 // 请求拦截器 - 在每个请求发送前执行，用于注入认证信息
 service.interceptors.request.use(
@@ -46,8 +59,6 @@ service.interceptors.request.use(
     if (userStore.userInfo?.userName) {
       config.headers['X-Username'] = userStore.userInfo.userName
     }
-    // 其他用户信息（realName, email, phone, avatar）不需要通过请求头传递
-    // 后端可以通过 userId 从数据库获取完整用户信息
 
     return config
   },
@@ -78,11 +89,52 @@ service.interceptors.response.use(
         grouping: true
       })
 
-      // 401 未授权 - 令牌过期或无效，清除认证信息并跳转到登录页
+      // 401 未授权 - 尝试刷新 Token
       if (res.code === 401) {
+        const config = response.config
         const userStore = useUserStore()
-        userStore.clearAuth()
-        router.push('/login')
+        const storedRefreshToken = userStore.refreshToken
+
+        if (!storedRefreshToken) {
+          userStore.clearAuth()
+          router.push('/login')
+          return Promise.reject(new Error(res.message || 'Error'))
+        }
+
+        if (!isRefreshing) {
+          isRefreshing = true
+          // 使用原始 axios 实例发送刷新请求，避免拦截器循环
+          axios.post('/api/auth/refresh', { refreshToken: storedRefreshToken })
+            .then(res => {
+              const data = res.data?.data || res.data
+              if (data?.accessToken) {
+                userStore.token = data.accessToken
+                userStore.refreshToken = data.refreshToken
+                localStorage.setItem('token', data.accessToken)
+                localStorage.setItem('refreshToken', data.refreshToken)
+                onRefreshed(data.accessToken)
+              } else {
+                throw new Error('刷新令牌响应无效')
+              }
+            })
+            .catch(() => {
+              // 刷新失败，清除认证信息并跳转登录页
+              userStore.clearAuth()
+              router.push('/login')
+              refreshSubscribers = []
+            })
+            .finally(() => {
+              isRefreshing = false
+            })
+        }
+
+        // 将当前请求加入等待队列，刷新成功后自动重试
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken) => {
+            config.headers['Authorization'] = `Bearer ${newToken}`
+            resolve(service(config))
+          })
+        })
       }
 
       return Promise.reject(new Error(res.message || 'Error'))
@@ -98,25 +150,65 @@ service.interceptors.response.use(
     if (error.response) {
       const status = error.response.status
 
-      let errorMsg = ''
-      switch (status) {
-        case 401:
-          // 未授权 - 令牌失效，需要重新登录
-          errorMsg = '登录已过期，请重新登录'
-          const userStore = useUserStore()
+      // 401 - 尝试刷新 Token 后重试
+      if (status === 401) {
+        const config = error.config
+        const userStore = useUserStore()
+        const storedRefreshToken = userStore.refreshToken
+
+        if (!storedRefreshToken) {
           userStore.clearAuth()
           router.push('/login')
-          break
+          return Promise.reject(error)
+        }
+
+        if (!isRefreshing) {
+          isRefreshing = true
+          return axios.post('/api/auth/refresh', { refreshToken: storedRefreshToken })
+            .then(res => {
+              const data = res.data?.data || res.data
+              if (data?.accessToken) {
+                userStore.token = data.accessToken
+                userStore.refreshToken = data.refreshToken
+                localStorage.setItem('token', data.accessToken)
+                localStorage.setItem('refreshToken', data.refreshToken)
+                onRefreshed(data.accessToken)
+                // 重试原请求
+                config.headers['Authorization'] = `Bearer ${data.accessToken}`
+                return service(config)
+              } else {
+                throw new Error('刷新令牌响应无效')
+              }
+            })
+            .catch(() => {
+              userStore.clearAuth()
+              router.push('/login')
+              refreshSubscribers = []
+              return Promise.reject(error)
+            })
+            .finally(() => {
+              isRefreshing = false
+            })
+        }
+
+        // 正在刷新中，加入等待队列
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken) => {
+            config.headers['Authorization'] = `Bearer ${newToken}`
+            resolve(service(config))
+          })
+        })
+      }
+
+      let errorMsg = ''
+      switch (status) {
         case 403:
-          // 禁止访问 - 当前用户无权限
           errorMsg = '没有权限访问'
           break
         case 404:
-          // 资源不存在
           errorMsg = '请求的资源不存在'
           break
         case 500:
-          // 服务器内部错误
           errorMsg = '服务器内部错误'
           break
         default:

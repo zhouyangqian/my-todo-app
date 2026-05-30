@@ -239,7 +239,7 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人中心</el-dropdown-item>
+                <el-dropdown-item @click="router.push('/system/profile')">个人中心</el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -371,7 +371,8 @@ const breadcrumbMap = {
   '/finance/bank-account': '银行账户',
   '/finance/invoice': '发票管理',
   '/finance/cost': '成本核算',
-  '/finance/report': '财务报表'
+  '/finance/report': '财务报表',
+  '/system/profile': '个人中心'
 }
 
 const breadcrumbs = computed(() => {

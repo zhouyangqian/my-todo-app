@@ -3,6 +3,7 @@
 
 import { ElMessage } from 'element-plus'
 import router from '@/router'
+import { useUserStore } from '@/stores/user'
 
 let eventSource = null
 let reconnectTimer = null
@@ -48,7 +49,6 @@ export function connectSSE(token) {
     // 断开 SSE 连接
     disconnectSSE()
     // 清除本地认证信息并跳转到登录页
-    const { useUserStore } = require('@/stores/user')
     const userStore = useUserStore()
     userStore.clearAuth()
     router.push('/login')

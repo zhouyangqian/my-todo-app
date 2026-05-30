@@ -6,6 +6,8 @@ import com.example.erp.api.dto.SalesOrderDTO;
 import com.example.erp.api.vo.CreateSalesOrderVO;
 import com.example.erp.entity.SalesOrder;
 
+import java.math.BigDecimal;
+
 /**
  * 销售订单服务接口
  */
@@ -25,4 +27,8 @@ public interface SalesOrderService extends IService<SalesOrder> {
     void approveOrder(Long orderId, Long approverId);
 
     void cancelOrder(Long orderId, Long userId);
+
+    long countByStatus(Long tenantId, Integer status);
+
+    BigDecimal sumTotalAmount(Long tenantId);
 }

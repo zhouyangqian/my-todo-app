@@ -1,7 +1,7 @@
 // api/gateway.js - 网关监控 API 接口模块
-// 提供服务健康状态、断路器状态、缓存管理、金丝雀发布、监控指标等接口
+// 提供服务健康状态、断路器状态、缓存管理、金丝雀发布、监控指标、降级配置等接口
 
-import { get, del } from '@/utils/request'
+import { get, post, put, del } from '@/utils/request'
 
 /**
  * 获取所有服务的健康状态
@@ -57,4 +57,37 @@ export function getSlowApis(count = 10) {
  */
 export function getErrorApis(count = 10) {
   return get('/gateway/error-apis', { count })
+}
+
+// ========== 熔断器管理 ==========
+
+/**
+ * 获取所有服务熔断状态
+ */
+export function getCircuitBreakerStatusV2() {
+  return get('/gateway/circuit-breakers/status')
+}
+
+/**
+ * 重置指定服务的熔断状态
+ */
+export function resetCircuitBreaker(serviceId) {
+  return post(`/gateway/circuit-breakers/${serviceId}/reset`)
+}
+
+// ========== 降级配置管理 ==========
+
+/**
+ * 获取降级配置
+ */
+export function getDegradationConfig() {
+  return get('/gateway/degradation/config')
+}
+
+/**
+ * 更新降级配置
+ * @param {Object} config - 包含 serviceId 和 fallbackResponse 的配置对象
+ */
+export function updateDegradationConfig(config) {
+  return put('/gateway/degradation/config', config)
 }
