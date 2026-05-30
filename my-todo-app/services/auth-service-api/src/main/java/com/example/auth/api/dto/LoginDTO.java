@@ -43,7 +43,7 @@ public class LoginDTO {
         /** 用户ID */
         private Long userId;
         /** 用户名 */
-        private String username;
+        private String userName;
         /** 邮箱 */
         private String email;
         /** 真实姓名 */

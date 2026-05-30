@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerIntercep
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
+import com.example.common.mybatis.interceptor.DataPermissionInterceptor;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,9 @@ import java.time.LocalDateTime;
  * <p>
  * 配置以下核心功能：
  * <ul>
- *   <li>分页插件 - 支持多种数据库的分页查询</li>
  *   <li>多租户插件 - 自动在 SQL 中注入租户ID条件，实现数据隔离</li>
+ *   <li>数据权限插件 - 根据 @DataPermission 注解自动注入数据范围 WHERE 条件</li>
+ *   <li>分页插件 - 支持多种数据库的分页查询</li>
  *   <li>乐观锁插件 - 防止并发更新导致的数据不一致</li>
  *   <li>防止全表更新删除 - 避免误操作导致的数据丢失</li>
  *   <li>自动填充 - 自动设置 createTime、updateTime 等字段</li>
@@ -35,6 +37,7 @@ public class MybatisPlusConfig {
      * 按顺序添加以下拦截器：
      * <ol>
      *   <li>多租户拦截器 - 必须在第一位，在 SQL 执行前注入租户条件</li>
+     *   <li>数据权限拦截器 - 在租户隔离之后，根据 @DataPermission 注解追加数据范围条件</li>
      *   <li>分页拦截器 - 自动处理分页查询</li>
      *   <li>乐观锁拦截器 - 处理 version 字段的乐观锁逻辑</li>
      *   <li>防止全表更新删除拦截器 - 安全防护</li>
@@ -50,18 +53,24 @@ public class MybatisPlusConfig {
         tenantInterceptor.setTenantLineHandler(new MultiTenantHandler());
         interceptor.addInnerInterceptor(tenantInterceptor);
 
-        // 2. 分页拦截器
+        // 2. 数据权限拦截器 - 在租户隔离之后执行
+        //    DataPermissionInterceptor 是 MP 内置的 InnerInterceptor，
+        //    DataPermissionInterceptor（自定义）实现 DataPermissionHandler 接口提供权限条件
+        com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor mpDataPermissionInterceptor =
+                new com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor();
+        mpDataPermissionInterceptor.setDataPermissionHandler(new DataPermissionInterceptor());
+        interceptor.addInnerInterceptor(mpDataPermissionInterceptor);
+
+        // 3. 分页拦截器
         PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor(DbType.MYSQL);
-        // 设置单页分页条数限制（可选，防止恶意查询超大分页）
         paginationInterceptor.setMaxLimit(1000L);
-        // 当查询总数为 0 时，不执行 count 语句（提升性能）
         paginationInterceptor.setOverflow(false);
         interceptor.addInnerInterceptor(paginationInterceptor);
 
-        // 3. 乐观锁拦截器
+        // 4. 乐观锁拦截器
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
 
-        // 4. 防止全表更新和删除拦截器
+        // 5. 防止全表更新和删除拦截器
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
 
         return interceptor;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -97,6 +98,16 @@ public class Supplier implements Serializable {
      * 账期天数，当结算方式为"账期"时生效，表示从收货到付款的天数
      */
     private Integer creditDays;
+
+    /**
+     * 信用额度，供应商可赊账的最大金额
+     */
+    private BigDecimal creditLimit;
+
+    /**
+     * 当前欠款，供应商当前未结算的采购金额
+     */
+    private BigDecimal currentDebt;
 
     /**
      * 备注，用于记录供应商的补充说明信息

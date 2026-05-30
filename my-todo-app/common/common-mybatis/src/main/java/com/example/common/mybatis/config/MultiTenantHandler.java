@@ -3,7 +3,6 @@ package com.example.common.mybatis.config;
 import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NullValue;
 
 /**
  * 多租户处理器
@@ -41,7 +40,7 @@ public class MultiTenantHandler implements TenantLineHandler {
         if (tenantId != null) {
             return new LongValue(tenantId);
         }
-        // 返回 null 表示不注入租户条件（适用于未登录的场景）
+        // 未设置租户上下文时返回 null，配合 ignoreTable 中的判断跳过租户条件
         return null;
     }
 
@@ -80,10 +79,14 @@ public class MultiTenantHandler implements TenantLineHandler {
      */
     @Override
     public boolean ignoreTable(String tableName) {
+        // 没有租户上下文时（如登录、注册等未认证场景），跳过所有表的租户条件
+        // 避免 MyBatis-Plus 生成 tenant_id = NULL 的无效 SQL
+        if (TenantContext.getTenantId() == null) {
+            return true;
+        }
         // 系统表和认证相关表不需要租户隔离
-        return tableName.startsWith("sys_")
+        return tableName.startsWith("sys_captcha")
             || tableName.startsWith("gateway_")
-            || tableName.equals("user")              // 用户表（认证服务）
             || tableName.equals("login_session")      // 登录会话表
             || tableName.equals("refresh_token")      // 刷新令牌表
             || tableName.equals("login_log")          // 登录日志表
@@ -91,7 +94,13 @@ public class MultiTenantHandler implements TenantLineHandler {
             || tableName.equals("password_history")   // 密码历史表
             || tableName.equals("social_account")     // 社交账号表
             || tableName.equals("databasechangelog")
-            || tableName.equals("databasechangeloglock");
+            || tableName.equals("databasechangeloglock")
+            // 全局共享表（无 tenant_id 列）
+            || tableName.equals("saas_package")       // SaaS套餐（所有租户共享）
+            || tableName.equals("marketing_activity") // 营销活动（所有租户共享）
+            || tableName.equals("error_category")     // 错误分类（全局字典）
+            || tableName.equals("error_solution")     // 错误解决方案（全局字典）
+            || tableName.equals("code_template");     // 代码模板（全局共享）
     }
 }
 

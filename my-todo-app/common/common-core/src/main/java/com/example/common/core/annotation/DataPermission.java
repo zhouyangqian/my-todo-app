@@ -11,10 +11,11 @@ import java.lang.annotation.*;
  * <p>
  * 过滤类型：
  * <ul>
+ *   <li>ALL - 查看所有数据（需要特定权限）</li>
  *   <li>DEPT - 按部门过滤，只能查看本部门数据</li>
  *   <li>DEPT_AND_SUB - 按部门及子部门过滤</li>
  *   <li>SELF - 仅查看本人数据</li>
- *   <li>ALL - 查看所有数据（需要特定权限）</li>
+ *   <li>PROJECT - 按项目过滤，只能查看指定项目的数据</li>
  * </ul>
  * </p>
  */
@@ -39,6 +40,7 @@ public @interface DataPermission {
         ALL,          // 全部数据
         DEPT,         // 本部门数据
         DEPT_AND_SUB, // 本部门及子部门数据
-        SELF          // 仅本人数据
+        SELF,         // 仅本人数据
+        PROJECT       // 按项目过滤数据
     }
 }

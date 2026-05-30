@@ -3,23 +3,31 @@
 
 USE `my-todo-app-dev`;
 
--- 用户表
+-- 用户表（统一用户与认证信息）
 CREATE TABLE IF NOT EXISTS `sys_user` (
     `id` BIGINT NOT NULL COMMENT '用户ID',
     `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户ID',
     `username` VARCHAR(50) NOT NULL COMMENT '用户名',
+    `password` VARCHAR(255) NOT NULL COMMENT '密码(BCrypt加密)',
     `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
     `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
     `real_name` VARCHAR(50) DEFAULT NULL COMMENT '真实姓名',
     `avatar` VARCHAR(255) DEFAULT NULL COMMENT '头像',
     `dept_id` BIGINT DEFAULT NULL COMMENT '部门ID',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    `locked` TINYINT NOT NULL DEFAULT 0 COMMENT '锁定状态: 0-未锁定, 1-已锁定',
+    `locked_until` DATETIME DEFAULT NULL COMMENT '锁定到期时间',
+    `login_fail_count` INT NOT NULL DEFAULT 0 COMMENT '登录失败次数',
+    `last_login_time` DATETIME DEFAULT NULL COMMENT '最后登录时间',
+    `last_login_ip` VARCHAR(50) DEFAULT NULL COMMENT '最后登录IP',
+    `password_changed_at` DATETIME DEFAULT NULL COMMENT '密码修改时间',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '软删除',
     `created_by` BIGINT DEFAULT NULL COMMENT '创建人',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_by` BIGINT DEFAULT NULL COMMENT '更新人',
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_username_tenant` (`username`, `tenant_id`),
     KEY `idx_tenant_id` (`tenant_id`),
     KEY `idx_dept_id` (`dept_id`),
     KEY `idx_status` (`status`)
@@ -68,9 +76,9 @@ CREATE TABLE IF NOT EXISTS `sys_user_address` (
     KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户地址表';
 
--- 插入默认管理员用户
-INSERT INTO `sys_user` (`id`, `tenant_id`, `username`, `email`, `phone`, `real_name`, `status`, `created_at`)
-VALUES (1, 1, 'admin', 'admin@example.com', '13800000000', '系统管理员', 1, NOW());
+-- 插入默认管理员用户(密码: admin123)
+INSERT INTO `sys_user` (`id`, `tenant_id`, `username`, `password`, `email`, `phone`, `real_name`, `status`, `created_at`)
+VALUES (1, 1, 'admin', '$2a$10$FaVniNYzRkROPg/PlCLKJOQKLE1jGcDJZJYE7ryXfOFOMdIrfbN7u', 'admin@example.com', '13800000000', '系统管理员', 1, NOW());
 
 INSERT INTO `sys_user_profile` (`user_id`, `tenant_id`, `real_name`, `gender`, `created_at`)
 VALUES (1, 1, '系统管理员', 1, NOW());

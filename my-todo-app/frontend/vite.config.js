@@ -43,7 +43,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks: {
+          'vendor-vue': ['vue', 'vue-router', 'pinia'],
+          'vendor-element': ['element-plus'],
+          'vendor-utils': ['axios', 'nprogress']
+        }
       }
     }
   },

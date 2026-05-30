@@ -1,0 +1,5 @@
+# Docker/K8s profile overrides for Gateway
+logging:
+  level:
+    com.example.gateway: INFO
+    org.springframework.cloud.gateway: WARN

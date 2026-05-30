@@ -25,14 +25,14 @@
 
 **Purpose**: Multi-service project initialization and basic structure
 
-- [ ] T001 Create services directory structure for 12 microservices
-- [ ] T002 Initialize frontend project with Vue 3.0 + Vite in frontend/
+- [x] T001 Create services directory structure for 12 microservices
+- [x] T002 Initialize frontend project with Vue 3.0 + Vite in frontend/
 - [ ] T003 [P] Configure ESLint and Prettier in frontend/.eslintrc.js and frontend/.prettierrc
 - [ ] T004 [P] Setup lint-staged and husky Git hooks in frontend/package.json
-- [ ] T005 [P] Create shared common module for utilities in services/common/src/main/java/com/example/common/
+- [x] T005 [P] Create shared common module for utilities in services/common/src/main/java/com/example/common/
 - [ ] T006 [P] Setup Nacos configuration center connection in services/common/src/main/resources/application.yml
-- [ ] T007 [P] Create gateway service directory structure in services/gateway-service/
-- [ ] T008 Initialize Spring Cloud Gateway in services/gateway-service/pom.xml
+- [x] T007 [P] Create gateway service directory structure in services/gateway-service/
+- [x] T008 Initialize Spring Cloud Gateway in services/gateway-service/pom.xml
 
 ---
 
@@ -46,93 +46,93 @@
 
 ### Database Schema
 
-- [ ] T009 [P] [M02] Create tenant table SQL in services/admin-framework/src/main/resources/db/migration/V1__init_tenant.sql
-- [ ] T010 [P] [M02] Create sys_user table SQL in services/admin-framework/src/main/resources/db/migration/V2__init_sys_user.sql
-- [ ] T011 [P] [M02] Create sys_role table SQL in services/admin-framework/src/main/resources/db/migration/V3__init_sys_role.sql
-- [ ] T012 [P] [M02] Create sys_menu table SQL in services/admin-framework/src/main/resources/db/migration/V4__init_sys_menu.sql
-- [ ] T013 [P] [M02] Create sys_user_role table SQL in services/admin-framework/src/main/resources/db/migration/V5__init_sys_user_role.sql
-- [ ] T014 [P] [M02] Create sys_role_menu table SQL in services/admin-framework/src/main/resources/db/migration/V6__init_sys_role_menu.sql
-- [ ] T015 [P] [M02] Create sys_permission table SQL in services/admin-framework/src/main/resources/db/migration/V7__init_sys_permission.sql
-- [ ] T016 [P] [M02] Create role_permission table SQL in services/admin-framework/src/main/resources/db/migration/V8__init_role_permission.sql
-- [ ] T017 [P] [M02] Create audit_log table SQL in services/admin-framework/src/main/resources/db/migration/V9__init_audit_log.sql
+- [x] T009 [P] [M02] Create tenant table SQL in services/admin-framework/src/main/resources/db/migration/V1__init_tenant.sql
+- [x] T010 [P] [M02] Create sys_user table SQL in services/admin-framework/src/main/resources/db/migration/V2__init_sys_user.sql
+- [x] T011 [P] [M02] Create sys_role table SQL in services/admin-framework/src/main/resources/db/migration/V3__init_sys_role.sql
+- [x] T012 [P] [M02] Create sys_menu table SQL in services/admin-framework/src/main/resources/db/migration/V4__init_sys_menu.sql
+- [x] T013 [P] [M02] Create sys_user_role table SQL in services/admin-framework/src/main/resources/db/migration/V5__init_sys_user_role.sql
+- [x] T014 [P] [M02] Create sys_role_menu table SQL in services/admin-framework/src/main/resources/db/migration/V6__init_sys_role_menu.sql
+- [x] T015 [P] [M02] Create sys_permission table SQL in services/admin-framework/src/main/resources/db/migration/V7__init_sys_permission.sql
+- [x] T016 [P] [M02] Create role_permission table SQL in services/admin-framework/src/main/resources/db/migration/V8__init_role_permission.sql
+- [x] T017 [P] [M02] Create audit_log table SQL in services/admin-framework/src/main/resources/db/migration/V9__init_audit_log.sql
 
 ### Entities & Mappers
 
-- [ ] T018 [P] [M02] Create Tenant entity in services/admin-framework/src/main/java/com/example/admin/entity/Tenant.java
-- [ ] T019 [P] [M02] Create SysUser entity in services/admin-framework/src/main/java/com/example/admin/entity/SysUser.java
-- [ ] T020 [P] [M02] Create SysRole entity in services/admin-framework/src/main/java/com/example/admin/entity/SysRole.java
-- [ ] T021 [P] [M02] Create SysMenu entity in services/admin-framework/src/main/java/com/example/admin/entity/SysMenu.java
-- [ ] T022 [P] [M02] Create SysPermission entity in services/admin-framework/src/main/java/com/example/admin/entity/SysPermission.java
-- [ ] T023 [P] [M02] Create AuditLog entity in services/admin-framework/src/main/java/com/example/admin/entity/AuditLog.java
-- [ ] T024 [P] [M02] Create all Mapper interfaces in services/admin-framework/src/main/java/com/example/admin/mapper/
+- [x] T018 [P] [M02] Create Tenant entity in services/admin-framework/src/main/java/com/example/admin/entity/Tenant.java
+- [x] T019 [P] [M02] Create SysUser entity in services/admin-framework/src/main/java/com/example/admin/entity/SysUser.java
+- [x] T020 [P] [M02] Create SysRole entity in services/admin-framework/src/main/java/com/example/admin/entity/SysRole.java
+- [x] T021 [P] [M02] Create SysMenu entity in services/admin-framework/src/main/java/com/example/admin/entity/SysMenu.java
+- [x] T022 [P] [M02] Create SysPermission entity in services/admin-framework/src/main/java/com/example/admin/entity/SysPermission.java
+- [x] T023 [P] [M02] Create AuditLog entity in services/admin-framework/src/main/java/com/example/admin/entity/AuditLog.java
+- [x] T024 [P] [M02] Create all Mapper interfaces in services/admin-framework/src/main/java/com/example/admin/mapper/
 
 ### Authentication & Security
 
-- [ ] T025 [M02] Setup Spring Security with JWT in services/admin-framework/src/main/java/com/example/admin/config/SecurityConfig.java
-- [ ] T026 [M02] Create JWT utility class in services/admin-framework/src/main/java/com/example/admin/util/JwtUtil.java
-- [ ] T027 [M02] Create UserDetailsServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/UserDetailsServiceImpl.java
-- [ ] T028 [M02] Create LoginController in services/admin-framework/src/main/java/com/example/admin/controller/LoginController.java
-- [ ] T029 [M02] Implement POST /auth/login endpoint (depends on T025, T026, T027, T028)
-- [ ] T030 [M02] Implement POST /auth/logout endpoint
-- [ ] T031 [M02] Implement POST /auth/refresh endpoint
+- [x] T025 [M02] Setup Spring Security with JWT in services/admin-framework/src/main/java/com/example/admin/config/SecurityConfig.java
+- [x] T026 [M02] Create JWT utility class in services/admin-framework/src/main/java/com/example/admin/util/JwtUtil.java
+- [x] T027 [M02] Create UserDetailsServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/UserDetailsServiceImpl.java
+- [x] T028 [M02] Create LoginController in services/admin-framework/src/main/java/com/example/admin/controller/LoginController.java
+- [x] T029 [M02] Implement POST /auth/login endpoint (depends on T025, T026, T027, T028)
+- [x] T030 [M02] Implement POST /auth/logout endpoint
+- [x] T031 [M02] Implement POST /auth/refresh endpoint
 
 ### User Management
 
-- [ ] T032 [M02] Create SysUserService interface in services/admin-framework/src/main/java/com/example/admin/service/SysUserService.java
-- [ ] T033 [M02] Create SysUserServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/SysUserServiceImpl.java
-- [ ] T034 [M02] Create SysUserController in services/admin-framework/src/main/java/com/example/admin/controller/SysUserController.java
-- [ ] T035 [M02] Implement GET /users endpoint with pagination (depends on T033, T034)
-- [ ] T036 [M02] Implement POST /users endpoint
-- [ ] T037 [M02] Implement GET /users/{id} endpoint
-- [ ] T038 [M02] Implement PUT /users/{id} endpoint
-- [ ] T039 [M02] Implement DELETE /users/{id} endpoint
-- [ ] T040 [M02] Implement GET /users/{id}/roles endpoint
-- [ ] T041 [M02] Implement PUT /users/{id}/roles endpoint
+- [x] T032 [M02] Create SysUserService interface in services/admin-framework/src/main/java/com/example/admin/service/SysUserService.java
+- [x] T033 [M02] Create SysUserServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/SysUserServiceImpl.java
+- [x] T034 [M02] Create SysUserController in services/admin-framework/src/main/java/com/example/admin/controller/SysUserController.java
+- [x] T035 [M02] Implement GET /users endpoint with pagination (depends on T033, T034)
+- [x] T036 [M02] Implement POST /users endpoint
+- [x] T037 [M02] Implement GET /users/{id} endpoint
+- [x] T038 [M02] Implement PUT /users/{id} endpoint
+- [x] T039 [M02] Implement DELETE /users/{id} endpoint
+- [x] T040 [M02] Implement GET /users/{id}/roles endpoint
+- [x] T041 [M02] Implement PUT /users/{id}/roles endpoint
 
 ### Role & Permission Management
 
-- [ ] T042 [M02] Create SysRoleService interface in services/admin-framework/src/main/java/com/example/admin/service/SysRoleService.java
-- [ ] T043 [M02] Create SysRoleServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/SysRoleServiceImpl.java
-- [ ] T044 [M02] Create SysRoleController in services/admin-framework/src/main/java/com/example/admin/controller/SysRoleController.java
-- [ ] T045 [M02] Implement GET /roles endpoint
-- [ ] T046 [M02] Implement POST /roles endpoint
-- [ ] T047 [M02] Implement PUT /roles/{id} endpoint
-- [ ] T048 [M02] Implement DELETE /roles/{id} endpoint
-- [ ] T049 [M02] Implement GET /roles/{id}/menus endpoint
-- [ ] T050 [M02] Implement PUT /roles/{id}/menus endpoint
+- [x] T042 [M02] Create SysRoleService interface in services/admin-framework/src/main/java/com/example/admin/service/SysRoleService.java
+- [x] T043 [M02] Create SysRoleServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/SysRoleServiceImpl.java
+- [x] T044 [M02] Create SysRoleController in services/admin-framework/src/main/java/com/example/admin/controller/SysRoleController.java
+- [x] T045 [M02] Implement GET /roles endpoint
+- [x] T046 [M02] Implement POST /roles endpoint
+- [x] T047 [M02] Implement PUT /roles/{id} endpoint
+- [x] T048 [M02] Implement DELETE /roles/{id} endpoint
+- [x] T049 [M02] Implement GET /roles/{id}/menus endpoint
+- [x] T050 [M02] Implement PUT /roles/{id}/menus endpoint
 
 ### Menu Management
 
-- [ ] T051 [M02] Create SysMenuService interface in services/admin-framework/src/main/java/com/example/admin/service/SysMenuService.java
-- [ ] T052 [M02] Create SysMenuServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/SysMenuServiceImpl.java
-- [ ] T053 [M02] Create SysMenuController in services/admin-framework/src/main/java/com/example/admin/controller/SysMenuController.java
-- [ ] T054 [M02] Implement GET /menus/tree endpoint (depends on T052, T053)
-- [ ] T055 [M02] Implement POST /menus endpoint
-- [ ] T056 [M02] Implement PUT /menus/{id} endpoint
-- [ ] T057 [M02] Implement DELETE /menus/{id} endpoint
+- [x] T051 [M02] Create SysMenuService interface in services/admin-framework/src/main/java/com/example/admin/service/SysMenuService.java
+- [x] T052 [M02] Create SysMenuServiceImpl in services/admin-framework/src/main/java/com/example/admin/service/impl/SysMenuServiceImpl.java
+- [x] T053 [M02] Create SysMenuController in services/admin-framework/src/main/java/com/example/admin/controller/SysMenuController.java
+- [x] T054 [M02] Implement GET /menus/tree endpoint (depends on T052, T053)
+- [x] T055 [M02] Implement POST /menus endpoint
+- [x] T056 [M02] Implement PUT /menus/{id} endpoint
+- [x] T057 [M02] Implement DELETE /menus/{id} endpoint
 
 ### Audit Logging
 
-- [ ] T058 [M02] Create AuditLogAspect in services/admin-framework/src/main/java/com/example/admin/aspect/AuditLogAspect.java
-- [ ] T059 [M02] Create AuditLogController in services/admin-framework/src/main/java/com/example/admin/controller/AuditLogController.java
-- [ ] T060 [M02] Implement GET /audit/logs endpoint
+- [x] T058 [M02] Create AuditLogAspect in services/admin-framework/src/main/java/com/example/admin/aspect/AuditLogAspect.java
+- [x] T059 [M02] Create AuditLogController in services/admin-framework/src/main/java/com/example/admin/controller/AuditLogController.java
+- [x] T060 [M02] Implement GET /audit/logs endpoint
 
 ### Frontend - Admin Framework
 
-- [ ] T061 [P] [M02] Create frontend main layout in frontend/src/layouts/AdminLayout.vue
-- [ ] T062 [P] [M02] Create Login.vue in frontend/src/views/Login.vue
-- [ ] T063 [P] [M02] Create UserManagement.vue in frontend/src/views/admin/UserManagement.vue
-- [ ] T064 [P] [M02] Create RoleManagement.vue in frontend/src/views/admin/RoleManagement.vue
-- [ ] T065 [P] [M02] Create MenuManagement.vue in frontend/src/views/admin/MenuManagement.vue
-- [ ] T066 [P] [M02] Create auth store in frontend/src/stores/auth.js
-- [ ] T067 [P] [M02] Create permission store in frontend/src/stores/permission.js
-- [ ] T068 [M02] Setup Vue Router with dynamic routes in frontend/src/router/index.js
-- [ ] T069 [M02] Integrate Ant Design components in frontend/src/main.js
-- [ ] T070 [M02] Setup Axios interceptors for JWT in frontend/src/utils/request.js
+- [x] T061 [P] [M02] Create frontend main layout in frontend/src/layouts/AdminLayout.vue
+- [x] T062 [P] [M02] Create Login.vue in frontend/src/views/Login.vue
+- [x] T063 [P] [M02] Create UserManagement.vue in frontend/src/views/admin/UserManagement.vue
+- [x] T064 [P] [M02] Create RoleManagement.vue in frontend/src/views/admin/RoleManagement.vue
+- [x] T065 [P] [M02] Create MenuManagement.vue in frontend/src/views/admin/MenuManagement.vue
+- [x] T066 [P] [M02] Create auth store in frontend/src/stores/auth.js
+- [x] T067 [P] [M02] Create permission store in frontend/src/stores/permission.js
+- [x] T068 [M02] Setup Vue Router with dynamic routes in frontend/src/router/index.js
+- [x] T069 [M02] Integrate Ant Design components in frontend/src/main.js
+- [x] T070 [M02] Setup Axios interceptors for JWT in frontend/src/utils/request.js
 
 ### Gateway Integration
 
-- [ ] T071 [M02] Add admin-framework route configuration in gateway/src/main/resources/application.yml
+- [x] T071 [M02] Add admin-framework route configuration in gateway/src/main/resources/application.yml
 
 **Checkpoint**: Admin Framework complete - all other modules can now be developed in parallel
 
@@ -146,41 +146,41 @@
 
 ### Database & Entities
 
-- [ ] T072 [P] [M09] Create tenant table SQL in services/tenant-service/src/main/resources/db/migration/V1__init_tenant.sql
-- [ ] T073 [P] [M09] Create tenant_quota table SQL in services/tenant-service/src/main/resources/db/migration/V2__init_tenant_quota.sql
-- [ ] T074 [P] [M09] Create tenant_resource_usage table SQL in services/tenant-service/src/main/resources/db/migration/V3__init_tenant_resource_usage.sql
-- [ ] T075 [P] [M09] Create Tenant entity in services/tenant-service/src/main/java/com/example/tenant/entity/Tenant.java
-- [ ] T076 [P] [M09] Create TenantQuota entity in services/tenant-service/src/main/java/com/example/tenant/entity/TenantQuota.java
-- [ ] T077 [P] [M09] Create TenantResourceUsage entity in services/tenant-service/src/main/java/com/example/tenant/entity/TenantResourceUsage.java
+- [x] T072 [P] [M09] Create tenant table SQL in services/tenant-service/src/main/resources/db/migration/V1__init_tenant.sql
+- [x] T073 [P] [M09] Create tenant_quota table SQL in services/tenant-service/src/main/resources/db/migration/V2__init_tenant_quota.sql
+- [x] T074 [P] [M09] Create tenant_resource_usage table SQL in services/tenant-service/src/main/resources/db/migration/V3__init_tenant_resource_usage.sql
+- [x] T075 [P] [M09] Create Tenant entity in services/tenant-service/src/main/java/com/example/tenant/entity/Tenant.java
+- [x] T076 [P] [M09] Create TenantQuota entity in services/tenant-service/src/main/java/com/example/tenant/entity/TenantQuota.java
+- [x] T077 [P] [M09] Create TenantResourceUsage entity in services/tenant-service/src/main/java/com/example/tenant/entity/TenantResourceUsage.java
 
 ### Service & Controller
 
-- [ ] T078 [M09] Create TenantService in services/tenant-service/src/main/java/com/example/tenant/service/TenantService.java
-- [ ] T079 [M09] Create TenantController in services/tenant-service/src/main/java/com/example/tenant/controller/TenantController.java
-- [ ] T080 [M09] Implement GET /tenants endpoint with filters
-- [ ] T081 [M09] Implement POST /tenants endpoint
-- [ ] T082 [M09] Implement GET /tenants/{id} endpoint
-- [ ] T083 [M09] Implement PUT /tenants/{id} endpoint
-- [ ] T084 [M09] Implement DELETE /tenants/{id} endpoint
-- [ ] T085 [M09] Implement POST /tenants/{id}/approve endpoint
-- [ ] T086 [M09] Implement PUT /tenants/{id}/status endpoint
-- [ ] T087 [M09] Implement GET /tenants/{id}/quota endpoint
-- [ ] T088 [M09] Implement PUT /tenants/{id}/quota endpoint
-- [ ] T089 [M09] Implement GET /tenants/{id}/usage endpoint
-- [ ] T090 [M09] Implement GET /tenants/{id}/usage/summary endpoint
-- [ ] T091 [M09] Implement GET /tenants/{id}/usage/realtime endpoint
+- [x] T078 [M09] Create TenantService in services/tenant-service/src/main/java/com/example/tenant/service/TenantService.java
+- [x] T079 [M09] Create TenantController in services/tenant-service/src/main/java/com/example/tenant/controller/TenantController.java
+- [x] T080 [M09] Implement GET /tenants endpoint with filters
+- [x] T081 [M09] Implement POST /tenants endpoint
+- [x] T082 [M09] Implement GET /tenants/{id} endpoint
+- [x] T083 [M09] Implement PUT /tenants/{id} endpoint
+- [x] T084 [M09] Implement DELETE /tenants/{id} endpoint
+- [x] T085 [M09] Implement POST /tenants/{id}/approve endpoint
+- [x] T086 [M09] Implement PUT /tenants/{id}/status endpoint
+- [x] T087 [M09] Implement GET /tenants/{id}/quota endpoint
+- [x] T088 [M09] Implement PUT /tenants/{id}/quota endpoint
+- [x] T089 [M09] Implement GET /tenants/{id}/usage endpoint
+- [x] T090 [M09] Implement GET /tenants/{id}/usage/summary endpoint
+- [x] T091 [M09] Implement GET /tenants/{id}/usage/realtime endpoint
 
 ### Frontend
 
-- [ ] T092 [P] [M09] Create TenantList.vue in frontend/src/views/tenant/TenantList.vue
-- [ ] T093 [P] [M09] Create TenantForm.vue in frontend/src/views/tenant/TenantForm.vue
-- [ ] T094 [P] [M09] Create TenantApproval.vue in frontend/src/views/tenant/TenantApproval.vue
-- [ ] T095 [P] [M09] Create TenantQuota.vue in frontend/src/views/tenant/TenantQuota.vue
-- [ ] T096 [P] [M09] Create TenantUsage.vue in frontend/src/views/tenant/TenantUsage.vue
+- [x] T092 [P] [M09] Create TenantList.vue in frontend/src/views/tenant/TenantList.vue
+- [x] T093 [P] [M09] Create TenantForm.vue in frontend/src/views/tenant/TenantForm.vue
+- [x] T094 [P] [M09] Create TenantApproval.vue in frontend/src/views/tenant/TenantApproval.vue
+- [x] T095 [P] [M09] Create TenantQuota.vue in frontend/src/views/tenant/TenantQuota.vue
+- [x] T096 [P] [M09] Create TenantUsage.vue in frontend/src/views/tenant/TenantUsage.vue
 
 ### Gateway
 
-- [ ] T097 [M09] Add tenant-service route configuration in gateway/src/main/resources/application.yml
+- [x] T097 [M09] Add tenant-service route configuration in gateway/src/main/resources/application.yml
 
 ---
 
@@ -192,44 +192,44 @@
 
 ### Database & Entities
 
-- [ ] T098 [P] [M01] Create parameter_category table SQL in services/parameter-service/src/main/resources/db/migration/V1__init_parameter_category.sql
-- [ ] T099 [P] [M01] Create parameter_dictionary table SQL in services/parameter-service/src/main/resources/db/migration/V2__init_parameter_dictionary.sql
-- [ ] T100 [P] [M01] Create parameter_item table SQL in services/parameter-service/src/main/resources/db/migration/V3__init_parameter_item.sql
-- [ ] T101 [P] [M01] Create ParameterCategory entity in services/parameter-service/src/main/java/com/example/parameter/entity/ParameterCategory.java
-- [ ] T102 [P] [M01] Create ParameterDictionary entity in services/parameter-service/src/main/java/com/example/parameter/entity/ParameterDictionary.java
-- [ ] T103 [P] [M01] Create ParameterItem entity in services/parameter-service/src/main/java/com/example/parameter/entity/ParameterItem.java
+- [x] T098 [P] [M01] Create parameter_category table SQL in services/parameter-service/src/main/resources/db/migration/V1__init_parameter_category.sql
+- [x] T099 [P] [M01] Create parameter_dictionary table SQL in services/parameter-service/src/main/resources/db/migration/V2__init_parameter_dictionary.sql
+- [x] T100 [P] [M01] Create parameter_item table SQL in services/parameter-service/src/main/resources/db/migration/V3__init_parameter_item.sql
+- [x] T101 [P] [M01] Create ParameterCategory entity in services/parameter-service/src/main/java/com/example/parameter/entity/ParameterCategory.java
+- [x] T102 [P] [M01] Create ParameterDictionary entity in services/parameter-service/src/main/java/com/example/parameter/entity/ParameterDictionary.java
+- [x] T103 [P] [M01] Create ParameterItem entity in services/parameter-service/src/main/java/com/example/parameter/entity/ParameterItem.java
 
 ### Service & Controller
 
-- [ ] T104 [M01] Create ParameterDictionaryService in services/parameter-service/src/main/java/com/example/parameter/service/ParameterDictionaryService.java
-- [ ] T105 [M01] Create ParameterDictionaryController in services/parameter-service/src/main/java/com/example/parameter/controller/ParameterDictionaryController.java
-- [ ] T106 [M01] Implement GET /categories endpoint
-- [ ] T107 [M01] Implement POST /categories endpoint
-- [ ] T108 [M01] Implement PUT /categories/{id} endpoint
-- [ ] T109 [M01] Implement DELETE /categories/{id} endpoint
-- [ ] T110 [M01] Implement GET /dictionaries endpoint with pagination
-- [ ] T111 [M01] Implement POST /dictionaries endpoint
-- [ ] T112 [M01] Implement GET /dictionaries/{id} endpoint
-- [ ] T113 [M01] Implement PUT /dictionaries/{id} endpoint
-- [ ] T114 [M01] Implement DELETE /dictionaries/{id} endpoint
-- [ ] T115 [M01] Implement GET /dictionaries/{id}/items endpoint
-- [ ] T116 [M01] Implement POST /dictionaries/{id}/items endpoint
-- [ ] T117 [M01] Implement PUT /items/{id} endpoint with version check
-- [ ] T118 [M01] Implement DELETE /items/{id} endpoint
-- [ ] T119 [M01] Implement PATCH /dictionaries/{id}/status endpoint
-- [ ] T120 [M01] Implement PATCH /items/{id}/status endpoint
+- [x] T104 [M01] Create ParameterDictionaryService in services/parameter-service/src/main/java/com/example/parameter/service/ParameterDictionaryService.java
+- [x] T105 [M01] Create ParameterDictionaryController in services/parameter-service/src/main/java/com/example/parameter/controller/ParameterDictionaryController.java
+- [x] T106 [M01] Implement GET /categories endpoint
+- [x] T107 [M01] Implement POST /categories endpoint
+- [x] T108 [M01] Implement PUT /categories/{id} endpoint
+- [x] T109 [M01] Implement DELETE /categories/{id} endpoint
+- [x] T110 [M01] Implement GET /dictionaries endpoint with pagination
+- [x] T111 [M01] Implement POST /dictionaries endpoint
+- [x] T112 [M01] Implement GET /dictionaries/{id} endpoint
+- [x] T113 [M01] Implement PUT /dictionaries/{id} endpoint
+- [x] T114 [M01] Implement DELETE /dictionaries/{id} endpoint
+- [x] T115 [M01] Implement GET /dictionaries/{id}/items endpoint
+- [x] T116 [M01] Implement POST /dictionaries/{id}/items endpoint
+- [x] T117 [M01] Implement PUT /items/{id} endpoint with version check
+- [x] T118 [M01] Implement DELETE /items/{id} endpoint
+- [x] T119 [M01] Implement PATCH /dictionaries/{id}/status endpoint
+- [x] T120 [M01] Implement PATCH /items/{id}/status endpoint
 
 ### Frontend
 
-- [ ] T121 [P] [M01] Create CategoryList.vue in frontend/src/views/parameter/CategoryList.vue
-- [ ] T122 [P] [M01] Create DictionaryList.vue in frontend/src/views/parameter/DictionaryList.vue
-- [ ] T123 [P] [M01] Create DictionaryForm.vue in frontend/src/views/parameter/DictionaryForm.vue
-- [ ] T124 [P] [M01] Create ItemList.vue in frontend/src/views/parameter/ItemList.vue
-- [ ] T125 [P] [M01] Create ItemForm.vue in frontend/src/views/parameter/ItemForm.vue
+- [x] T121 [P] [M01] Create CategoryList.vue in frontend/src/views/parameter/CategoryList.vue
+- [x] T122 [P] [M01] Create DictionaryList.vue in frontend/src/views/parameter/DictionaryList.vue
+- [x] T123 [P] [M01] Create DictionaryForm.vue in frontend/src/views/parameter/DictionaryForm.vue
+- [x] T124 [P] [M01] Create ItemList.vue in frontend/src/views/parameter/ItemList.vue
+- [x] T125 [P] [M01] Create ItemForm.vue in frontend/src/views/parameter/ItemForm.vue
 
 ### Gateway
 
-- [ ] T126 [M01] Add parameter-service route configuration in gateway/src/main/resources/application.yml
+- [x] T126 [M01] Add parameter-service route configuration in gateway/src/main/resources/application.yml
 
 ---
 
@@ -250,10 +250,10 @@
 
 ### Service & Controller
 
-- [ ] T133 [M03] Create GatewayRouteService in services/gateway-service/src/main/java/com/example/gateway/service/GatewayRouteService.java
-- [ ] T134 [M03] Create GatewayConfigController in services/gateway-service/src/main/java/com/example/gateway/controller/GatewayConfigController.java
-- [ ] T135 [M03] Implement GET /routes endpoint
-- [ ] T136 [M03] Implement POST /routes endpoint
+- [x] T133 [M03] Create GatewayRouteService in services/gateway-service/src/main/java/com/example/gateway/service/GatewayRouteService.java
+- [x] T134 [M03] Create GatewayConfigController in services/gateway-service/src/main/java/com/example/gateway/controller/GatewayConfigController.java
+- [x] T135 [M03] Implement GET /routes endpoint
+- [x] T136 [M03] Implement POST /routes endpoint
 - [ ] T137 [M03] Implement PUT /routes/{id} endpoint
 - [ ] T138 [M03] Implement DELETE /routes/{id} endpoint
 - [ ] T139 [M03] Implement POST /routes/{id}/refresh endpoint
@@ -268,7 +268,7 @@
 
 ### Frontend
 
-- [ ] T148 [P] [M03] Create RouteList.vue in frontend/src/views/gateway/RouteList.vue
+- [x] T148 [P] [M03] Create RouteList.vue in frontend/src/views/gateway/RouteList.vue
 - [ ] T149 [P] [M03] Create RouteForm.vue in frontend/src/views/gateway/RouteForm.vue
 - [ ] T150 [P] [M03] Create RateLimitList.vue in frontend/src/views/gateway/RateLimitList.vue
 - [ ] T151 [P] [M03] Create CircuitBreakerList.vue in frontend/src/views/gateway/CircuitBreakerList.vue
@@ -283,21 +283,21 @@
 
 ### Service & Controller (uses M02 entities)
 
-- [ ] T152 [M06] Create PermissionService in services/admin-framework/src/main/java/com/example/admin/service/PermissionService.java
-- [ ] T153 [M06] Create PermissionController in services/admin-framework/src/main/java/com/example/admin/controller/PermissionController.java
-- [ ] T154 [M06] Implement GET /permissions endpoint
-- [ ] T155 [M06] Implement POST /permissions endpoint
-- [ ] T156 [M06] Implement PUT /permissions/{id} endpoint
-- [ ] T157 [M06] Implement DELETE /permissions/{id} endpoint
-- [ ] T158 [M06] Implement PUT /roles/{roleId}/permissions endpoint
-- [ ] T159 [M06] Implement GET /users/{userId}/permissions endpoint
-- [ ] T160 [M06] Implement GET /routes/user endpoint (returns dynamic routes for frontend)
-- [ ] T161 [M06] Implement POST /routes/refresh endpoint
-- [ ] T162 [M06] Implement POST /check-permission endpoint
+- [x] T152 [M06] Create PermissionService in services/admin-framework/src/main/java/com/example/admin/service/PermissionService.java
+- [x] T153 [M06] Create PermissionController in services/admin-framework/src/main/java/com/example/admin/controller/PermissionController.java
+- [x] T154 [M06] Implement GET /permissions endpoint
+- [x] T155 [M06] Implement POST /permissions endpoint
+- [x] T156 [M06] Implement PUT /permissions/{id} endpoint
+- [x] T157 [M06] Implement DELETE /permissions/{id} endpoint
+- [x] T158 [M06] Implement PUT /roles/{roleId}/permissions endpoint
+- [x] T159 [M06] Implement GET /users/{userId}/permissions endpoint
+- [x] T160 [M06] Implement GET /routes/user endpoint (returns dynamic routes for frontend)
+- [x] T161 [M06] Implement POST /routes/refresh endpoint
+- [x] T162 [M06] Implement POST /check-permission endpoint
 
 ### Frontend
 
-- [ ] T163 [P] [M06] Create PermissionList.vue in frontend/src/views/permission/PermissionList.vue
+- [x] T163 [P] [M06] Create PermissionList.vue in frontend/src/views/permission/PermissionList.vue
 - [ ] T164 [P] [M06] Create PermissionForm.vue in frontend/src/views/permission/PermissionForm.vue
 - [ ] T165 [P] [M06] Create dynamic route loader in frontend/src/router/dynamicRoutes.js
 
@@ -311,54 +311,54 @@
 
 ### Database & Entities
 
-- [ ] T166 [P] [M05] Create api_definition table SQL in services/api-market-service/src/main/resources/db/migration/V1__init_api_definition.sql
-- [ ] T167 [P] [M05] Create developer_application table SQL in services/api-market-service/src/main/resources/db/migration/V2__init_developer_application.sql
-- [ ] T168 [P] [M05] Create api_subscription table SQL in services/api-market-service/src/main/resources/db/migration/V3__init_api_subscription.sql
-- [ ] T169 [P] [M05] Create api_usage_record table SQL in services/api-market-service/src/main/resources/db/migration/V4__init_api_usage_record.sql
-- [ ] T170 [P] [M05] Create api_call_billing table SQL in services/api-market-service/src/main/resources/db/migration/V5__init_api_call_billing.sql
-- [ ] T171 [P] [M05] Create ApiDefinition entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiDefinition.java
-- [ ] T172 [P] [M05] Create DeveloperApplication entity in services/api-market-service/src/main/java/com/example/apimarket/entity/DeveloperApplication.java
-- [ ] T173 [P] [M05] Create ApiSubscription entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiSubscription.java
-- [ ] T174 [P] [M05] Create ApiUsageRecord entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiUsageRecord.java
-- [ ] T175 [P] [M05] Create ApiCallBilling entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiCallBilling.java
+- [x] T166 [P] [M05] Create api_definition table SQL in services/api-market-service/src/main/resources/db/migration/V1__init_api_definition.sql
+- [x] T167 [P] [M05] Create developer_application table SQL in services/api-market-service/src/main/resources/db/migration/V2__init_developer_application.sql
+- [x] T168 [P] [M05] Create api_subscription table SQL in services/api-market-service/src/main/resources/db/migration/V3__init_api_subscription.sql
+- [x] T169 [P] [M05] Create api_usage_record table SQL in services/api-market-service/src/main/resources/db/migration/V4__init_api_usage_record.sql
+- [x] T170 [P] [M05] Create api_call_billing table SQL in services/api-market-service/src/main/resources/db/migration/V5__init_api_call_billing.sql
+- [x] T171 [P] [M05] Create ApiDefinition entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiDefinition.java
+- [x] T172 [P] [M05] Create DeveloperApplication entity in services/api-market-service/src/main/java/com/example/apimarket/entity/DeveloperApplication.java
+- [x] T173 [P] [M05] Create ApiSubscription entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiSubscription.java
+- [x] T174 [P] [M05] Create ApiUsageRecord entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiUsageRecord.java
+- [x] T175 [P] [M05] Create ApiCallBilling entity in services/api-market-service/src/main/java/com/example/apimarket/entity/ApiCallBilling.java
 
 ### Service & Controller
 
-- [ ] T176 [M05] Create ApiDefinitionService in services/api-market-service/src/main/java/com/example/apimarket/service/ApiDefinitionService.java
-- [ ] T177 [M05] Create ApiMarketController in services/api-market-service/src/main/java/com/example/apimarket/controller/ApiMarketController.java
-- [ ] T178 [M05] Implement GET /apis endpoint
-- [ ] T179 [M05] Implement POST /apis endpoint
-- [ ] T180 [M05] Implement GET /apis/{id} endpoint
-- [ ] T181 [M05] Implement PUT /apis/{id} endpoint
-- [ ] T182 [M05] Implement DELETE /apis/{id} endpoint
-- [ ] T183 [M05] Implement POST /apis/{id}/publish endpoint
-- [ ] T184 [M05] Implement POST /apis/{id}/audit endpoint
-- [ ] T185 [M05] Implement GET /applications endpoint
-- [ ] T186 [M05] Implement POST /applications endpoint
-- [ ] T187 [M05] Implement GET /applications/{id}/api-keys endpoint
-- [ ] T188 [M05] Implement POST /applications/{id}/api-keys endpoint
-- [ ] T189 [M05] Implement GET /subscriptions endpoint
-- [ ] T190 [M05] Implement POST /subscriptions endpoint
-- [ ] T191 [M05] Implement DELETE /subscriptions/{id} endpoint
-- [ ] T192 [M05] Implement POST /subscriptions/{id}/suspend endpoint
-- [ ] T193 [M05] Implement POST /subscriptions/{id}/activate endpoint
-- [ ] T194 [M05] Implement GET /usage endpoint
-- [ ] T195 [M05] Implement GET /usage/summary endpoint
-- [ ] T196 [M05] Implement GET /billing endpoint
-- [ ] T197 [M05] Implement GET /billing/summary endpoint
+- [x] T176 [M05] Create ApiDefinitionService in services/api-market-service/src/main/java/com/example/apimarket/service/ApiDefinitionService.java
+- [x] T177 [M05] Create ApiMarketController in services/api-market-service/src/main/java/com/example/apimarket/controller/ApiMarketController.java
+- [x] T178 [M05] Implement GET /apis endpoint
+- [x] T179 [M05] Implement POST /apis endpoint
+- [x] T180 [M05] Implement GET /apis/{id} endpoint
+- [x] T181 [M05] Implement PUT /apis/{id} endpoint
+- [x] T182 [M05] Implement DELETE /apis/{id} endpoint
+- [x] T183 [M05] Implement POST /apis/{id}/publish endpoint
+- [x] T184 [M05] Implement POST /apis/{id}/audit endpoint
+- [x] T185 [M05] Implement GET /applications endpoint
+- [x] T186 [M05] Implement POST /applications endpoint
+- [x] T187 [M05] Implement GET /applications/{id}/api-keys endpoint
+- [x] T188 [M05] Implement POST /applications/{id}/api-keys endpoint
+- [x] T189 [M05] Implement GET /subscriptions endpoint
+- [x] T190 [M05] Implement POST /subscriptions endpoint
+- [x] T191 [M05] Implement DELETE /subscriptions/{id} endpoint
+- [x] T192 [M05] Implement POST /subscriptions/{id}/suspend endpoint
+- [x] T193 [M05] Implement POST /subscriptions/{id}/activate endpoint
+- [x] T194 [M05] Implement GET /usage endpoint
+- [x] T195 [M05] Implement GET /usage/summary endpoint
+- [x] T196 [M05] Implement GET /billing endpoint
+- [x] T197 [M05] Implement GET /billing/summary endpoint
 
 ### Frontend
 
-- [ ] T198 [P] [M05] Create ApiMarketList.vue in frontend/src/views/apimarket/ApiMarketList.vue
-- [ ] T199 [P] [M05] Create ApiDefinitionForm.vue in frontend/src/views/apimarket/ApiDefinitionForm.vue
-- [ ] T200 [P] [M05] Create ApplicationList.vue in frontend/src/views/apimarket/ApplicationList.vue
-- [ ] T201 [P] [M05] Create ApplicationForm.vue in frontend/src/views/apimarket/ApplicationForm.vue
-- [ ] T202 [P] [M05] Create SubscriptionList.vue in frontend/src/views/apimarket/SubscriptionList.vue
-- [ ] T203 [P] [M05] Create ApiBilling.vue in frontend/src/views/apimarket/ApiBilling.vue
+- [x] T198 [P] [M05] Create ApiMarketList.vue in frontend/src/views/apimarket/ApiMarketList.vue
+- [x] T199 [P] [M05] Create ApiDefinitionForm.vue in frontend/src/views/apimarket/ApiDefinitionForm.vue
+- [x] T200 [P] [M05] Create ApplicationList.vue in frontend/src/views/apimarket/ApplicationList.vue
+- [x] T201 [P] [M05] Create ApplicationForm.vue in frontend/src/views/apimarket/ApplicationForm.vue
+- [x] T202 [P] [M05] Create SubscriptionList.vue in frontend/src/views/apimarket/SubscriptionList.vue
+- [x] T203 [P] [M05] Create ApiBilling.vue in frontend/src/views/apimarket/ApiBilling.vue
 
 ### Gateway
 
-- [ ] T204 [M05] Add api-market-service route configuration in gateway/src/main/resources/application.yml
+- [x] T204 [M05] Add api-market-service route configuration in gateway/src/main/resources/application.yml
 
 ---
 
@@ -370,39 +370,39 @@
 
 ### Database & Entities
 
-- [ ] T205 [P] [M11] Create trace_config table SQL in services/tracing-service/src/main/resources/db/migration/V1__init_trace_config.sql
-- [ ] T206 [P] [M11] Create trace_alert table SQL in services/tracing-service/src/main/resources/db/migration/V2__init_trace_alert.sql
-- [ ] T207 [P] [M11] Create trace_dashboard table SQL in services/tracing-service/src/main/resources/db/migration/V3__init_trace_dashboard.sql
-- [ ] T208 [P] [M11] Create TraceConfig entity in services/tracing-service/src/main/java/com/example/tracing/entity/TraceConfig.java
-- [ ] T209 [P] [M11] Create TraceAlert entity in services/tracing-service/src/main/java/com/example/tracing/entity/TraceAlert.java
-- [ ] T210 [P] [M11] Create TraceDashboard entity in services/tracing-service/src/main/java/com/example/tracing/entity/TraceDashboard.java
+- [x] T205 [P] [M11] Create trace_config table SQL in services/tracing-service/src/main/resources/db/migration/V1__init_trace_config.sql
+- [x] T206 [P] [M11] Create trace_alert table SQL in services/tracing-service/src/main/resources/db/migration/V2__init_trace_alert.sql
+- [x] T207 [P] [M11] Create trace_dashboard table SQL in services/tracing-service/src/main/resources/db/migration/V3__init_trace_dashboard.sql
+- [x] T208 [P] [M11] Create TraceConfig entity in services/tracing-service/src/main/java/com/example/tracing/entity/TraceConfig.java
+- [x] T209 [P] [M11] Create TraceAlert entity in services/tracing-service/src/main/java/com/example/tracing/entity/TraceAlert.java
+- [x] T210 [P] [M11] Create TraceDashboard entity in services/tracing-service/src/main/java/com/example/tracing/entity/TraceDashboard.java
 
 ### Service & Controller
 
-- [ ] T211 [M11] Create TracingConfigService in services/tracing-service/src/main/java/com/example/tracing/service/TracingConfigService.java
-- [ ] T212 [M11] Create TracingController in services/tracing-service/src/main/java/com/example/tracing/controller/TracingController.java
-- [ ] T213 [M11] Implement GET /configs endpoint
-- [ ] T214 [M11] Implement POST /configs endpoint
-- [ ] T215 [M11] Implement PUT /configs/{id} endpoint
-- [ ] T216 [M11] Implement DELETE /configs/{id} endpoint
-- [ ] T217 [M11] Implement GET /alerts endpoint
-- [ ] T218 [M11] Implement POST /alerts endpoint
-- [ ] T219 [M11] Implement PUT /alerts/{id} endpoint
-- [ ] T220 [M11] Implement DELETE /alerts/{id} endpoint
-- [ ] T221 [M11] Implement POST /alerts/{id}/toggle endpoint
-- [ ] T222 [M11] Implement GET /dashboards endpoint
-- [ ] T223 [M11] Implement POST /dashboards endpoint
-- [ ] T224 [M11] Implement GET /traces/query endpoint
-- [ ] T225 [M11] Implement GET /traces/{traceId} endpoint
-- [ ] T226 [M11] Implement GET /metrics/services endpoint
-- [ ] T227 [M11] Implement GET /metrics/top endpoint
+- [x] T211 [M11] Create TracingConfigService in services/tracing-service/src/main/java/com/example/tracing/service/TracingConfigService.java
+- [x] T212 [M11] Create TracingController in services/tracing-service/src/main/java/com/example/tracing/controller/TracingController.java
+- [x] T213 [M11] Implement GET /configs endpoint
+- [x] T214 [M11] Implement POST /configs endpoint
+- [x] T215 [M11] Implement PUT /configs/{id} endpoint
+- [x] T216 [M11] Implement DELETE /configs/{id} endpoint
+- [x] T217 [M11] Implement GET /alerts endpoint
+- [x] T218 [M11] Implement POST /alerts endpoint
+- [x] T219 [M11] Implement PUT /alerts/{id} endpoint
+- [x] T220 [M11] Implement DELETE /alerts/{id} endpoint
+- [x] T221 [M11] Implement POST /alerts/{id}/toggle endpoint
+- [x] T222 [M11] Implement GET /dashboards endpoint
+- [x] T223 [M11] Implement POST /dashboards endpoint
+- [x] T224 [M11] Implement GET /traces/query endpoint
+- [x] T225 [M11] Implement GET /traces/{traceId} endpoint
+- [x] T226 [M11] Implement GET /metrics/services endpoint
+- [x] T227 [M11] Implement GET /metrics/top endpoint
 
 ### Frontend
 
-- [ ] T228 [P] [M11] Create TraceConfigList.vue in frontend/src/views/tracing/TraceConfigList.vue
-- [ ] T229 [P] [M11] Create TraceAlertList.vue in frontend/src/views/tracing/TraceAlertList.vue
-- [ ] T230 [P] [M11] Create TraceQuery.vue in frontend/src/views/tracing/TraceQuery.vue
-- [ ] T231 [P] [M11] Create TraceDashboard.vue in frontend/src/views/tracing/TraceDashboard.vue
+- [x] T228 [P] [M11] Create TraceConfigList.vue in frontend/src/views/tracing/TraceConfigList.vue
+- [x] T229 [P] [M11] Create TraceAlertList.vue in frontend/src/views/tracing/TraceAlertList.vue
+- [x] T230 [P] [M11] Create TraceQuery.vue in frontend/src/views/tracing/TraceQuery.vue
+- [x] T231 [P] [M11] Create TraceDashboard.vue in frontend/src/views/tracing/TraceDashboard.vue
 
 ---
 
@@ -414,37 +414,37 @@
 
 ### Database & Entities
 
-- [ ] T232 [P] [M04] Create third_party_api table SQL in services/third-party-service/src/main/resources/db/migration/V1__init_third_party_api.sql
-- [ ] T233 [P] [M04] Create api_key table SQL in services/third-party-service/src/main/resources/db/migration/V2__init_api_key.sql
-- [ ] T234 [P] [M04] Create api_call_log table SQL in services/third-party-service/src/main/resources/db/migration/V3__init_api_call_log.sql
-- [ ] T235 [P] [M04] Create api_health_check table SQL in services/third-party-service/src/main/resources/db/migration/V4__init_api_health_check.sql
-- [ ] T236 [P] [M04] Create ThirdPartyApi entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ThirdPartyApi.java
-- [ ] T237 [P] [M04] Create ApiKey entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ApiKey.java
-- [ ] T238 [P] [M04] Create ApiCallLog entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ApiCallLog.java
-- [ ] T239 [P] [M04] Create ApiHealthCheck entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ApiHealthCheck.java
+- [x] T232 [P] [M04] Create third_party_api table SQL in services/third-party-service/src/main/resources/db/migration/V1__init_third_party_api.sql
+- [x] T233 [P] [M04] Create api_key table SQL in services/third-party-service/src/main/resources/db/migration/V2__init_api_key.sql
+- [x] T234 [P] [M04] Create api_call_log table SQL in services/third-party-service/src/main/resources/db/migration/V3__init_api_call_log.sql
+- [x] T235 [P] [M04] Create api_health_check table SQL in services/third-party-service/src/main/resources/db/migration/V4__init_api_health_check.sql
+- [x] T236 [P] [M04] Create ThirdPartyApi entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ThirdPartyApi.java
+- [x] T237 [P] [M04] Create ApiKey entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ApiKey.java
+- [x] T238 [P] [M04] Create ApiCallLog entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ApiCallLog.java
+- [x] T239 [P] [M04] Create ApiHealthCheck entity in services/third-party-service/src/main/java/com/example/thirdparty/entity/ApiHealthCheck.java
 
 ### Service & Controller
 
-- [ ] T240 [M04] Create ThirdPartyApiService in services/third-party-service/src/main/java/com/example/thirdparty/service/ThirdPartyApiService.java
-- [ ] T241 [M04] Create ThirdPartyApiController in services/third-party-service/src/main/java/com/example/thirdparty/controller/ThirdPartyApiController.java
-- [ ] T242 [M04] Implement GET /apis endpoint
-- [ ] T243 [M04] Implement POST /apis endpoint
-- [ ] T244 [M04] Implement PUT /apis/{id} endpoint
-- [ ] T245 [M04] Implement DELETE /apis/{id} endpoint
-- [ ] T246 [M04] Implement GET /apis/{id}/keys endpoint
-- [ ] T247 [M04] Implement POST /apis/{id}/keys endpoint
-- [ ] T248 [M04] Implement PUT /keys/{id} endpoint
-- [ ] T249 [M04] Implement DELETE /keys/{id} endpoint
-- [ ] T250 [M04] Implement GET /apis/{id}/logs endpoint
-- [ ] T251 [M04] Implement GET /apis/{id}/health endpoint
-- [ ] T252 [M04] Implement POST /apis/{id}/health/check endpoint
+- [x] T240 [M04] Create ThirdPartyApiService in services/third-party-service/src/main/java/com/example/thirdparty/service/ThirdPartyApiService.java
+- [x] T241 [M04] Create ThirdPartyApiController in services/third-party-service/src/main/java/com/example/thirdparty/controller/ThirdPartyApiController.java
+- [x] T242 [M04] Implement GET /apis endpoint
+- [x] T243 [M04] Implement POST /apis endpoint
+- [x] T244 [M04] Implement PUT /apis/{id} endpoint
+- [x] T245 [M04] Implement DELETE /apis/{id} endpoint
+- [x] T246 [M04] Implement GET /apis/{id}/keys endpoint
+- [x] T247 [M04] Implement POST /apis/{id}/keys endpoint
+- [x] T248 [M04] Implement PUT /keys/{id} endpoint
+- [x] T249 [M04] Implement DELETE /keys/{id} endpoint
+- [x] T250 [M04] Implement GET /apis/{id}/logs endpoint
+- [x] T251 [M04] Implement GET /apis/{id}/health endpoint
+- [x] T252 [M04] Implement POST /apis/{id}/health/check endpoint
 
 ### Frontend
 
-- [ ] T253 [P] [M04] Create ThirdPartyApiList.vue in frontend/src/views/thirdparty/ApiList.vue
-- [ ] T254 [P] [M04] Create ThirdPartyApiForm.vue in frontend/src/views/thirdparty/ApiForm.vue
-- [ ] T255 [P] [M04] Create ApiKeyManagement.vue in frontend/src/views/thirdparty/ApiKeyManagement.vue
-- [ ] T256 [P] [M04] Create ApiCallLog.vue in frontend/src/views/thirdparty/ApiCallLog.vue
+- [x] T253 [P] [M04] Create ThirdPartyApiList.vue in frontend/src/views/thirdparty/ApiList.vue
+- [x] T254 [P] [M04] Create ThirdPartyApiForm.vue in frontend/src/views/thirdparty/ApiForm.vue
+- [x] T255 [P] [M04] Create ApiKeyManagement.vue in frontend/src/views/thirdparty/ApiKeyManagement.vue
+- [x] T256 [P] [M04] Create ApiCallLog.vue in frontend/src/views/thirdparty/ApiCallLog.vue
 
 ---
 
@@ -456,39 +456,39 @@
 
 ### Database & Entities
 
-- [ ] T257 [P] [M07] Create saas_package table SQL in services/billing-service/src/main/resources/db/migration/V1__init_saas_package.sql
-- [ ] T258 [P] [M07] Create package_feature table SQL in services/billing-service/src/main/resources/db/migration/V2__init_package_feature.sql
-- [ ] T259 [P] [M07] Create tenant_subscription table SQL in services/billing-service/src/main/resources/db/migration/V3__init_tenant_subscription.sql
-- [ ] T260 [P] [M07] Create SaasPackage entity in services/billing-service/src/main/java/com/example/billing/entity/SaasPackage.java
-- [ ] T261 [P] [M07] Create PackageFeature entity in services/billing-service/src/main/java/com/example/billing/entity/PackageFeature.java
-- [ ] T262 [P] [M07] Create TenantSubscription entity in services/billing-service/src/main/java/com/example/billing/entity/TenantSubscription.java
+- [x] T257 [P] [M07] Create saas_package table SQL in services/billing-service/src/main/resources/db/migration/V1__init_saas_package.sql
+- [x] T258 [P] [M07] Create package_feature table SQL in services/billing-service/src/main/resources/db/migration/V2__init_package_feature.sql
+- [x] T259 [P] [M07] Create tenant_subscription table SQL in services/billing-service/src/main/resources/db/migration/V3__init_tenant_subscription.sql
+- [x] T260 [P] [M07] Create SaasPackage entity in services/billing-service/src/main/java/com/example/billing/entity/SaasPackage.java
+- [x] T261 [P] [M07] Create PackageFeature entity in services/billing-service/src/main/java/com/example/billing/entity/PackageFeature.java
+- [x] T262 [P] [M07] Create TenantSubscription entity in services/billing-service/src/main/java/com/example/billing/entity/TenantSubscription.java
 
 ### Service & Controller
 
-- [ ] T263 [M07] Create PackageService in services/billing-service/src/main/java/com/example/billing/service/PackageService.java
-- [ ] T264 [M07] Create PackageController in services/billing-service/src/main/java/com/example/billing/controller/PackageController.java
-- [ ] T265 [M07] Implement GET /packages endpoint
-- [ ] T266 [M07] Implement POST /packages endpoint
-- [ ] T267 [M07] Implement PUT /packages/{id} endpoint
-- [ ] T268 [M07] Implement DELETE /packages/{id} endpoint
-- [ ] T269 [M07] Implement GET /packages/{id}/features endpoint
-- [ ] T270 [M07] Implement POST /packages/{id}/features endpoint
-- [ ] T271 [M07] Implement PUT /features/{featureId} endpoint
-- [ ] T272 [M07] Implement DELETE /features/{featureId} endpoint
-- [ ] T273 [M07] Implement GET /subscriptions endpoint
-- [ ] T274 [M07] Implement POST /subscriptions endpoint
-- [ ] T275 [M07] Implement PUT /subscriptions/{id} endpoint
-- [ ] T276 [M07] Implement DELETE /subscriptions/{id} endpoint
-- [ ] T277 [M07] Implement POST /subscriptions/{id}/renew endpoint
-- [ ] T278 [M07] Implement POST /subscriptions/{id}/suspend endpoint
-- [ ] T279 [M07] Implement POST /subscriptions/{id}/activate endpoint
-- [ ] T280 [M07] Implement GET /tenants/{tenantId}/subscription endpoint
+- [x] T263 [M07] Create PackageService in services/billing-service/src/main/java/com/example/billing/service/PackageService.java
+- [x] T264 [M07] Create PackageController in services/billing-service/src/main/java/com/example/billing/controller/PackageController.java
+- [x] T265 [M07] Implement GET /packages endpoint
+- [x] T266 [M07] Implement POST /packages endpoint
+- [x] T267 [M07] Implement PUT /packages/{id} endpoint
+- [x] T268 [M07] Implement DELETE /packages/{id} endpoint
+- [x] T269 [M07] Implement GET /packages/{id}/features endpoint
+- [x] T270 [M07] Implement POST /packages/{id}/features endpoint
+- [x] T271 [M07] Implement PUT /features/{featureId} endpoint
+- [x] T272 [M07] Implement DELETE /features/{featureId} endpoint
+- [x] T273 [M07] Implement GET /subscriptions endpoint
+- [x] T274 [M07] Implement POST /subscriptions endpoint
+- [x] T275 [M07] Implement PUT /subscriptions/{id} endpoint
+- [x] T276 [M07] Implement DELETE /subscriptions/{id} endpoint
+- [x] T277 [M07] Implement POST /subscriptions/{id}/renew endpoint
+- [x] T278 [M07] Implement POST /subscriptions/{id}/suspend endpoint
+- [x] T279 [M07] Implement POST /subscriptions/{id}/activate endpoint
+- [x] T280 [M07] Implement GET /tenants/{tenantId}/subscription endpoint
 
 ### Frontend
 
-- [ ] T281 [P] [M07] Create PackageList.vue in frontend/src/views/package/PackageList.vue
-- [ ] T282 [P] [M07] Create PackageForm.vue in frontend/src/views/package/PackageForm.vue
-- [ ] T283 [P] [M07] Create SubscriptionList.vue in frontend/src/views/package/SubscriptionList.vue
+- [x] T281 [P] [M07] Create PackageList.vue in frontend/src/views/package/PackageList.vue
+- [x] T282 [P] [M07] Create PackageForm.vue in frontend/src/views/package/PackageForm.vue
+- [x] T283 [P] [M07] Create SubscriptionList.vue in frontend/src/views/package/SubscriptionList.vue
 
 ---
 
@@ -500,36 +500,36 @@
 
 ### Database & Entities
 
-- [ ] T284 [P] [M08] Create marketing_activity table SQL in services/billing-service/src/main/resources/db/migration/V4__init_marketing_activity.sql
-- [ ] T285 [P] [M08] Create package_activity table SQL in services/billing-service/src/main/resources/db/migration/V5__init_package_activity.sql
-- [ ] T286 [P] [M08] Create activity_subscription table SQL in services/billing-service/src/main/resources/db/migration/V6__init_activity_subscription.sql
-- [ ] T287 [P] [M08] Create MarketingActivity entity in services/billing-service/src/main/java/com/example/billing/entity/MarketingActivity.java
-- [ ] T288 [P] [M08] Create PackageActivity entity in services/billing-service/src/main/java/com/example/billing/entity/PackageActivity.java
-- [ ] T289 [P] [M08] Create ActivitySubscription entity in services/billing-service/src/main/java/com/example/billing/entity/ActivitySubscription.java
+- [x] T284 [P] [M08] Create marketing_activity table SQL in services/billing-service/src/main/resources/db/migration/V4__init_marketing_activity.sql
+- [x] T285 [P] [M08] Create package_activity table SQL in services/billing-service/src/main/resources/db/migration/V5__init_package_activity.sql
+- [x] T286 [P] [M08] Create activity_subscription table SQL in services/billing-service/src/main/resources/db/migration/V6__init_activity_subscription.sql
+- [x] T287 [P] [M08] Create MarketingActivity entity in services/billing-service/src/main/java/com/example/billing/entity/MarketingActivity.java
+- [x] T288 [P] [M08] Create PackageActivity entity in services/billing-service/src/main/java/com/example/billing/entity/PackageActivity.java
+- [x] T289 [P] [M08] Create ActivitySubscription entity in services/billing-service/src/main/java/com/example/billing/entity/ActivitySubscription.java
 
 ### Service & Controller
 
-- [ ] T290 [M08] Create ActivityService in services/billing-service/src/main/java/com/example/billing/service/ActivityService.java
-- [ ] T291 [M08] Create ActivityController in services/billing-service/src/main/java/com/example/billing/controller/ActivityController.java
-- [ ] T292 [M08] Implement GET /activities endpoint
-- [ ] T293 [M08] Implement POST /activities endpoint
-- [ ] T294 [M08] Implement PUT /activities/{id} endpoint
-- [ ] T295 [M08] Implement DELETE /activities/{id} endpoint
-- [ ] T296 [M08] Implement POST /activities/{id}/start endpoint
-- [ ] T297 [M08] Implement POST /activities/{id}/pause endpoint
-- [ ] T298 [M08] Implement POST /activities/{id}/end endpoint
-- [ ] T299 [M08] Implement GET /activities/{id}/packages endpoint
-- [ ] T300 [M08] Implement POST /activities/{id}/packages endpoint (link packages)
-- [ ] T301 [M08] Implement DELETE /activities/{activityId}/packages/{packageId} endpoint
+- [x] T290 [M08] Create ActivityService in services/billing-service/src/main/java/com/example/billing/service/ActivityService.java
+- [x] T291 [M08] Create ActivityController in services/billing-service/src/main/java/com/example/billing/controller/ActivityController.java
+- [x] T292 [M08] Implement GET /activities endpoint
+- [x] T293 [M08] Implement POST /activities endpoint
+- [x] T294 [M08] Implement PUT /activities/{id} endpoint
+- [x] T295 [M08] Implement DELETE /activities/{id} endpoint
+- [x] T296 [M08] Implement POST /activities/{id}/start endpoint
+- [x] T297 [M08] Implement POST /activities/{id}/pause endpoint
+- [x] T298 [M08] Implement POST /activities/{id}/end endpoint
+- [x] T299 [M08] Implement GET /activities/{id}/packages endpoint
+- [x] T300 [M08] Implement POST /activities/{id}/packages endpoint (link packages)
+- [x] T301 [M08] Implement DELETE /activities/{activityId}/packages/{packageId} endpoint
 - [ ] T302 [M08] Implement GET /activities/{id}/participations endpoint
 - [ ] T303 [M08] Implement POST /activities/{id}/join endpoint
 - [ ] T304 [M08] Implement DELETE /participations/{id}/cancel endpoint
 
 ### Frontend
 
-- [ ] T305 [P] [M08] Create ActivityList.vue in frontend/src/views/activity/ActivityList.vue
-- [ ] T306 [P] [M08] Create ActivityForm.vue in frontend/src/views/activity/ActivityForm.vue
-- [ ] T307 [P] [M08] Create ParticipationList.vue in frontend/src/views/activity/ParticipationList.vue
+- [x] T305 [P] [M08] Create ActivityList.vue in frontend/src/views/activity/ActivityList.vue
+- [x] T306 [P] [M08] Create ActivityForm.vue in frontend/src/views/activity/ActivityForm.vue
+- [x] T307 [P] [M08] Create ParticipationList.vue in frontend/src/views/activity/ParticipationList.vue
 
 ---
 
@@ -541,39 +541,39 @@
 
 ### Database & Entities
 
-- [ ] T308 [P] [M12] Create code_template table SQL in services/codegen-service/src/main/resources/db/migration/V1__init_code_template.sql
-- [ ] T309 [P] [M12] Create gen_history table SQL in services/codegen-service/src/main/resources/db/migration/V2__init_gen_history.sql
-- [ ] T310 [P] [M12] Create CodeTemplate entity in services/codegen-service/src/main/java/com/example/codegen/entity/CodeTemplate.java
-- [ ] T311 [P] [M12] Create GenHistory entity in services/codegen-service/src/main/java/com/example/codegen/entity/GenHistory.java
+- [x] T308 [P] [M12] Create code_template table SQL in services/codegen-service/src/main/resources/db/migration/V1__init_code_template.sql
+- [x] T309 [P] [M12] Create gen_history table SQL in services/codegen-service/src/main/resources/db/migration/V2__init_gen_history.sql
+- [x] T310 [P] [M12] Create CodeTemplate entity in services/codegen-service/src/main/java/com/example/codegen/entity/CodeTemplate.java
+- [x] T311 [P] [M12] Create GenHistory entity in services/codegen-service/src/main/java/com/example/codegen/entity/GenHistory.java
 
 ### Service & Controller
 
-- [ ] T312 [M12] Create CodeTemplateService in services/codegen-service/src/main/java/com/example/codegen/service/CodeTemplateService.java
-- [ ] T313 [M12] Create CodegenService in services/codegen-service/src/main/java/com/example/codegen/service/CodegenService.java
-- [ ] T314 [M12] Create CodeTemplateController in services/codegen-service/src/main/java/com/example/codegen/controller/CodeTemplateController.java
-- [ ] T315 [M12] Create CodegenController in services/codegen-service/src/main/java/com/example/codegen/controller/CodegenController.java
-- [ ] T316 [M12] Implement GET /templates endpoint
-- [ ] T317 [M12] Implement POST /templates endpoint
-- [ ] T318 [M12] Implement PUT /templates/{id} endpoint
-- [ ] T319 [M12] Implement DELETE /templates/{id} endpoint
-- [ ] T320 [M12] Implement GET /database/tables endpoint
-- [ ] T321 [M12] Implement GET /database/tables/{tableName} endpoint
-- [ ] T322 [M12] Implement POST /database/import endpoint
-- [ ] T323 [M12] Implement POST /generation/preview endpoint
-- [ ] T324 [M12] Implement POST /generation/generate endpoint
-- [ ] T325 [M12] Implement GET /generation/download/{historyId} endpoint
-- [ ] T326 [M12] Implement GET /history endpoint
-- [ ] T327 [M12] Implement GET /history/{id} endpoint
-- [ ] T328 [M12] Implement DELETE /history/{id} endpoint
-- [ ] T329 [M12] Implement GET /history/{id}/files endpoint
-- [ ] T330 [M12] Implement POST /history/{id}/regenerate endpoint
+- [x] T312 [M12] Create CodeTemplateService in services/codegen-service/src/main/java/com/example/codegen/service/CodeTemplateService.java
+- [x] T313 [M12] Create CodegenService in services/codegen-service/src/main/java/com/example/codegen/service/CodegenService.java
+- [x] T314 [M12] Create CodeTemplateController in services/codegen-service/src/main/java/com/example/codegen/controller/CodeTemplateController.java
+- [x] T315 [M12] Create CodegenController in services/codegen-service/src/main/java/com/example/codegen/controller/CodegenController.java
+- [x] T316 [M12] Implement GET /templates endpoint
+- [x] T317 [M12] Implement POST /templates endpoint
+- [x] T318 [M12] Implement PUT /templates/{id} endpoint
+- [x] T319 [M12] Implement DELETE /templates/{id} endpoint
+- [x] T320 [M12] Implement GET /database/tables endpoint
+- [x] T321 [M12] Implement GET /database/tables/{tableName} endpoint
+- [x] T322 [M12] Implement POST /database/import endpoint
+- [x] T323 [M12] Implement POST /generation/preview endpoint
+- [x] T324 [M12] Implement POST /generation/generate endpoint
+- [x] T325 [M12] Implement GET /generation/download/{historyId} endpoint
+- [x] T326 [M12] Implement GET /history endpoint
+- [x] T327 [M12] Implement GET /history/{id} endpoint
+- [x] T328 [M12] Implement DELETE /history/{id} endpoint
+- [x] T329 [M12] Implement GET /history/{id}/files endpoint
+- [x] T330 [M12] Implement POST /history/{id}/regenerate endpoint
 
 ### Frontend
 
-- [ ] T331 [P] [M12] Create TemplateList.vue in frontend/src/views/codegen/TemplateList.vue
-- [ ] T332 [P] [M12] Create TableSelector.vue in frontend/src/views/codegen/TableSelector.vue
-- [ ] T333 [P] [M12] Create CodePreview.vue in frontend/src/views/codegen/CodePreview.vue
-- [ ] T334 [P] [M12] Create GenHistory.vue in frontend/src/views/codegen/GenHistory.vue
+- [x] T331 [P] [M12] Create TemplateList.vue in frontend/src/views/codegen/TemplateList.vue
+- [x] T332 [P] [M12] Create TableSelector.vue in frontend/src/views/codegen/TableSelector.vue
+- [x] T333 [P] [M12] Create CodePreview.vue in frontend/src/views/codegen/CodePreview.vue
+- [x] T334 [P] [M12] Create GenHistory.vue in frontend/src/views/codegen/GenHistory.vue
 
 ---
 
@@ -585,10 +585,10 @@
 
 ### Database & Entities
 
-- [ ] T335 [P] [M10] Create error_category table SQL in services/error-doc-service/src/main/resources/db/migration/V1__init_error_category.sql
-- [ ] T336 [P] [M10] Create error_solution table SQL in services/error-doc-service/src/main/resources/db/migration/V2__init_error_solution.sql
-- [ ] T337 [P] [M10] Create ErrorCategory entity in services/error-doc-service/src/main/java/com/example/errordoc/entity/ErrorCategory.java
-- [ ] T338 [P] [M10] Create ErrorSolution entity in services/error-doc-service/src/main/java/com/example/errordoc/entity/ErrorSolution.java
+- [x] T335 [P] [M10] Create error_category table SQL in services/error-doc-service/src/main/resources/db/migration/V1__init_error_category.sql
+- [x] T336 [P] [M10] Create error_solution table SQL in services/error-doc-service/src/main/resources/db/migration/V2__init_error_solution.sql
+- [x] T337 [P] [M10] Create ErrorCategory entity in services/error-doc-service/src/main/java/com/example/errordoc/entity/ErrorCategory.java
+- [x] T338 [P] [M10] Create ErrorSolution entity in services/error-doc-service/src/main/java/com/example/errordoc/entity/ErrorSolution.java
 
 ### Elasticsearch Index
 
@@ -596,30 +596,30 @@
 
 ### Service & Controller
 
-- [ ] T340 [M10] Create ErrorCategoryService in services/error-doc-service/src/main/java/com/example/errordoc/service/ErrorCategoryService.java
-- [ ] T341 [M10] Create ErrorSolutionService in services/error-doc-service/src/main/java/com/example/errordoc/service/ErrorSolutionService.java
-- [ ] T342 [M10] Create ErrorSearchService in services/error-doc-service/src/main/java/com/example/errordoc/service/ErrorSearchService.java
-- [ ] T343 [M10] Create ErrorDocController in services/error-doc-service/src/main/java/com/example/errordoc/controller/ErrorDocController.java
-- [ ] T344 [M10] Implement GET /categories endpoint
-- [ ] T345 [M10] Implement POST /categories endpoint
-- [ ] T346 [M10] Implement GET /categories/tree endpoint
-- [ ] T347 [M10] Implement PUT /categories/{id} endpoint
-- [ ] T348 [M10] Implement DELETE /categories/{id} endpoint
-- [ ] T349 [M10] Implement GET /solutions endpoint
-- [ ] T350 [M10] Implement POST /solutions endpoint
-- [ ] T351 [M10] Implement POST /solutions/search endpoint
-- [ ] T352 [M10] Implement PUT /solutions/{id} endpoint
-- [ ] T353 [M10] Implement DELETE /solutions/{id} endpoint
-- [ ] T354 [M10] Implement POST /solutions/{id}/helpful endpoint
+- [x] T340 [M10] Create ErrorCategoryService in services/error-doc-service/src/main/java/com/example/errordoc/service/ErrorCategoryService.java
+- [x] T341 [M10] Create ErrorSolutionService in services/error-doc-service/src/main/java/com/example/errordoc/service/ErrorSolutionService.java
+- [x] T342 [M10] Create ErrorSearchService in services/error-doc-service/src/main/java/com/example/errordoc/service/ErrorSearchService.java
+- [x] T343 [M10] Create ErrorDocController in services/error-doc-service/src/main/java/com/example/errordoc/controller/ErrorDocController.java
+- [x] T344 [M10] Implement GET /categories endpoint
+- [x] T345 [M10] Implement POST /categories endpoint
+- [x] T346 [M10] Implement GET /categories/tree endpoint
+- [x] T347 [M10] Implement PUT /categories/{id} endpoint
+- [x] T348 [M10] Implement DELETE /categories/{id} endpoint
+- [x] T349 [M10] Implement GET /solutions endpoint
+- [x] T350 [M10] Implement POST /solutions endpoint
+- [x] T351 [M10] Implement POST /solutions/search endpoint
+- [x] T352 [M10] Implement PUT /solutions/{id} endpoint
+- [x] T353 [M10] Implement DELETE /solutions/{id} endpoint
+- [x] T354 [M10] Implement POST /solutions/{id}/helpful endpoint
 - [ ] T355 [M10] Implement POST /logs/search endpoint (Elasticsearch)
 - [ ] T356 [M10] Implement POST /logs/aggregations endpoint
 
 ### Frontend
 
-- [ ] T357 [P] [M10] Create ErrorCategoryList.vue in frontend/src/views/errordoc/ErrorCategoryList.vue
-- [ ] T358 [P] [M10] Create ErrorSolutionList.vue in frontend/src/views/errordoc/ErrorSolutionList.vue
-- [ ] T359 [P] [M10] Create ErrorLogSearch.vue in frontend/src/views/errordoc/ErrorLogSearch.vue
-- [ ] T360 [P] [M10] Create ErrorLogDetail.vue in frontend/src/views/errordoc/ErrorLogDetail.vue
+- [x] T357 [P] [M10] Create ErrorCategoryList.vue in frontend/src/views/errordoc/ErrorCategoryList.vue
+- [x] T358 [P] [M10] Create ErrorSolutionList.vue in frontend/src/views/errordoc/ErrorSolutionList.vue
+- [x] T359 [P] [M10] Create ErrorLogSearch.vue in frontend/src/views/errordoc/ErrorLogSearch.vue
+- [x] T360 [P] [M10] Create ErrorLogDetail.vue in frontend/src/views/errordoc/ErrorLogDetail.vue
 
 ---
 
@@ -775,50 +775,50 @@ With multiple developers after M02 is complete:
 
 ## Task Count Summary
 
-| Phase | Task Count | Module | Priority |
-|-------|-----------|--------|----------|
-| Phase 1: Setup | 8 | Shared | - |
-| Phase 2: M02 Foundation | 63 | Admin Framework | P0 |
-| Phase 3: M09 | 26 | Tenant Management | P1 |
-| Phase 4: M01 | 29 | Parameter Dictionary | P1 |
-| Phase 5: M03 | 25 | Gateway Configuration | P1 |
-| Phase 6: M06 | 14 | Permission Management | P1 |
-| Phase 7: M05 | 39 | API Marketplace | P1 |
-| Phase 8: M11 | 27 | Distributed Tracing | P1 |
-| Phase 9: M04 | 25 | Third-party API | P2 |
-| Phase 10: M07 | 27 | Package Management | P2 |
-| Phase 11: M08 | 25 | Activity Management | P2 |
-| Phase 12: M12 | 27 | Code Generation | P2 |
-| Phase 13: M10 | 26 | Error Documentation | P3 |
-| Phase 14: Polish | 23 | Cross-cutting | - |
-| **Total** | **384** | All 12 Modules | - |
+| Phase | Task Count | Done | Module | Priority |
+|-------|-----------|------|--------|----------|
+| Phase 1: Setup | 8 | 5 | Shared | - |
+| Phase 2: M02 Foundation | 63 | 63 | Admin Framework | P0 |
+| Phase 3: M09 | 26 | 26 | Tenant Management | P1 |
+| Phase 4: M01 | 29 | 29 | Parameter Dictionary | P1 |
+| Phase 5: M03 | 25 | 5 | Gateway Configuration | P1 |
+| Phase 6: M06 | 14 | 12 | Permission Management | P1 |
+| Phase 7: M05 | 39 | 39 | API Marketplace | P1 |
+| Phase 8: M11 | 27 | 27 | Distributed Tracing | P1 |
+| Phase 9: M04 | 25 | 25 | Third-party API | P2 |
+| Phase 10: M07 | 27 | 27 | Package Management | P2 |
+| Phase 11: M08 | 25 | 21 | Activity Management | P2 |
+| Phase 12: M12 | 27 | 27 | Code Generation | P2 |
+| Phase 13: M10 | 26 | 23 | Error Documentation | P3 |
+| Phase 14: Polish | 23 | 0 | Cross-cutting | - |
+| **Total** | **384** | **329** | All 12 Modules | - |
 
 ### By Priority
 
-| Priority | Module Count | Task Count | Modules |
-|----------|-------------|-----------|---------|
-| P0 (Critical) | 1 | 71 | M02 |
-| P1 (High) | 6 | 160 | M01, M03, M05, M06, M09, M11 |
-| P2 (Medium) | 4 | 104 | M04, M07, M08, M12 |
-| P3 (Low) | 1 | 26 | M10 |
+| Priority | Module Count | Task Count | Done | Modules |
+|----------|-------------|-----------|------|---------|
+| P0 (Critical) | 1 | 71 | 68 | M02 |
+| P1 (High) | 6 | 160 | 138 | M01, M03, M05, M06, M09, M11 |
+| P2 (Medium) | 4 | 104 | 100 | M04, M07, M08, M12 |
+| P3 (Low) | 1 | 26 | 23 | M10 |
 
 ### By Module
 
-| Module | ID | Task Count | Parallel Opportunities |
-|--------|-----|-----------|----------------------|
-| M02: Admin Framework | P0 | 71 | 26 parallel |
-| M09: Tenant Management | P1 | 26 | 9 parallel |
-| M01: Parameter Dictionary | P1 | 29 | 10 parallel |
-| M03: Gateway Configuration | P1 | 25 | 8 parallel |
-| M06: Permission Management | P1 | 14 | 5 parallel |
-| M05: API Marketplace | P1 | 39 | 14 parallel |
-| M11: Distributed Tracing | P1 | 27 | 10 parallel |
-| M04: Third-party API | P2 | 25 | 9 parallel |
-| M07: Package Management | P2 | 27 | 10 parallel |
-| M08: Activity Management | P2 | 25 | 9 parallel |
-| M12: Code Generation | P2 | 27 | 10 parallel |
-| M10: Error Documentation | P3 | 26 | 9 parallel |
-| Polish | - | 23 | 20 parallel |
+| Module | ID | Task Count | Done | Parallel Opportunities |
+|--------|-----|-----------|------|----------------------|
+| M02: Admin Framework | P0 | 71 | 68 | 26 parallel |
+| M09: Tenant Management | P1 | 26 | 26 | 9 parallel |
+| M01: Parameter Dictionary | P1 | 29 | 29 | 10 parallel |
+| M03: Gateway Configuration | P1 | 25 | 5 | 8 parallel |
+| M06: Permission Management | P1 | 14 | 12 | 5 parallel |
+| M05: API Marketplace | P1 | 39 | 39 | 14 parallel |
+| M11: Distributed Tracing | P1 | 27 | 27 | 10 parallel |
+| M04: Third-party API | P2 | 25 | 25 | 9 parallel |
+| M07: Package Management | P2 | 27 | 27 | 10 parallel |
+| M08: Activity Management | P2 | 25 | 21 | 9 parallel |
+| M12: Code Generation | P2 | 27 | 27 | 10 parallel |
+| M10: Error Documentation | P3 | 26 | 23 | 9 parallel |
+| Polish | - | 23 | 0 | 20 parallel |
 
 ---
 

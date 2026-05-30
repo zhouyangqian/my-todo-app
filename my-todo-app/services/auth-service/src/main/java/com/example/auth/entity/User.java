@@ -12,22 +12,24 @@ import java.time.LocalDateTime;
 /**
  * 用户实体类（认证服务）
  * <p>
- * 对应 user 表，继承 BaseEntity 包含公共字段。
- * 包含用户基本信息、账号状态、锁定信息、登录统计等。
+ * 对应 sys_user 表，与 user-service 共享同一张用户表。
+ * 包含用户基本信息、认证信息、账号状态、锁定信息、登录统计等。
  * </p>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("user")
+@TableName("sys_user")
 public class User extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
     /** 用户名 */
-    private String username;
+    @TableField("user_name")
+    private String userName;
 
     /** 密码（BCrypt 加密存储） */
-    private String password;
+    @TableField("pass_word")
+    private String passWord;
 
     /** 邮箱 */
     private String email;

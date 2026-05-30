@@ -16,7 +16,7 @@ public class LoginVO {
     /** 用户名（必填，3-50位） */
     @NotBlank(message = "用户名不能为空")
     @Size(min = 3, max = 50, message = "用户名长度必须在3-50位之间")
-    private String username;
+    private String userName;
 
     /** 密码（必填） */
     @NotBlank(message = "密码不能为空")

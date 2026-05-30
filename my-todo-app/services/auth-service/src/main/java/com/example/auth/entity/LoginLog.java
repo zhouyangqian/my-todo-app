@@ -1,6 +1,7 @@
 package com.example.auth.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -33,7 +34,8 @@ public class LoginLog implements Serializable {
     private Long userId;
 
     /** 登录用户名 */
-    private String username;
+    @TableField("username")
+    private String userName;
 
     /** 登录方式：1-密码登录，2-短信验证码，3-第三方登录 */
     private Integer loginType;

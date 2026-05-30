@@ -1,6 +1,6 @@
 <!-- views/login/index.vue - 登录页面
   提供用户名密码输入表单，调用用户 Store 执行登录操作
-  包含表单验证、加载状态、回车提交等功能
+  包含表单验证、验证码、加载状态、回车提交等功能
 -->
 <template>
   <div class="login-container">
@@ -13,9 +13,9 @@
       <!-- 登录表单，包含用户名和密码字段 -->
       <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form">
         <!-- 用户名输入框 -->
-        <el-form-item prop="username">
+        <el-form-item prop="userName">
           <el-input
-            v-model="loginForm.username"
+            v-model="loginForm.userName"
             placeholder="用户名"
             prefix-icon="User"
             size="large"
@@ -33,6 +33,27 @@
             @keyup.enter="handleLogin"
           />
         </el-form-item>
+        <!-- 验证码输入框和图片 -->
+        <el-form-item prop="captchaValue">
+          <div class="captcha-row">
+            <el-input
+              v-model="loginForm.captchaValue"
+              placeholder="验证码"
+              prefix-icon="Key"
+              size="large"
+              class="captcha-input"
+              @keyup.enter="handleLogin"
+            />
+            <img
+              v-if="captchaImage"
+              :src="captchaImage"
+              alt="验证码"
+              class="captcha-img"
+              @click="refreshCaptcha"
+              title="点击刷新验证码"
+            />
+          </div>
+        </el-form-item>
         <!-- 登录按钮 -->
         <el-form-item>
           <el-button
@@ -45,6 +66,10 @@
             登录
           </el-button>
         </el-form-item>
+        <!-- 租户注册链接 -->
+        <div class="register-link">
+          <router-link to="/register">租户注册</router-link>
+        </div>
       </el-form>
       <!-- 默认账号提示（开发环境使用） -->
       <div class="login-footer">
@@ -55,9 +80,10 @@
 </template>
 
 <script setup>
-// 登录页面逻辑：表单数据绑定、验证规则、登录提交处理
-import { ref, reactive } from 'vue'
+// 登录页面逻辑：表单数据绑定、验证规则、验证码、登录提交处理
+import { ref, reactive, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { getCaptcha } from '@/api/auth'
 
 // 用户状态管理实例，用于调用登录方法
 const userStore = useUserStore()
@@ -66,28 +92,50 @@ const userStore = useUserStore()
 const loginFormRef = ref()
 // 登录按钮加载状态，防止重复提交
 const loading = ref(false)
+// 验证码图片（Base64）
+const captchaImage = ref('')
 
 // 登录表单数据（预填充默认账号，方便开发调试）
 const loginForm = reactive({
-  username: 'admin',
-  password: 'admin123'
+  userName: 'admin',
+  password: 'admin123',
+  captchaKey: '',
+  captchaValue: ''
 })
 
 // 表单验证规则
 const loginRules = {
-  username: [
+  userName: [
     { required: true, message: '请输入用户名', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+  ],
+  captchaValue: [
+    { required: true, message: '请输入验证码', trigger: 'blur' }
   ]
+}
+
+/**
+ * 获取验证码
+ * 调用后端接口获取验证码Key和图片
+ */
+const refreshCaptcha = async () => {
+  try {
+    const data = await getCaptcha()
+    captchaImage.value = data.captchaImage
+    loginForm.captchaKey = data.captchaKey
+    loginForm.captchaValue = ''
+  } catch (error) {
+    console.error('获取验证码失败:', error)
+  }
 }
 
 /**
  * 处理登录操作
  * 1. 验证表单字段是否合法
- * 2. 验证通过后调用 Store 的登录方法
+ * 2. 验证通过后调用 Store 的登录方法（附带验证码信息）
  * 3. 登录成功后 Store 会自动跳转到工作台
  */
 const handleLogin = async () => {
@@ -99,15 +147,22 @@ const handleLogin = async () => {
       loading.value = true
       try {
         // 调用用户 Store 的登录动作（包含接口请求、令牌保存、跳转等）
-        await userStore.loginAction(loginForm.username, loginForm.password)
+        await userStore.loginAction(loginForm.userName, loginForm.password, loginForm.captchaKey, loginForm.captchaValue)
       } catch (error) {
         console.error('Login failed:', error)
+        // 登录失败刷新验证码
+        refreshCaptcha()
       } finally {
         loading.value = false
       }
     }
   })
 }
+
+// 页面加载时获取验证码
+onMounted(() => {
+  refreshCaptcha()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -145,6 +200,41 @@ const handleLogin = async () => {
     .login-form {
       .login-btn {
         width: 100%;
+      }
+
+      .captcha-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 10px;
+
+        .captcha-input {
+          flex: 1;
+        }
+
+        .captcha-img {
+          height: 40px;
+          cursor: pointer;
+          border: 1px solid #dcdfe6;
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+      }
+    }
+
+    .register-link {
+      text-align: right;
+      margin-top: -10px;
+      margin-bottom: 10px;
+
+      a {
+        color: #409eff;
+        font-size: 13px;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
 

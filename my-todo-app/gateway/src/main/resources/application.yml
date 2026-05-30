@@ -70,7 +70,7 @@ spring:
         - id: dict-service
           uri: lb://dict-service
           predicates:
-            - Path=/api/dict/**,/api/config/**
+            - Path=/api/dict/**,/api/config/**,/api/api-market/**,/api/tracing/**,/api/trace/**,/api/third-party/**,/api/packages/**,/api/activities/**,/api/codegen/**,/api/error-doc/**
 
   data:
     redis:
@@ -86,11 +86,39 @@ jwt:
   refresh-token-expiration: 604800000
   issuer: my-todo-app
 
-# Rate Limiting
+# Rate Limiting (多维度限流)
 rate-limit:
   enabled: true
-  default-limit: 100
-  default-period: 60
+  ip:
+    limit: 100
+    period: 60
+  user:
+    limit: 200
+    period: 60
+  tenant:
+    limit: 500
+    period: 60
+
+# 健康检查配置
+health-check:
+  enabled: true
+  interval: 30000   # 30秒检查一次
+  timeout: 5000     # 5秒超时
+
+# 断路器配置
+circuit-breaker:
+  enabled: true
+  failure-threshold: 5       # 失败次数阈值
+  open-duration: 60000       # OPEN状态持续时间(ms)
+  half-open-max-requests: 1  # HALF_OPEN探测请求数
+
+# 金丝雀发布配置
+canary:
+  enabled: true
+  routes:
+    - service-id: erp-service
+      target-version: v2
+      traffic-percentage: 10
 
 # Knife4j API Documentation
 knife4j:
@@ -105,7 +133,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,gateway
+        include: health,info,metrics,gateway,gateway-health,gateway-status
   endpoint:
     health:
       show-details: always

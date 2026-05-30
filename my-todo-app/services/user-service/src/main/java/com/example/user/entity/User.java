@@ -32,7 +32,8 @@ public class User extends BaseEntity {
     /**
      * 用户名（登录账号），在同一租户下必须唯一
      */
-    private String username;
+    @TableField("user_name")
+    private String userName;
 
     /**
      * 邮箱地址

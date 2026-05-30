@@ -124,16 +124,6 @@ export function transfer(data) {
 
 /**
  * 分页查询库存流水记录（出入库记录）
- * @param params 分页参数和筛选条件（商品ID、仓库ID、流水类型）
- */
-export function getInventoryFlowPage(params) {
-  return get('/erp/inventory/flow', params)
-}
-
-// ============ 库存流水 API ============
-
-/**
- * 分页查询库存流水记录
  * @param params 分页参数和筛选条件（仓库ID、商品ID、业务类型）
  */
 export function getInventoryFlowPage(params) {

@@ -43,8 +43,8 @@ service.interceptors.request.use(
     }
 
     // 添加用户名到请求头，用于后端获取当前用户信息
-    if (userStore.userInfo?.username) {
-      config.headers['X-Username'] = userStore.userInfo.username
+    if (userStore.userInfo?.userName) {
+      config.headers['X-Username'] = userStore.userInfo.userName
     }
     // 其他用户信息（realName, email, phone, avatar）不需要通过请求头传递
     // 后端可以通过 userId 从数据库获取完整用户信息

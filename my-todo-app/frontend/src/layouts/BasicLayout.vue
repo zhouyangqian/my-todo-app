@@ -47,6 +47,10 @@
             <el-icon><OfficeBuilding /></el-icon>
             <span>部门管理</span>
           </el-menu-item>
+          <el-menu-item index="/system/gateway">
+            <el-icon><Monitor /></el-icon>
+            <span>网关监控</span>
+          </el-menu-item>
         </el-sub-menu>
 
         <!-- 字典管理子菜单 -->
@@ -62,6 +66,34 @@
           <el-menu-item index="/dict/config">
             <el-icon><Tools /></el-icon>
             <span>系统配置</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/api-market">
+            <el-icon><Connection /></el-icon>
+            <span>API市场</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/third-party">
+            <el-icon><Link /></el-icon>
+            <span>第三方API</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/package">
+            <el-icon><Box /></el-icon>
+            <span>SaaS套餐</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/activity">
+            <el-icon><Present /></el-icon>
+            <span>营销活动</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/trace">
+            <el-icon><View /></el-icon>
+            <span>追踪管理</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/codegen">
+            <el-icon><DocumentCopy /></el-icon>
+            <span>代码生成</span>
+          </el-menu-item>
+          <el-menu-item index="/dict/error-doc">
+            <el-icon><Warning /></el-icon>
+            <span>错误文档</span>
           </el-menu-item>
         </el-sub-menu>
 
@@ -148,6 +180,18 @@
             <el-icon><Postcard /></el-icon>
             <span>银行账户</span>
           </el-menu-item>
+          <el-menu-item index="/finance/invoice">
+            <el-icon><Document /></el-icon>
+            <span>发票管理</span>
+          </el-menu-item>
+          <el-menu-item index="/finance/cost">
+            <el-icon><DataAnalysis /></el-icon>
+            <span>成本核算</span>
+          </el-menu-item>
+          <el-menu-item index="/finance/report">
+            <el-icon><TrendCharts /></el-icon>
+            <span>财务报表</span>
+          </el-menu-item>
         </el-sub-menu>
       </el-menu>
       </el-scrollbar>
@@ -190,7 +234,7 @@
               <el-avatar :size="32" :src="userStore.userInfo?.avatar">
                 {{ userStore.userInfo?.realName?.charAt(0) || 'U' }}
               </el-avatar>
-              <span class="username">{{ userStore.userInfo?.realName || userStore.userInfo?.username }}</span>
+              <span class="username">{{ userStore.userInfo?.realName || userStore.userInfo?.userName }}</span>
               <el-icon><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
@@ -255,7 +299,13 @@ import {
   RefreshRight,
   PriceTag,
   DataAnalysis,
-  Present
+  Present,
+  Monitor,
+  TrendCharts,
+  Connection,
+  Link,
+  DocumentCopy,
+  View
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -286,6 +336,7 @@ const breadcrumbMap = {
   '/system/role': '角色管理',
   '/system/permission': '权限管理',
   '/system/dept': '部门管理',
+  '/system/gateway': '网关监控',
   '/dict/type': '字典类型',
   '/dict/config': '系统配置',
   '/erp/product-category': '商品分类',
@@ -306,10 +357,21 @@ const breadcrumbMap = {
   '/erp/sales-shipment': '销售出库',
   '/erp/report': '报表统计',
   '/erp/config': '系统配置',
+  '/dict/parameter': '参数管理',
+  '/dict/api-market': 'API市场',
+  '/dict/third-party': '第三方API',
+  '/dict/package': 'SaaS套餐',
+  '/dict/activity': '营销活动',
+  '/dict/trace': '追踪管理',
+  '/dict/codegen': '代码生成',
+  '/dict/error-doc': '错误文档',
   '/finance/receivable': '应收账款',
   '/finance/payable': '应付账款',
   '/finance/record': '收支记录',
-  '/finance/bank-account': '银行账户'
+  '/finance/bank-account': '银行账户',
+  '/finance/invoice': '发票管理',
+  '/finance/cost': '成本核算',
+  '/finance/report': '财务报表'
 }
 
 const breadcrumbs = computed(() => {

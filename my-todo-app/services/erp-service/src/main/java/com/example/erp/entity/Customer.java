@@ -95,6 +95,11 @@ public class Customer implements Serializable {
     private BigDecimal creditLimit;
 
     /**
+     * 当前欠款，客户当前未结算的销售金额
+     */
+    private BigDecimal currentDebt;
+
+    /**
      * 状态：0-停用，1-启用。停用的客户不可用于销售业务
      */
     private Integer status;

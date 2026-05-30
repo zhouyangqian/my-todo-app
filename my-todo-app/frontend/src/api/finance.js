@@ -313,3 +313,116 @@ export function getReportList(params) {
 export function lockReport(id) {
   return post(`/finance/reports/lock-report/${id}`)
 }
+
+// ============ 银行对账 API ============
+
+/**
+ * 导入银行对账单
+ * @param {FormData} data 包含file和bankAccountId的FormData
+ * @returns {Promise}
+ */
+export function importBankStatement(data) {
+  return post('/finance/bank-reconciliation/import', data)
+}
+
+/**
+ * 自动匹配对账
+ * @param {string} id 对账记录ID
+ * @returns {Promise}
+ */
+export function autoMatchReconciliation(id) {
+  return post(`/finance/bank-reconciliation/auto-match/${id}`)
+}
+
+/**
+ * 手动匹配银行记录
+ * @param {Object} data bankRecordId, systemRecordId
+ * @returns {Promise}
+ */
+export function manualMatchBankRecord(data) {
+  return post('/finance/bank-reconciliation/manual-match', data)
+}
+
+/**
+ * 分页查询银行对账列表
+ * @param {Object} params 分页参数
+ * @returns {Promise}
+ */
+export function getBankReconciliationPage(params) {
+  return get('/finance/bank-reconciliation/page', params)
+}
+
+/**
+ * 获取未匹配记录
+ * @param {string} id 对账记录ID
+ * @returns {Promise}
+ */
+export function getUnmatchedRecords(id) {
+  return get(`/finance/bank-reconciliation/unmatched/${id}`)
+}
+
+/**
+ * 取消匹配
+ * @param {string} bankRecordId 银行记录ID
+ * @returns {Promise}
+ */
+export function unmatchBankRecord(bankRecordId) {
+  return post(`/finance/bank-reconciliation/unmatch/${bankRecordId}`)
+}
+
+// ============ 预算管理 API ============
+
+/**
+ * 分页查询预算列表
+ * @param {Object} params 分页参数和筛选条件
+ * @returns {Promise}
+ */
+export function getBudgetPage(params) {
+  return get('/finance/budgets/page', params)
+}
+
+/**
+ * 创建预算
+ * @param {Object} data 预算信息
+ * @returns {Promise}
+ */
+export function createBudget(data) {
+  return post('/finance/budgets/create', data)
+}
+
+/**
+ * 更新预算
+ * @param {string} id 预算ID
+ * @param {Object} data 预算信息
+ * @returns {Promise}
+ */
+export function updateBudget(id, data) {
+  return put(`/finance/budgets/update/${id}`, data)
+}
+
+/**
+ * 审批预算
+ * @param {string} id 预算ID
+ * @returns {Promise}
+ */
+export function approveBudget(id) {
+  return post(`/finance/budgets/approve/${id}`)
+}
+
+/**
+ * 删除预算
+ * @param {string} id 预算ID
+ * @returns {Promise}
+ */
+export function deleteBudget(id) {
+  return del(`/finance/budgets/delete/${id}`)
+}
+
+/**
+ * 获取预算执行情况
+ * @param {string} id 预算ID
+ * @returns {Promise}
+ */
+export function getBudgetExecution(id) {
+  return get(`/finance/budgets/execution/${id}`)
+}

@@ -80,6 +80,27 @@ public class PaymentRecord implements Serializable {
     /** 审核状态：0-待审核（刚创建），1-已审核（审核通过），2-已取消（作废） */
     private Integer status;
 
+    /** 汇率，外币兑换本位币的汇率，默认1.0 */
+    private BigDecimal exchangeRate;
+
+    /** 本位币金额，按汇率折算后的本位币金额 */
+    private BigDecimal baseAmount;
+
+    /** 交易类型：INCOME-收入, EXPENSE-支出, TRANSFER-转账（与recordType并存，保持向后兼容） */
+    private String transType;
+
+    /** 关联交易ID，用于关联成对的转账记录（转出记录关联转入记录） */
+    private Long relatedTransId;
+
+    /** 来源类型：BILL-单据, MANUAL-手工, ADJUSTMENT-调整 */
+    private String sourceType;
+
+    /** 科目编码，会计科目代码 */
+    private String categoryCode;
+
+    /** 科目名称，会计科目名称 */
+    private String categoryName;
+
     /** 备注信息，用于补充说明该笔收支的相关信息 */
     private String remark;
 

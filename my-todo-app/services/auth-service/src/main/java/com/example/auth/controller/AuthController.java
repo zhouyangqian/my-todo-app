@@ -1,6 +1,7 @@
 package com.example.auth.controller;
 
 import com.example.auth.api.dto.LoginDTO;
+import com.example.auth.api.dto.UserProfileDTO;
 import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.permission.checker.PermissionChecker;
 import com.example.auth.api.vo.ChangePasswordVO;
@@ -209,6 +210,21 @@ public class AuthController {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 获取当前用户档案信息
+     * <p>从请求头中读取网关注入的用户ID，返回用户详细信息</p>
+     *
+     * @param userId 用户ID（由网关从 JWT 解析后注入 X-User-Id 请求头）
+     * @return 用户档案信息
+     */
+    @Operation(summary = "获取当前用户档案")
+    @GetMapping("/profile")
+    public ApiResponse<UserProfileDTO> getProfile(
+            @RequestHeader("X-User-Id") Long userId) {
+        UserProfileDTO profile = authService.getUserProfile(userId);
+        return ApiResponse.success(profile);
     }
 
     /** 健康检查接口 */

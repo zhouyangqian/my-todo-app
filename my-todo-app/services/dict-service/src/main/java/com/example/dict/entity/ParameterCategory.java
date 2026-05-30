@@ -1,0 +1,93 @@
+package com.example.dict.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 参数分类实体
+ */
+@Data
+@TableName("sys_parameter_category")
+public class ParameterCategory implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 分类ID
+     */
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    /**
+     * 租户ID
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long tenantId;
+
+    /**
+     * 分类名称
+     */
+    private String categoryName;
+
+    /**
+     * 分类编码
+     */
+    private String categoryCode;
+
+    /**
+     * 分类类型(SYSTEM/BUSINESS)
+     */
+    private String categoryType;
+
+    /**
+     * 描述
+     */
+    private String description;
+
+    /**
+     * 排序
+     */
+    private Integer sortOrder;
+
+    /**
+     * 状态: 0-禁用, 1-启用
+     */
+    private Integer status;
+
+    /**
+     * 软删除
+     */
+    @TableLogic
+    @TableField(fill = FieldFill.INSERT)
+    private Integer deleted;
+
+    /**
+     * 创建人
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createdBy;
+
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新人
+     */
+    @TableField(fill = FieldFill.UPDATE)
+    private Long updatedBy;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDateTime updatedAt;
+}

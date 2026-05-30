@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -21,6 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *   <li>@EnableDiscoveryClient - 启用服务注册与发现（Nacos/Eureka）</li>
  *   <li>@MapperScan - 自动扫描 MyBatis Mapper 接口所在包</li>
  *   <li>@EnableScheduling - 启用定时任务调度（如逾期账单提醒）</li>
+ *   <li>@EnableAsync - 启用异步方法执行（如事件监听器异步处理）</li>
  * </ul>
  * </p>
  *
@@ -31,6 +33,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDiscoveryClient
 @MapperScan("com.example.finance.mapper")
 @EnableScheduling
+@EnableAsync
 @ComponentScan(basePackages = {"com.example.finance", "com.example.common"})
 public class FinanceServiceApplication {
     /**

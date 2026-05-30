@@ -1,20 +1,31 @@
 package com.example.finance.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.finance.entity.*;
 import com.example.finance.service.*;
+import com.example.finance.vo.TransferVO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 财务管理统一控制器
@@ -53,6 +64,9 @@ public class FinanceController {
 
     /** 银行账户服务 */
     private final BankAccountService bankAccountService;
+
+    /** 财务报表服务 */
+    private final FinanceReportService financeReportService;
 
     // ==================== 应收账款接口 ====================
 
@@ -414,5 +428,176 @@ public class FinanceController {
     public ApiResponse<Void> deleteBankAccount(@PathVariable Long id) {
         bankAccountService.delete(id);
         return ApiResponse.success();
+    }
+
+    // ==================== 转账与统计接口 ====================
+
+    /**
+     * 账户间转账
+     * <p>
+     * 创建两条收支记录：转出账户生成EXPENSE记录，转入账户生成INCOME记录，
+     * 两条记录通过 relatedTransId 互相关联。
+     * </p>
+     *
+     * @param transferVO 转账请求参数
+     * @param tenantId   租户ID（从请求头获取）
+     * @param userId     当前操作用户ID（从请求头获取）
+     * @return 操作结果
+     */
+    @RequiresPermission(code = "finance:record:create", name = "创建收支记录")
+    @Operation(summary = "账户间转账")
+    @PostMapping("/transactions/transfer")
+    public ApiResponse<Void> transfer(
+            @RequestBody @Valid TransferVO transferVO,
+            @RequestHeader("X-Tenant-Id") Long tenantId,
+            @RequestHeader("X-User-Id") Long userId) {
+        // 构建转出记录（EXPENSE）
+        PaymentRecord expenseRecord = new PaymentRecord();
+        expenseRecord.setTenantId(tenantId);
+        expenseRecord.setCreatedBy(userId);
+        expenseRecord.setHandlerId(userId);
+        expenseRecord.setRecordType(2); // 支出
+        expenseRecord.setTransType("EXPENSE");
+        expenseRecord.setAmount(transferVO.getAmount());
+        expenseRecord.setCurrency(transferVO.getCurrency());
+        expenseRecord.setBankAccountId(transferVO.getFromAccountId());
+        expenseRecord.setExchangeRate(transferVO.getExchangeRate() != null
+                ? transferVO.getExchangeRate() : BigDecimal.ONE);
+        expenseRecord.setBaseAmount(transferVO.getAmount().multiply(
+                transferVO.getExchangeRate() != null ? transferVO.getExchangeRate() : BigDecimal.ONE));
+        expenseRecord.setSourceType("MANUAL");
+        expenseRecord.setRemark(transferVO.getRemark() != null ? transferVO.getRemark() : "账户转账-转出");
+        paymentRecordService.create(expenseRecord);
+
+        // 构建转入记录（INCOME）
+        PaymentRecord incomeRecord = new PaymentRecord();
+        incomeRecord.setTenantId(tenantId);
+        incomeRecord.setCreatedBy(userId);
+        incomeRecord.setHandlerId(userId);
+        incomeRecord.setRecordType(1); // 收入
+        incomeRecord.setTransType("INCOME");
+        incomeRecord.setAmount(transferVO.getAmount());
+        incomeRecord.setCurrency(transferVO.getCurrency());
+        incomeRecord.setBankAccountId(transferVO.getToAccountId());
+        incomeRecord.setExchangeRate(transferVO.getExchangeRate() != null
+                ? transferVO.getExchangeRate() : BigDecimal.ONE);
+        incomeRecord.setBaseAmount(transferVO.getAmount().multiply(
+                transferVO.getExchangeRate() != null ? transferVO.getExchangeRate() : BigDecimal.ONE));
+        incomeRecord.setSourceType("MANUAL");
+        incomeRecord.setRemark(transferVO.getRemark() != null ? transferVO.getRemark() : "账户转账-转入");
+        paymentRecordService.create(incomeRecord);
+
+        // 互相关联
+        expenseRecord.setRelatedTransId(incomeRecord.getId());
+        incomeRecord.setRelatedTransId(expenseRecord.getId());
+        paymentRecordService.updateById(expenseRecord);
+        paymentRecordService.updateById(incomeRecord);
+
+        return ApiResponse.success();
+    }
+
+    /**
+     * 账单汇总统计
+     * <p>
+     * 汇总应收/应付账款的总金额、已付/已收金额、未付/未收金额和逾期金额。
+     * </p>
+     *
+     * @param tenantId 租户ID（从请求头获取）
+     * @return 包含AR/AP汇总统计的Map
+     */
+    @RequiresPermission(code = "finance:receivable:list", name = "查询应收账款列表")
+    @Operation(summary = "账单汇总统计")
+    @GetMapping("/ar-ap/summary")
+    public ApiResponse<Map<String, Object>> getBillSummary(
+            @RequestHeader("X-Tenant-Id") Long tenantId) {
+        Map<String, Object> summary = new HashMap<>();
+
+        // 应收账款统计
+        List<AccountReceivable> receivables = accountReceivableService.list(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<AccountReceivable>()
+                        .eq(AccountReceivable::getTenantId, tenantId)
+                        .eq(AccountReceivable::getDeleted, 0));
+        BigDecimal totalAR = receivables.stream().map(AccountReceivable::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal receivedAR = receivables.stream().map(AccountReceivable::getReceivedAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal unreceivedAR = receivables.stream().map(AccountReceivable::getUnreceivedAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<AccountReceivable> overdueReceivables = accountReceivableService.getOverdueList(tenantId);
+        BigDecimal overdueAR = overdueReceivables.stream().map(AccountReceivable::getUnreceivedAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> arSummary = new HashMap<>();
+        arSummary.put("total", totalAR);
+        arSummary.put("paid", receivedAR);
+        arSummary.put("unpaid", unreceivedAR);
+        arSummary.put("overdue", overdueAR);
+        summary.put("accountsReceivable", arSummary);
+
+        // 应付账款统计
+        List<AccountPayable> payables = accountPayableService.list(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<AccountPayable>()
+                        .eq(AccountPayable::getTenantId, tenantId)
+                        .eq(AccountPayable::getDeleted, 0));
+        BigDecimal totalAP = payables.stream().map(AccountPayable::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal paidAP = payables.stream().map(AccountPayable::getPaidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal unpaidAP = payables.stream().map(AccountPayable::getUnpaidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        List<AccountPayable> overduePayables = accountPayableService.getOverdueList(tenantId);
+        BigDecimal overdueAP = overduePayables.stream().map(AccountPayable::getUnpaidAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> apSummary = new HashMap<>();
+        apSummary.put("total", totalAP);
+        apSummary.put("paid", paidAP);
+        apSummary.put("unpaid", unpaidAP);
+        apSummary.put("overdue", overdueAP);
+        summary.put("accountsPayable", apSummary);
+
+        return ApiResponse.success(summary);
+    }
+
+    /**
+     * 导出财务报表到Excel
+     * <p>
+     * 将指定报表的 reportData（JSON格式）解析后导出为Excel文件。
+     * 使用 EasyExcel 进行导出。
+     * </p>
+     *
+     * @param id       报表ID（路径参数）
+     * @param response HTTP响应对象
+     * @throws IOException 写出文件时可能抛出的IO异常
+     */
+    @RequiresPermission(code = "finance:report:export", name = "导出财务报表")
+    @Operation(summary = "导出报表到Excel")
+    @GetMapping("/reports/{id}/export")
+    public void exportReport(@PathVariable Long id, HttpServletResponse response) throws IOException {
+        FinReport report = financeReportService.getById(id);
+        if (report == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write("报表不存在");
+            return;
+        }
+
+        // 设置响应头
+        String fileName = URLEncoder.encode(
+                "财务报表-" + report.getReportPeriod() + "-" + report.getReportType(), StandardCharsets.UTF_8);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
+
+        // 解析 reportData JSON 为 List<List<String>> 两行结构（标题行 + 数值行）
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> dataMap = objectMapper.readValue(report.getReportData(), Map.class);
+
+        List<List<String>> headList = new ArrayList<>();
+        List<List<Object>> dataList = new ArrayList<>();
+        List<Object> valueRow = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
+            List<String> headCol = new ArrayList<>();
+            headCol.add(entry.getKey());
+            headList.add(headCol);
+            valueRow.add(entry.getValue());
+        }
+        dataList.add(valueRow);
+
+        EasyExcel.write(response.getOutputStream())
+                .head(headList)
+                .sheet("报表数据")
+                .doWrite(dataList);
     }
 }

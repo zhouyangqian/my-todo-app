@@ -372,9 +372,29 @@ const handleDelete = async (row) => {
 }
 
 /**
+ * 从权限树中收集所有非叶子节点的 ID（即有 children 的节点）
+ * el-tree 的 setCheckedKeys 只能传叶子节点 ID，传父节点 ID 会导致所有子节点被勾选
+ * @param nodes 权限树节点列表
+ * @returns 非叶子节点 ID 集合
+ */
+const collectNonLeafIds = (nodes) => {
+  const ids = new Set()
+  const traverse = (list) => {
+    for (const node of list) {
+      if (node.children && node.children.length > 0) {
+        ids.add(node.id)
+        traverse(node.children)
+      }
+    }
+  }
+  traverse(nodes)
+  return ids
+}
+
+/**
  * 打开权限分配对话框
  * 1. 首次打开时加载权限树
- * 2. 获取该角色当前已分配的权限ID
+ * 2. 获取该角色当前已分配的权限ID（仅叶子节点）
  * @param row 当前行角色数据
  */
 const handleAssignPermission = async (row) => {
@@ -392,11 +412,14 @@ const handleAssignPermission = async (row) => {
   } catch (error) {
     permissionIds = []
   }
-  checkedPermissionIds.value = permissionIds
+  // 过滤掉父节点 ID，只保留叶子节点，避免 el-tree 自动勾选所有子节点
+  const nonLeafIds = collectNonLeafIds(permissionTree.value)
+  const leafIds = permissionIds.filter(id => !nonLeafIds.has(id))
+  checkedPermissionIds.value = leafIds
   // 等树渲染完成后手动设置选中状态
   setTimeout(() => {
     if (treeRef.value) {
-      treeRef.value.setCheckedKeys(permissionIds)
+      treeRef.value.setCheckedKeys(leafIds)
     }
   }, 100)
 }

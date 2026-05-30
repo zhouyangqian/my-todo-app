@@ -20,7 +20,7 @@ public class RegisterVO {
     @NotBlank(message = "用户名不能为空")
     @Size(min = 3, max = 50, message = "用户名长度必须在3-50位之间")
     @Pattern(regexp = "^[a-zA-Z][a-zA-Z0-9_]*$", message = "用户名必须以字母开头，只能包含字母、数字和下划线")
-    private String username;
+    private String userName;
 
     /** 密码（必填，8-100位） */
     @NotBlank(message = "密码不能为空")

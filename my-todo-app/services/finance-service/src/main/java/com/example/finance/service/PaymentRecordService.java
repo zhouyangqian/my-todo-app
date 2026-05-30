@@ -1,210 +1,31 @@
 package com.example.finance.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.finance.entity.PaymentRecord;
-import com.example.finance.mapper.PaymentRecordMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 
 /**
- * 收支记录业务服务类
- * <p>
- * 继承 MyBatis-Plus 的 ServiceImpl，提供收支记录的完整业务逻辑，
- * 包括分页查询、创建、审核、取消以及单据编号自动生成。
- * 审核通过后会自动调用 BankAccountService 调整对应银行账户的余额。
- * 所有数据库写操作均使用 @Transactional 注解保证事务一致性。
- * </p>
+ * 收支记录业务服务接口
  *
  * @author finance-team
  * @since 1.0
  */
-@Slf4j
-@Service
-@RequiredArgsConstructor
-public class PaymentRecordService extends ServiceImpl<PaymentRecordMapper, PaymentRecord> {
+public interface PaymentRecordService extends IService<PaymentRecord> {
 
-    /** 银行账户服务，用于审核收支记录时调整账户余额 */
-    private final BankAccountService bankAccountService;
+    Page<PaymentRecord> getPage(Long tenantId, int page, int size,
+                                 Integer recordType, Integer bizType,
+                                 LocalDateTime startDate, LocalDateTime endDate);
 
-    /**
-     * 分页查询收支记录列表
-     * <p>
-     * 支持按收支类型、业务类型和交易日期范围进行筛选。
-     * </p>
-     *
-     * @param tenantId   租户ID，用于多租户数据隔离
-     * @param page       当前页码（从1开始）
-     * @param size       每页记录数
-     * @param recordType 收支类型（可选），1-收入, 2-支出
-     * @param bizType    业务类型（可选），1-销售收款, 2-采购付款, 3-退款, 4-其他收入, 5-其他支出
-     * @param startDate  交易日期起始范围（可选）
-     * @param endDate    交易日期结束范围（可选）
-     * @return 分页结果对象，包含符合条件的收支记录列表及分页信息
-     */
-    public Page<PaymentRecord> getPage(Long tenantId, int page, int size,
-                                        Integer recordType, Integer bizType,
-                                        LocalDateTime startDate, LocalDateTime endDate) {
-        // 构建查询条件：限定租户 + 未删除
-        LambdaQueryWrapper<PaymentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(PaymentRecord::getTenantId, tenantId)
-               .eq(PaymentRecord::getDeleted, 0);
-        // 可选过滤：按收支类型筛选（收入/支出）
-        if (recordType != null) {
-            wrapper.eq(PaymentRecord::getRecordType, recordType);
-        }
-        // 可选过滤：按业务类型筛选
-        if (bizType != null) {
-            wrapper.eq(PaymentRecord::getBizType, bizType);
-        }
-        // 可选过滤：交易日期起始范围
-        if (startDate != null) {
-            wrapper.ge(PaymentRecord::getTransactionDate, startDate);
-        }
-        // 可选过滤：交易日期结束范围
-        if (endDate != null) {
-            wrapper.le(PaymentRecord::getTransactionDate, endDate);
-        }
-        // 按交易日期倒序排列，最新的记录排在前面
-        wrapper.orderByDesc(PaymentRecord::getTransactionDate);
-        return page(new Page<>(page, size), wrapper);
-    }
+    PaymentRecord create(PaymentRecord record);
 
-    /**
-     * 创建收支记录
-     * <p>
-     * 创建时自动生成唯一的单据编号（收款单号以SK开头，付款单号以FK开头），
-     * 初始状态设为"待审核"，需经过审核后才会实际影响账户余额。
-     * </p>
-     *
-     * @param record 收支记录实体对象（需包含 tenantId, recordType, amount, bankAccountId 等字段）
-     * @return 创建成功后的收支记录对象（含自动生成的单据编号和ID）
-     */
-    @Transactional
-    public PaymentRecord create(PaymentRecord record) {
-        // 根据收支类型生成对应的单据编号（SK收款/FK付款）
-        record.setRecordNo(generateRecordNo(record.getRecordType()));
-        // 初始状态为待审核
-        record.setStatus(0);
-        save(record);
-        log.info("创建收支记录: {}, 金额={}", record.getRecordNo(), record.getAmount());
-        return record;
-    }
+    void approve(Long id, Long approverId);
 
-    /**
-     * 审核收支记录
-     * <p>
-     * 审核通过后状态变为"已审核"，同时自动调整关联银行账户的余额：
-     * 收入类型增加账户余额，支出类型减少账户余额。
-     * 仅"待审核"状态的记录允许审核操作。
-     * </p>
-     *
-     * @param id          收支记录ID
-     * @param approverId  审核人ID
-     * @throws IllegalArgumentException 当收支记录不存在时抛出
-     * @throws IllegalStateException    当记录状态不是"待审核"时抛出
-     */
-    @Transactional
-    public void approve(Long id, Long approverId) {
-        PaymentRecord record = getById(id);
-        if (record == null) {
-            throw new IllegalArgumentException("收支记录不存在");
-        }
-        // 校验状态：只有待审核状态的记录才能审核
-        if (record.getStatus() != 0) {
-            throw new IllegalStateException("只能审核待审核状态的记录");
-        }
+    void cancel(Long id);
 
-        // 更新状态为已审核
-        record.setStatus(1);
-        updateById(record);
-
-        // 审核通过后，自动调整关联银行账户的余额
-        if (record.getBankAccountId() != null) {
-            bankAccountService.adjustBalance(record.getBankAccountId(), record.getAmount(),
-                    record.getRecordType() == 1); // 收入类型(recordType==1)增加余额，支出类型减少余额
-        }
-
-        log.info("审核收支记录: {}", record.getRecordNo());
-    }
-
-    /**
-     * 取消收支记录
-     * <p>
-     * 如果该记录已审核通过，则需先反向调整银行账户余额（即撤销之前的余额变动），
-     * 然后将状态设为"已取消"。
-     * </p>
-     *
-     * @param id 收支记录ID
-     * @throws IllegalArgumentException 当收支记录不存在时抛出
-     */
-    @Transactional
-    public void cancel(Long id) {
-        PaymentRecord record = getById(id);
-        if (record == null) {
-            throw new IllegalArgumentException("收支记录不存在");
-        }
-        // 如果记录已审核通过，需要先回滚账户余额（反向操作）
-        if (record.getStatus() == 1) {
-            if (record.getBankAccountId() != null) {
-                // 反向调整：原来是收入则减少余额，原来是支出则增加余额
-                bankAccountService.adjustBalance(record.getBankAccountId(), record.getAmount(),
-                        record.getRecordType() != 1);
-            }
-        }
-        // 更新状态为已取消
-        record.setStatus(2);
-        updateById(record);
-        log.info("取消收支记录: {}", record.getRecordNo());
-    }
-
-    /**
-     * 生成收支单据编号
-     * <p>
-     * 编号规则：前缀 + 日期 + 随机字符串
-     * 收款单前缀为"SK"（收款），付款单前缀为"FK"（付款），
-     * 中间为8位日期（yyyyMMdd），末尾为6位随机大写字母数字。
-     * 示例：SK20260413A1B2C3
-     * </p>
-     *
-     * @param recordType 收支类型，1-收入生成SK前缀，2-支出生成FK前缀
-     * @return 生成的唯一单据编号
-     */
-    private String generateRecordNo(Integer recordType) {
-        String prefix = recordType == 1 ? "SK" : "FK"; // SK=收款, FK=付款
-        String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String random = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        return prefix + dateStr + random;
-    }
-
-    /**
-     * 按日期范围查询已审核的收支记录（用于报表生成）
-     *
-     * @param tenantId   租户ID
-     * @param recordType 收支类型: 1-收入, 2-支出
-     * @param startDate  开始日期
-     * @param endDate    结束日期
-     * @return 符合条件的已审核收支记录列表
-     */
-    public List<PaymentRecord> getByDateRange(Long tenantId, Integer recordType,
-                                               LocalDate startDate, LocalDate endDate) {
-        LambdaQueryWrapper<PaymentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(PaymentRecord::getTenantId, tenantId)
-               .eq(PaymentRecord::getDeleted, 0)
-               .eq(PaymentRecord::getStatus, 1) // 已审核
-               .eq(recordType != null, PaymentRecord::getRecordType, recordType)
-               .ge(PaymentRecord::getTransactionDate, startDate.atStartOfDay())
-               .le(PaymentRecord::getTransactionDate, endDate.atTime(23, 59, 59))
-               .orderByDesc(PaymentRecord::getTransactionDate);
-        return list(wrapper);
-    }
+    List<PaymentRecord> getByDateRange(Long tenantId, Integer recordType,
+                                        LocalDate startDate, LocalDate endDate);
 }

@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * 认证服务启动类
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableScheduling
 @MapperScan("com.example.auth.mapper")
 @ComponentScan(basePackages = {"com.example.auth", "com.example.common"})
 public class AuthServiceApplication {

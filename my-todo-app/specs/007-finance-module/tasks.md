@@ -56,18 +56,18 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 
 ### Tasks
 
-- [ ] T001 创建 finance-service Maven 模块 `backend/finance-service/pom.xml`
-- [ ] T002 [P] 创建 Spring Boot 主类 `backend/finance-service/src/main/java/com/company/finance/FinanceServiceApplication.java`
-- [ ] T003 [P] 配置 application.yml `backend/finance-service/src/main/resources/application.yml`
+- [x] T001 创建 finance-service Maven 模块 `backend/finance-service/pom.xml` ✅ 实际已存在
+- [x] T002 [P] 创建 Spring Boot 主类 `backend/finance-service/src/main/java/com/company/finance/FinanceServiceApplication.java` ✅ 实际已存在
+- [x] T003 [P] 配置 application.yml `backend/finance-service/src/main/resources/application.yml` ✅ 实际已存在
 - [ ] T004 [P] 配置 application-dev.yml `backend/finance-service/src/main/resources/application-dev.yml`
-- [ ] T005 创建数据库 schema 脚本 `backend/finance-service/src/main/resources/db/migration/V1__finance_schema.sql`
+- [x] T005 创建数据库 schema 脚本 `backend/finance-service/src/main/resources/db/migration/V1__finance_schema.sql` ✅ 实际位于 resources/schema.sql
 - [ ] T006 [P] 创建索引脚本 `backend/finance-service/src/main/resources/db/migration/V2__finance_indexes.sql`
 - [ ] T007 [P] 创建初始化数据脚本 `backend/finance-service/src/main/resources/db/migration/V3__finance_init_data.sql`
 - [ ] T008 [P] 创建多币种金额组件 `backend/finance-service/src/main/java/com/company/finance/common/Money.java`
 - [ ] T009 [P] 创建审计日志切面 `backend/finance-service/src/main/java/com/company/finance/common/AuditAspect.java`
 - [ ] T010 [P] 创建全局异常处理 `backend/finance-service/src/main/java/com/company/finance/common/GlobalExceptionHandler.java`
-- [ ] T011 [P] 创建统一响应类 `backend/finance-service/src/main/java/com/company/finance/common/ApiResponse.java`
-- [ ] T012 [P] 创建租户上下文 `backend/finance-service/src/main/java/com/company/finance/common/TenantContext.java`
+- [ ] T011 [P] 创建统一响应类 `backend/finance-service/src/main/java/com/company/finance/common/ApiResponse.java` ✅ 可能位于 common 模块
+- [ ] T012 [P] 创建租户上下文 `backend/finance-service/src/main/java/com/company/finance/common/TenantContext.java` ✅ 可能位于 common 模块
 
 **Checkpoint**: 项目可启动，数据库表创建成功
 
@@ -81,18 +81,18 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 
 ### Tasks
 
-- [ ] T013 创建 FinAccount 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinAccount.java`
-- [ ] T014 [P] 创建 FinBill 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBill.java`
-- [ ] T015 [P] 创建 FinTransaction 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinTransaction.java`
-- [ ] T016 [P] 创建 FinInvoice 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinInvoice.java`
-- [ ] T017 [P] 创建 FinPaymentRecord 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinPaymentRecord.java`
-- [ ] T018 [P] 创建 FinBillInvoice 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBillInvoice.java`
-- [ ] T019 [P] 创建 FinCostConfig 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinCostConfig.java`
-- [ ] T020 [P] 创建 FinCostHistory 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinCostHistory.java`
-- [ ] T021 [P] 创建 FinProfitCalc 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinProfitCalc.java`
-- [ ] T022 [P] 创建 FinBankRecord 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBankRecord.java`
-- [ ] T023 [P] 创建 FinBudget 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBudget.java`
-- [ ] T024 [P] 创建 FinReport 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinReport.java`
+- [x] T013 创建 FinAccount 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinAccount.java` ✅ 实际位于 BankAccount.java
+- [x] T014 [P] 创建 FinBill 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBill.java` ✅ 实际位于 Bill.java
+- [x] T015 [P] 创建 FinTransaction 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinTransaction.java` ✅ 实际位于 PaymentRecord.java
+- [x] T016 [P] 创建 FinInvoice 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinInvoice.java` ✅ 实际位于 Invoice.java
+- [x] T017 [P] 创建 FinPaymentRecord 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinPaymentRecord.java` ✅ 实际位于 PaymentRecord.java
+- [x] T018 [P] 创建 FinBillInvoice 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBillInvoice.java` ✅ 实际位于 BillInvoice.java
+- [x] T019 [P] 创建 FinCostConfig 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinCostConfig.java` ✅ 实际已存在
+- [x] T020 [P] 创建 FinCostHistory 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinCostHistory.java` ✅ 实际已存在
+- [x] T021 [P] 创建 FinProfitCalc 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinProfitCalc.java` ✅ 实际已存在
+- [x] T022 [P] 创建 FinBankRecord 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBankRecord.java` ✅ 实际已存在
+- [x] T023 [P] 创建 FinBudget 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinBudget.java` ✅ 实际已存在
+- [x] T024 [P] 创建 FinReport 实体 `backend/finance-service/src/main/java/com/company/finance/entity/FinReport.java` ✅ 实际已存在
 
 **Checkpoint**: 所有实体类编译通过，MyBatis-Plus 映射正常
 
@@ -109,25 +109,25 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Model & Mapper
-- [ ] T025 [P] [US1] 创建 BillMapper `backend/finance-service/src/main/java/com/company/finance/mapper/BillMapper.java`
-- [ ] T026 [P] [US1] 创建 PaymentRecordMapper `backend/finance-service/src/main/java/com/company/finance/mapper/PaymentRecordMapper.java`
-- [ ] T027 [P] [US1] 创建 AccountMapper `backend/finance-service/src/main/java/com/company/finance/mapper/AccountMapper.java`
+- [x] T025 [P] [US1] 创建 BillMapper `backend/finance-service/src/main/java/com/company/finance/mapper/BillMapper.java` ✅ 实际已存在
+- [x] T026 [P] [US1] 创建 PaymentRecordMapper `backend/finance-service/src/main/java/com/company/finance/mapper/PaymentRecordMapper.java` ✅ 实际已存在
+- [x] T027 [P] [US1] 创建 AccountMapper `backend/finance-service/src/main/java/com/company/finance/mapper/AccountMapper.java` ✅ 实际位于 AccountPayableMapper + AccountReceivableMapper + BankAccountMapper
 
 #### DTO
-- [ ] T028 [P] [US1] 创建 BillCreateRequest `backend/finance-service/src/main/java/com/company/finance/bill/dto/BillCreateRequest.java`
-- [ ] T029 [P] [US1] 创建 BillResponse `backend/finance-service/src/main/java/com/company/finance/bill/dto/BillResponse.java`
-- [ ] T030 [P] [US1] 创建 BillDetailResponse `backend/finance-service/src/main/java/com/company/finance/bill/dto/BillDetailResponse.java`
+- [ ] T028 [P] [US1] 创建 BillCreateRequest `backend/finance-service/src/main/java/com/company/finance/bill/dto/BillCreateRequest.java` （无独立DTO，直接使用实体）
+- [ ] T029 [P] [US1] 创建 BillResponse `backend/finance-service/src/main/java/com/company/finance/bill/dto/BillResponse.java` （无独立DTO）
+- [ ] T030 [P] [US1] 创建 BillDetailResponse `backend/finance-service/src/main/java/com/company/finance/bill/dto/BillDetailResponse.java` （无独立DTO）
 
 #### Service
-- [ ] T031 [US1] 创建 AccountService 接口 `backend/finance-service/src/main/java/com/company/finance/account/service/AccountService.java`
-- [ ] T032 [US1] 实现 AccountServiceImpl `backend/finance-service/src/main/java/com/company/finance/account/service/impl/AccountServiceImpl.java`
-- [ ] T033 [US1] 创建 BillService 接口 `backend/finance-service/src/main/java/com/company/finance/bill/service/BillService.java`
-- [ ] T034 [US1] 实现 BillServiceImpl `backend/finance-service/src/main/java/com/company/finance/bill/service/impl/BillServiceImpl.java`
-- [ ] T035 [US1] 实现 BillStateMachine `backend/finance-service/src/main/java/com/company/finance/bill/service/BillStateMachine.java`
+- [x] T031 [US1] 创建 AccountService 接口 `backend/finance-service/src/main/java/com/company/finance/account/service/AccountService.java` ✅ 实际位于 AccountPayableService + AccountReceivableService + BankAccountService
+- [x] T032 [US1] 实现 AccountServiceImpl `backend/finance-service/src/main/java/com/company/finance/account/service/impl/AccountServiceImpl.java` ✅ 功能直接在 Service 类中实现
+- [x] T033 [US1] 创建 BillService 接口 `backend/finance-service/src/main/java/com/company/finance/bill/service/BillService.java` ✅ 实际已存在，含完整生命周期（create/update/submit/approve/reject/cancel/summary/createFromPurchase/Sales）
+- [x] T034 [US1] 实现 BillServiceImpl `backend/finance-service/src/main/java/com/company/finance/bill/service/impl/BillServiceImpl.java` ✅ 功能直接在 BillService.java 中实现
+- [x] T035 [US1] 实现 BillStateMachine `backend/finance-service/src/main/java/com/company/finance/bill/service/BillStateMachine.java` ✅ 状态转换逻辑在 BillService 内部实现
 
 #### Controller
-- [ ] T036 [US1] 实现 AccountController `backend/finance-service/src/main/java/com/company/finance/account/controller/AccountController.java`
-- [ ] T037 [US1] 实现 BillController `backend/finance-service/src/main/java/com/company/finance/bill/controller/BillController.java`
+- [x] T036 [US1] 实现 AccountController `backend/finance-service/src/main/java/com/company/finance/account/controller/AccountController.java` ✅ 功能位于 FinanceController
+- [x] T037 [US1] 实现 BillController `backend/finance-service/src/main/java/com/company/finance/bill/controller/BillController.java` ✅ 实际已存在，含11个端点（CRUD + workflow + payments + invoices + summary）
 
 **Checkpoint**: 可通过 API 完成账单创建、审核、收付款、核销全流程
 
@@ -144,20 +144,20 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Mapper
-- [ ] T038 [P] [US2] 创建 TransactionMapper `backend/finance-service/src/main/java/com/company/finance/mapper/TransactionMapper.java`
+- [x] T038 [P] [US2] 创建 TransactionMapper `backend/finance-service/src/main/java/com/company/finance/mapper/TransactionMapper.java` ✅ 实际位于 PaymentRecordMapper
 
 #### DTO
-- [ ] T039 [P] [US2] 创建 TransactionCreateRequest `backend/finance-service/src/main/java/com/company/finance/transaction/dto/TransactionCreateRequest.java`
-- [ ] T040 [P] [US2] 创建 TransactionResponse `backend/finance-service/src/main/java/com/company/finance/transaction/dto/TransactionResponse.java`
-- [ ] T041 [P] [US2] 创建 TransferRequest `backend/finance-service/src/main/java/com/company/finance/transaction/dto/TransferRequest.java`
+- [ ] T039 [P] [US2] 创建 TransactionCreateRequest `backend/finance-service/src/main/java/com/company/finance/transaction/dto/TransactionCreateRequest.java` （无独立DTO）
+- [ ] T040 [P] [US2] 创建 TransactionResponse `backend/finance-service/src/main/java/com/company/finance/transaction/dto/TransactionResponse.java` （无独立DTO）
+- [ ] T041 [P] [US2] 创建 TransferRequest `backend/finance-service/src/main/java/com/company/finance/transaction/dto/TransferRequest.java` （实际有 TransferVO）
 
 #### Service
-- [ ] T042 [US2] 创建 TransactionService 接口 `backend/finance-service/src/main/java/com/company/finance/transaction/service/TransactionService.java`
-- [ ] T043 [US2] 实现 TransactionServiceImpl `backend/finance-service/src/main/java/com/company/finance/transaction/service/impl/TransactionServiceImpl.java`
+- [x] T042 [US2] 创建 TransactionService 接口 `backend/finance-service/src/main/java/com/company/finance/transaction/service/TransactionService.java` ✅ 实际位于 PaymentRecordService（CRUD + approve + cancel）
+- [x] T043 [US2] 实现 TransactionServiceImpl `backend/finance-service/src/main/java/com/company/finance/transaction/service/impl/TransactionServiceImpl.java` ✅ 功能直接在 PaymentRecordService 中实现
 
 #### Controller
-- [ ] T044 [US2] 实现 TransactionController `backend/finance-service/src/main/java/com/company/finance/transaction/controller/TransactionController.java`
-- [ ] T045 [US2] 实现收支统计 API `backend/finance-service/src/main/java/com/company/finance/transaction/controller/TransactionSummaryController.java`
+- [x] T044 [US2] 实现 TransactionController `backend/finance-service/src/main/java/com/company/finance/transaction/controller/TransactionController.java` ✅ 功能位于 FinanceController
+- [ ] T045 [US2] 实现收支统计 API `backend/finance-service/src/main/java/com/company/finance/transaction/controller/TransactionSummaryController.java` （非独立控制器）
 - [ ] T046 [US2] 实现收支导出 API `backend/finance-service/src/main/java/com/company/finance/transaction/controller/TransactionExportController.java`
 
 **Checkpoint**: 可通过 API 完成收支记录、转账、统计查询、导出
@@ -175,21 +175,21 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Mapper
-- [ ] T047 [P] [US3] 创建 InvoiceMapper `backend/finance-service/src/main/java/com/company/finance/mapper/InvoiceMapper.java`
-- [ ] T048 [P] [US3] 创建 BillInvoiceMapper `backend/finance-service/src/main/java/com/company/finance/mapper/BillInvoiceMapper.java`
+- [x] T047 [P] [US3] 创建 InvoiceMapper `backend/finance-service/src/main/java/com/company/finance/mapper/InvoiceMapper.java` ✅ 实际已存在
+- [x] T048 [P] [US3] 创建 BillInvoiceMapper `backend/finance-service/src/main/java/com/company/finance/mapper/BillInvoiceMapper.java` ✅ 实际已存在
 
 #### DTO
-- [ ] T049 [P] [US3] 创建 InvoiceCreateRequest `backend/finance-service/src/main/java/com/company/finance/invoice/dto/InvoiceCreateRequest.java`
-- [ ] T050 [P] [US3] 创建 InvoiceResponse `backend/finance-service/src/main/java/com/company/finance/invoice/dto/InvoiceResponse.java`
+- [ ] T049 [P] [US3] 创建 InvoiceCreateRequest `backend/finance-service/src/main/java/com/company/finance/invoice/dto/InvoiceCreateRequest.java` （无独立DTO）
+- [ ] T050 [P] [US3] 创建 InvoiceResponse `backend/finance-service/src/main/java/com/company/finance/invoice/dto/InvoiceResponse.java` （无独立DTO）
 
 #### Service
-- [ ] T051 [US3] 创建 InvoiceService 接口 `backend/finance-service/src/main/java/com/company/finance/invoice/service/InvoiceService.java`
-- [ ] T052 [US3] 实现 InvoiceServiceImpl `backend/finance-service/src/main/java/com/company/finance/invoice/service/impl/InvoiceServiceImpl.java`
+- [x] T051 [US3] 创建 InvoiceService 接口 `backend/finance-service/src/main/java/com/company/finance/invoice/service/InvoiceService.java` ✅ 实际已存在，含 CRUD + void + statistics
+- [x] T052 [US3] 实现 InvoiceServiceImpl `backend/finance-service/src/main/java/com/company/finance/invoice/service/impl/InvoiceServiceImpl.java` ✅ 功能直接在 InvoiceService 中实现
 
 #### Controller
-- [ ] T053 [US3] 实现 InvoiceController `backend/finance-service/src/main/java/com/company/finance/invoice/controller/InvoiceController.java`
-- [ ] T054 [US3] 实现发票统计 API `backend/finance-service/src/main/java/com/company/finance/invoice/controller/InvoiceStatisticsController.java`
-- [ ] T055 [US3] 实现发票账单关联 API `backend/finance-service/src/main/java/com/company/finance/invoice/controller/InvoiceBillController.java`
+- [x] T053 [US3] 实现 InvoiceController `backend/finance-service/src/main/java/com/company/finance/invoice/controller/InvoiceController.java` ✅ 实际已存在，含7个端点
+- [x] T054 [US3] 实现发票统计 API `backend/finance-service/src/main/java/com/company/finance/invoice/controller/InvoiceStatisticsController.java` ✅ 实际位于 InvoiceService.getStatistics()
+- [x] T055 [US3] 实现发票账单关联 API `backend/finance-service/src/main/java/com/company/finance/invoice/controller/InvoiceBillController.java` ✅ 实际位于 BillService.getBillInvoices()
 
 **Checkpoint**: 可通过 API 完成发票创建、关联账单、作废、统计
 
@@ -206,19 +206,19 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Strategy Pattern
-- [ ] T056 [P] [US4] 创建 CostCalculationStrategy 接口 `backend/finance-service/src/main/java/com/company/finance/cost/strategy/CostCalculationStrategy.java`
-- [ ] T057 [P] [US4] 实现 FifoCostStrategy `backend/finance-service/src/main/java/com/company/finance/cost/strategy/FifoCostStrategy.java`
-- [ ] T058 [P] [US4] 实现 WeightedAverageCostStrategy `backend/finance-service/src/main/java/com/company/finance/cost/strategy/WeightedAverageCostStrategy.java`
-- [ ] T059 [P] [US4] 实现 SpecificIdentificationStrategy `backend/finance-service/src/main/java/com/company/finance/cost/strategy/SpecificIdentificationStrategy.java`
+- [x] T056 [P] [US4] 创建 CostCalculationStrategy 接口 `backend/finance-service/src/main/java/com/company/finance/cost/strategy/CostCalculationStrategy.java` ✅ 实际已存在
+- [x] T057 [P] [US4] 实现 FifoCostStrategy `backend/finance-service/src/main/java/com/company/finance/cost/strategy/FifoCostStrategy.java` ✅ 实际已存在
+- [x] T058 [P] [US4] 实现 WeightedAverageCostStrategy `backend/finance-service/src/main/java/com/company/finance/cost/strategy/WeightedAverageCostStrategy.java` ✅ 实际已存在
+- [x] T059 [P] [US4] 实现 SpecificIdentificationStrategy `backend/finance-service/src/main/java/com/company/finance/cost/strategy/SpecificIdentificationStrategy.java` ✅ 实际位于 SpecificIdentificationCostStrategy
 
 #### Service
-- [ ] T060 [US4] 创建 CostCalculationService 接口 `backend/finance-service/src/main/java/com/company/finance/cost/service/CostCalculationService.java`
-- [ ] T061 [US4] 实现 CostCalculationServiceImpl `backend/finance-service/src/main/java/com/company/finance/cost/service/impl/CostCalculationServiceImpl.java`
-- [ ] T062 [US4] 创建 ProfitCalculationService `backend/finance-service/src/main/java/com/company/finance/cost/service/ProfitCalculationService.java`
+- [x] T060 [US4] 创建 CostCalculationService 接口 `backend/finance-service/src/main/java/com/company/finance/cost/service/CostCalculationService.java` ✅ 实际已存在，含 setCostMethod/calculateOutboundCost/recordInboundCost
+- [x] T061 [US4] 实现 CostCalculationServiceImpl `backend/finance-service/src/main/java/com/company/finance/cost/service/impl/CostCalculationServiceImpl.java` ✅ 功能直接在 CostCalculationService 中实现
+- [x] T062 [US4] 创建 ProfitCalculationService `backend/finance-service/src/main/java/com/company/finance/cost/service/ProfitCalculationService.java` ✅ 实际位于 CostCalculationService 内部
 
 #### Controller
-- [ ] T063 [US4] 实现 CostConfigController `backend/finance-service/src/main/java/com/company/finance/cost/controller/CostConfigController.java`
-- [ ] T064 [US4] 实现 ProfitAnalysisController `backend/finance-service/src/main/java/com/company/finance/cost/controller/ProfitAnalysisController.java`
+- [x] T063 [US4] 实现 CostConfigController `backend/finance-service/src/main/java/com/company/finance/cost/controller/CostConfigController.java` ✅ 实际位于 CostCalculationController
+- [x] T064 [US4] 实现 ProfitAnalysisController `backend/finance-service/src/main/java/com/company/finance/cost/controller/ProfitAnalysisController.java` ✅ 实际位于 CostCalculationController
 
 **Checkpoint**: 可设置成本方法、计算成本、查看毛利分析
 
@@ -235,20 +235,20 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Generator
-- [ ] T065 [P] [US7] 创建 BalanceSheetGenerator `backend/finance-service/src/main/java/com/company/finance/report/generator/BalanceSheetGenerator.java`
-- [ ] T066 [P] [US7] 创建 IncomeStatementGenerator `backend/finance-service/src/main/java/com/company/finance/report/generator/IncomeStatementGenerator.java`
-- [ ] T067 [P] [US7] 创建 CashFlowGenerator `backend/finance-service/src/main/java/com/company/finance/report/generator/CashFlowGenerator.java`
+- [x] T065 [P] [US7] 创建 BalanceSheetGenerator `backend/finance-service/src/main/java/com/company/finance/report/generator/BalanceSheetGenerator.java` ✅ 实际位于 FinanceReportService.generateBalanceSheet()
+- [x] T066 [P] [US7] 创建 IncomeStatementGenerator `backend/finance-service/src/main/java/com/company/finance/report/generator/IncomeStatementGenerator.java` ✅ 实际位于 FinanceReportService.generateIncomeStatement()
+- [x] T067 [P] [US7] 创建 CashFlowGenerator `backend/finance-service/src/main/java/com/company/finance/report/generator/CashFlowGenerator.java` ✅ 实际位于 FinanceReportService.generateCashFlowStatement()
 
 #### Service
-- [ ] T068 [US7] 创建 ReportService 接口 `backend/finance-service/src/main/java/com/company/finance/report/service/ReportService.java`
-- [ ] T069 [US7] 实现 ReportServiceImpl `backend/finance-service/src/main/java/com/company/finance/report/service/impl/ReportServiceImpl.java`
+- [x] T068 [US7] 创建 ReportService 接口 `backend/finance-service/src/main/java/com/company/finance/report/service/ReportService.java` ✅ 实际位于 FinanceReportService
+- [x] T069 [US7] 实现 ReportServiceImpl `backend/finance-service/src/main/java/com/company/finance/report/service/impl/ReportServiceImpl.java` ✅ 功能直接在 FinanceReportService 中实现
 
 #### Export
 - [ ] T070 [P] [US7] 实现 ExcelExporter `backend/finance-service/src/main/java/com/company/finance/report/export/ExcelExporter.java`
 - [ ] T071 [P] [US7] 实现 PdfExporter `backend/finance-service/src/main/java/com/company/finance/report/export/PdfExporter.java`
 
 #### Controller
-- [ ] T072 [US7] 实现 ReportController `backend/finance-service/src/main/java/com/company/finance/report/controller/ReportController.java`
+- [x] T072 [US7] 实现 ReportController `backend/finance-service/src/main/java/com/company/finance/report/controller/ReportController.java` ✅ 实际位于 FinanceReportController
 - [ ] T073 [US7] 实现 ReportExportController `backend/finance-service/src/main/java/com/company/finance/report/controller/ReportExportController.java`
 
 #### Templates
@@ -271,16 +271,16 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Event Definition
-- [ ] T077 [P] [US8] 创建 PurchaseCompletedEvent `backend/finance-service/src/main/java/com/company/finance/integration/event/PurchaseCompletedEvent.java`
-- [ ] T078 [P] [US8] 创建 SalesCompletedEvent `backend/finance-service/src/main/java/com/company/finance/integration/event/SalesCompletedEvent.java`
+- [x] T077 [P] [US8] 创建 PurchaseCompletedEvent `backend/finance-service/src/main/java/com/company/finance/integration/event/PurchaseCompletedEvent.java` ✅ 实际已存在
+- [x] T078 [P] [US8] 创建 SalesCompletedEvent `backend/finance-service/src/main/java/com/company/finance/integration/event/SalesCompletedEvent.java` ✅ 实际已存在
 
 #### Event Listener
-- [ ] T079 [US8] 实现 PurchaseEventListener `backend/finance-service/src/main/java/com/company/finance/integration/listener/PurchaseEventListener.java`
-- [ ] T080 [US8] 实现 SalesEventListener `backend/finance-service/src/main/java/com/company/finance/integration/listener/SalesEventListener.java`
+- [x] T079 [US8] 实现 PurchaseEventListener `backend/finance-service/src/main/java/com/company/finance/integration/listener/PurchaseEventListener.java` ✅ 实际位于 ErpEventListener.handlePurchaseCompleted()
+- [x] T080 [US8] 实现 SalesEventListener `backend/finance-service/src/main/java/com/company/finance/integration/listener/SalesEventListener.java` ✅ 实际位于 ErpEventListener.handleSalesCompleted()
 
 #### Settlement Service
-- [ ] T081 [US8] 创建 SettlementService `backend/finance-service/src/main/java/com/company/finance/integration/service/SettlementService.java`
-- [ ] T082 [US8] 实现结算链路追溯 API `backend/finance-service/src/main/java/com/company/finance/integration/controller/SettlementController.java`
+- [x] T081 [US8] 创建 SettlementService `backend/finance-service/src/main/java/com/company/finance/integration/service/SettlementService.java` ✅ 实际已存在
+- [x] T082 [US8] 实现结算链路追溯 API `backend/finance-service/src/main/java/com/company/finance/integration/controller/SettlementController.java` ✅ 实际位于 SettlementController
 
 **Checkpoint**: 进销存操作自动触发财务数据生成
 
@@ -297,13 +297,13 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Service
-- [ ] T083 [US5] 创建 BankReconciliationService `backend/finance-service/src/main/java/com/company/finance/reconciliation/service/BankReconciliationService.java`
-- [ ] T084 [US5] 实现 AutoMatchingService `backend/finance-service/src/main/java/com/company/finance/reconciliation/service/impl/AutoMatchingService.java`
+- [x] T083 [US5] 创建 BankReconciliationService `backend/finance-service/src/main/java/com/company/finance/reconciliation/service/BankReconciliationService.java` ✅ 实际已存在，含 import/autoMatch/manualMatch/unmatch
+- [x] T084 [US5] 实现 AutoMatchingService `backend/finance-service/src/main/java/com/company/finance/reconciliation/service/impl/AutoMatchingService.java` ✅ 实际位于 BankReconciliationService 内部（基于评分匹配）
 
 #### Controller
-- [ ] T085 [US5] 实现 BankReconciliationController `backend/finance-service/src/main/java/com/company/finance/reconciliation/controller/BankReconciliationController.java`
-- [ ] T086 [US5] 实现银行流水导入 API `backend/finance-service/src/main/java/com/company/finance/reconciliation/controller/BankRecordImportController.java`
-- [ ] T087 [US5] 实现对账差异报告 API `backend/finance-service/src/main/java/com/company/finance/reconciliation/controller/ReconciliationReportController.java`
+- [x] T085 [US5] 实现 BankReconciliationController `backend/finance-service/src/main/java/com/company/finance/reconciliation/controller/BankReconciliationController.java` ✅ 实际已存在，含6个端点
+- [x] T086 [US5] 实现银行流水导入 API `backend/finance-service/src/main/java/com/company/finance/reconciliation/controller/BankRecordImportController.java` ✅ 实际位于 BankReconciliationService.importBankStatement()
+- [x] T087 [US5] 实现对账差异报告 API `backend/finance-service/src/main/java/com/company/finance/reconciliation/controller/ReconciliationReportController.java` ✅ 实际位于 BankReconciliationService（含未匹配记录 + 统计）
 
 **Checkpoint**: 可导入银行流水、自动匹配、手动对账、查看差异
 
@@ -320,16 +320,16 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 ### Tasks
 
 #### Service
-- [ ] T088 [US6] 创建 BudgetService `backend/finance-service/src/main/java/com/company/finance/budget/service/BudgetService.java`
-- [ ] T089 [US6] 实现 BudgetServiceImpl `backend/finance-service/src/main/java/com/company/finance/budget/service/impl/BudgetServiceImpl.java`
+- [x] T088 [US6] 创建 BudgetService `backend/finance-service/src/main/java/com/company/finance/budget/service/BudgetService.java` ✅ 实际已存在，含 create/approve/update/check/recordUsage/execution tracking
+- [x] T089 [US6] 实现 BudgetServiceImpl `backend/finance-service/src/main/java/com/company/finance/budget/service/impl/BudgetServiceImpl.java` ✅ 功能直接在 BudgetService 中实现
 
 #### Controller
-- [ ] T090 [US6] 实现 BudgetController `backend/finance-service/src/main/java/com/company/finance/budget/controller/BudgetController.java`
-- [ ] T091 [US6] 实现预算审批 API `backend/finance-service/src/main/java/com/company/finance/budget/controller/BudgetApprovalController.java`
-- [ ] T092 [US6] 实现预算执行 API `backend/finance-service/src/main/java/com/company/finance/budget/controller/BudgetExecutionController.java`
+- [x] T090 [US6] 实现 BudgetController `backend/finance-service/src/main/java/com/company/finance/budget/controller/BudgetController.java` ✅ 实际已存在，含7个端点
+- [x] T091 [US6] 实现预算审批 API `backend/finance-service/src/main/java/com/company/finance/budget/controller/BudgetApprovalController.java` ✅ 实际位于 BudgetController POST /approve/{id}
+- [x] T092 [US6] 实现预算执行 API `backend/finance-service/src/main/java/com/company/finance/budget/controller/BudgetExecutionController.java` ✅ 实际位于 BudgetController GET /execution/{id}
 
 #### Interceptor
-- [ ] T093 [US6] 实现 BudgetControlInterceptor `backend/finance-service/src/main/java/com/company/finance/budget/interceptor/BudgetControlInterceptor.java`
+- [ ] T093 [US6] 实现 BudgetControlInterceptor `backend/finance-service/src/main/java/com/company/finance/budget/interceptor/BudgetControlInterceptor.java` （预算检查逻辑在 BudgetService.checkBudget() 中实现）
 
 **Checkpoint**: 可编制预算、审批、跟踪执行、接收预警
 
@@ -365,6 +365,8 @@ Phase 1 (Setup) ──► Phase 2 (Foundation)
 | Metric | Value |
 |--------|-------|
 | **Total Tasks** | 100 |
+| **Completed** | 68 |
+| **Remaining** | 32 |
 | **Parallel Tasks** | 52 |
 | **Phases** | 11 |
 | **Duration** | 12 weeks |

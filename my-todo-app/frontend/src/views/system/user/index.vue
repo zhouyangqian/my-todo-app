@@ -8,7 +8,7 @@
     <el-card class="search-card">
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="用户名">
-          <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable />
+          <el-input v-model="searchForm.userName" placeholder="请输入用户名" clearable />
         </el-form-item>
         <el-form-item label="姓名">
           <el-input v-model="searchForm.realName" placeholder="请输入姓名" clearable />
@@ -36,16 +36,55 @@
     <el-card class="table-card">
       <template #header>
         <div class="card-header">
-          <span>用户列表</span>
-          <el-button v-if="userStore.hasPermission('system:user:create')" type="primary" @click="handleAdd">
-            <el-icon><Plus /></el-icon>
-            新增用户
-          </el-button>
+          <div class="card-header-left">
+            <span>用户列表</span>
+            <el-button v-if="userStore.hasPermission('system:user:create')" type="primary" @click="handleAdd">
+              <el-icon><Plus /></el-icon>
+              新增用户
+            </el-button>
+            <!-- 批量操作按钮 -->
+            <el-button
+              v-if="userStore.hasPermission('system:user:disable')"
+              type="warning"
+              :disabled="selectedRows.length === 0"
+              @click="handleBatchDisable"
+            >
+              批量禁用 ({{ selectedRows.length }})
+            </el-button>
+            <el-button
+              v-if="userStore.hasPermission('system:user:delete')"
+              type="danger"
+              :disabled="selectedRows.length === 0"
+              @click="handleBatchDelete"
+            >
+              批量删除 ({{ selectedRows.length }})
+            </el-button>
+            <el-button
+              v-if="userStore.hasPermission('system:user:assignToUser')"
+              type="info"
+              :disabled="selectedRows.length === 0"
+              @click="handleBatchAssignRoles"
+            >
+              批量分配角色 ({{ selectedRows.length }})
+            </el-button>
+          </div>
+          <div class="card-header-right">
+            <el-button v-if="userStore.hasPermission('system:user:import')" @click="handleDownloadTemplate">
+              下载模板
+            </el-button>
+            <el-button v-if="userStore.hasPermission('system:user:import')" type="success" @click="importDialogVisible = true">
+              导入
+            </el-button>
+            <el-button v-if="userStore.hasPermission('system:user:export')" type="warning" @click="handleExport">
+              导出
+            </el-button>
+          </div>
         </div>
       </template>
 
-      <el-table :data="tableData" v-loading="loading" border stripe>
-        <el-table-column prop="username" label="用户名" width="120" />
+      <el-table ref="tableRef" :data="tableData" v-loading="loading" border stripe @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="50" />
+        <el-table-column prop="userName" label="用户名" width="120" />
         <el-table-column prop="realName" label="姓名" width="100" />
         <el-table-column prop="email" label="邮箱" width="180" />
         <el-table-column prop="phone" label="手机号" width="130" />
@@ -116,8 +155,8 @@
         :rules="formRules"
         label-width="80px"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="formData.username" placeholder="请输入用户名" @input="onUsernameInput" />
+        <el-form-item label="用户名" prop="userName">
+          <el-input v-model="formData.userName" placeholder="请输入用户名" @input="onUsernameInput" />
         </el-form-item>
         <el-form-item label="姓名" prop="realName">
           <el-input v-model="formData.realName" placeholder="请输入姓名" />
@@ -175,7 +214,7 @@
     >
       <el-form :model="passwordForm" label-width="100px">
         <el-form-item label="用户">
-          <el-input :model-value="passwordForm.username" disabled />
+          <el-input :model-value="passwordForm.userName" disabled />
         </el-form-item>
         <el-form-item label="默认密码">
           <el-input :model-value="passwordForm.defaultPassword" disabled>
@@ -196,6 +235,74 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 导入用户对话框 -->
+    <el-dialog
+      v-model="importDialogVisible"
+      title="导入用户"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-upload
+        ref="uploadRef"
+        :auto-upload="false"
+        :limit="1"
+        accept=".xlsx,.xls"
+        :on-change="handleImportFileChange"
+        :on-exceed="() => ElMessage.warning('只能上传一个文件')"
+        drag
+      >
+        <el-icon style="font-size: 40px; color: #c0c4cc;"><Upload /></el-icon>
+        <div style="margin-top: 10px;">将Excel文件拖到此处，或<em>点击上传</em></div>
+        <template #tip>
+          <div class="form-tip">仅支持 .xlsx / .xls 格式，单次最多导入1000条数据</div>
+        </template>
+      </el-upload>
+      <!-- 导入结果展示 -->
+      <div v-if="importResult" style="margin-top: 16px;">
+        <el-alert
+          :title="`导入完成：成功 ${importResult.successCount} 条，失败 ${importResult.failCount} 条，共 ${importResult.totalCount} 条`"
+          :type="importResult.failCount > 0 ? 'warning' : 'success'"
+          show-icon
+          :closable="false"
+        />
+        <el-table v-if="importResult.failures && importResult.failures.length > 0" :data="importResult.failures" border stripe style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+          <el-table-column prop="rowNum" label="行号" width="80" />
+          <el-table-column prop="userName" label="用户名" width="120" />
+          <el-table-column prop="reason" label="失败原因" />
+        </el-table>
+      </div>
+      <template #footer>
+        <el-button @click="handleImportDialogClose">关闭</el-button>
+        <el-button type="primary" @click="handleImportSubmit" :loading="importLoading" :disabled="!importFile">
+          开始导入
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 批量分配角色对话框 -->
+    <el-dialog
+      v-model="batchRoleDialogVisible"
+      title="批量分配角色"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <p style="margin-bottom: 12px; color: #606266;">已选择 {{ selectedRows.length }} 个用户</p>
+      <el-checkbox-group v-model="batchRoleIds">
+        <div v-for="role in allRoles" :key="role.id" style="margin-bottom: 10px;">
+          <el-checkbox :value="String(role.id)">
+            {{ role.roleName }}（{{ role.roleCode }}）
+          </el-checkbox>
+        </div>
+      </el-checkbox-group>
+      <el-empty v-if="allRoles.length === 0" description="暂无可用角色" />
+      <template #footer>
+        <el-button @click="batchRoleDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleBatchSaveRoles" :loading="batchRoleLoading">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -204,8 +311,8 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { pinyin } from 'pinyin-pro'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Plus } from '@element-plus/icons-vue'
-import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUser } from '@/api/user'
+import { Search, Refresh, Plus, Upload } from '@element-plus/icons-vue'
+import { getUserPage, createUser, updateUser, deleteUser, enableUser, disableUser, batchDisableUsers, batchDeleteUsers, batchAssignRoles, downloadImportTemplate, importUsers, exportUsers } from '@/api/user'
 import { getRoleList, getUserRoles, assignUserRoles, clearUserPermissionCache } from '@/api/permission'
 import { resetPassword, kickUser } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
@@ -217,7 +324,7 @@ const userStore = useUserStore()
 
 // 搜索表单数据
 const searchForm = reactive({
-  username: '',                              // 按用户名筛选
+  userName: '',                              // 按用户名筛选
   realName: '',                              // 按姓名筛选
   status: undefined                          // 按状态筛选（1-启用，0-禁用）
 })
@@ -237,6 +344,32 @@ const pagination = reactive({
 const tableData = ref([])
 // 表格加载状态
 const loading = ref(false)
+// 表格引用，用于多选操作
+const tableRef = ref()
+// 当前选中行
+const selectedRows = ref([])
+
+// ===== 批量操作相关 =====
+
+// 批量分配角色对话框是否可见
+const batchRoleDialogVisible = ref(false)
+// 批量分配角色选中的角色ID列表
+const batchRoleIds = ref([])
+// 批量分配角色加载状态
+const batchRoleLoading = ref(false)
+
+// ===== 导入导出相关 =====
+
+// 导入对话框是否可见
+const importDialogVisible = ref(false)
+// 导入文件
+const importFile = ref(null)
+// 导入加载状态
+const importLoading = ref(false)
+// 导入结果
+const importResult = ref(null)
+// 上传组件引用
+const uploadRef = ref()
 
 // ===== 对话框相关 =====
 
@@ -252,7 +385,7 @@ const submitLoading = ref(false)
 // 表单数据（新增/编辑共用）
 const formData = reactive({
   id: undefined,                         // 用户ID（编辑时有值，string类型）
-  username: '',                          // 用户名
+  userName: '',                          // 用户名
   realName: '',                          // 真实姓名
   email: '',                             // 邮箱
   phone: '',                             // 手机号
@@ -279,7 +412,7 @@ const passwordDialogVisible = ref(false)
 // 密码表单数据
 const passwordForm = reactive({
   userId: undefined,
-  username: '',
+  userName: '',
   defaultPassword: '',
   newPassword: ''
 })
@@ -291,7 +424,7 @@ const usernameManuallyEdited = ref(false)
 
 // 表单验证规则
 const formRules = {
-  username: [
+  userName: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
   ],
@@ -310,7 +443,7 @@ const formRules = {
 watch(() => formData.realName, (val) => {
   if (!val || formData.id || usernameManuallyEdited.value) return
   const py = pinyin(val, { toneType: 'none', type: 'array' })
-  formData.username = py.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('')
+  formData.userName = py.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('')
 })
 
 // 用户手动输入用户名时标记，后续不再自动覆盖
@@ -330,8 +463,8 @@ const loadData = async () => {
       size: pagination.size,
       ...searchForm   // 展开搜索条件
     })
-    tableData.value = res.records    // 填充表格数据
-    pagination.total = res.total     // 更新总记录数
+    tableData.value = res.records || []    // 填充表格数据
+    pagination.total = res.total || 0      // 更新总记录数
   } catch (error) {
     ElMessage.error('加载数据失败')
   } finally {
@@ -351,7 +484,7 @@ const handleSearch = () => {
  * 重置按钮处理：清空搜索条件后重新搜索
  */
 const handleReset = () => {
-  searchForm.username = ''
+  searchForm.userName = ''
   searchForm.realName = ''
   searchForm.status = undefined
   handleSearch()
@@ -363,7 +496,7 @@ const handleReset = () => {
 const handleAdd = () => {
   dialogTitle.value = '新增用户'
   formData.id = undefined
-  formData.username = ''
+  formData.userName = ''
   formData.realName = ''
   formData.email = ''
   formData.phone = ''
@@ -379,7 +512,7 @@ const handleAdd = () => {
 const handleEdit = (row) => {
   dialogTitle.value = '编辑用户'
   formData.id = String(row.id)  // 确保id是字符串类型
-  formData.username = row.username
+  formData.userName = row.userName
   formData.realName = row.realName
   formData.email = row.email
   formData.phone = row.phone
@@ -461,7 +594,7 @@ const handleDelete = async (row) => {
  * @param row 当前行的用户数据
  */
 const handleKick = async (row) => {
-  await ElMessageBox.confirm(`确定要将用户「${row.username}」强制下线吗？该用户的所有设备将被踢出。`, '踢出确认', {
+  await ElMessageBox.confirm(`确定要将用户「${row.userName}」强制下线吗？该用户的所有设备将被踢出。`, '踢出确认', {
     type: 'warning',
     confirmButtonText: '确定踢出',
     cancelButtonText: '取消'
@@ -485,7 +618,7 @@ const handleResetPassword = (row) => {
     : ''
   const defaultPwd = namePinyin + pagination.total
   passwordForm.userId = row.id
-  passwordForm.username = row.username
+  passwordForm.userName = row.userName
   passwordForm.defaultPassword = defaultPwd
   passwordForm.newPassword = defaultPwd
   passwordDialogVisible.value = true
@@ -594,6 +727,187 @@ const handlePageChange = (page) => {
   loadData()
 }
 
+// ===== 多选与批量操作 =====
+
+/**
+ * 表格选中行变化处理
+ */
+const handleSelectionChange = (rows) => {
+  selectedRows.value = rows
+}
+
+/**
+ * 批量禁用用户
+ */
+const handleBatchDisable = async () => {
+  const userIds = selectedRows.value.map(row => row.id)
+  await ElMessageBox.confirm(`确定要批量禁用 ${userIds.length} 个用户吗?`, '批量禁用', { type: 'warning' })
+  try {
+    const result = await batchDisableUsers({ userIds })
+    if (result.failCount > 0) {
+      ElMessage.warning(`批量禁用完成：成功${result.successCount}个，失败${result.failCount}个`)
+    } else {
+      ElMessage.success(`批量禁用成功：${result.successCount}个`)
+    }
+    tableRef.value?.clearSelection()
+    loadData()
+  } catch (error) {
+    ElMessage.error('批量禁用失败')
+  }
+}
+
+/**
+ * 批量删除用户
+ */
+const handleBatchDelete = async () => {
+  const userIds = selectedRows.value.map(row => row.id)
+  await ElMessageBox.confirm(`确定要批量删除 ${userIds.length} 个用户吗？删除后不可恢复。`, '批量删除', { type: 'warning' })
+  try {
+    const result = await batchDeleteUsers({ userIds })
+    if (result.failCount > 0) {
+      ElMessage.warning(`批量删除完成：成功${result.successCount}个，失败${result.failCount}个`)
+    } else {
+      ElMessage.success(`批量删除成功：${result.successCount}个`)
+    }
+    tableRef.value?.clearSelection()
+    loadData()
+  } catch (error) {
+    ElMessage.error('批量删除失败')
+  }
+}
+
+/**
+ * 打开批量分配角色对话框
+ */
+const handleBatchAssignRoles = async () => {
+  if (allRoles.value.length === 0) {
+    try {
+      const res = await getRoleList({ page: 1, size: 999 })
+      allRoles.value = res.records || []
+    } catch (error) {
+      ElMessage.error('加载角色列表失败')
+      return
+    }
+  }
+  batchRoleIds.value = []
+  batchRoleDialogVisible.value = true
+}
+
+/**
+ * 保存批量分配角色
+ */
+const handleBatchSaveRoles = async () => {
+  if (batchRoleIds.value.length === 0) {
+    ElMessage.warning('请至少选择一个角色')
+    return
+  }
+  const userIds = selectedRows.value.map(row => row.id)
+  batchRoleLoading.value = true
+  try {
+    const result = await batchAssignRoles({ userIds, roleIds: batchRoleIds.value.map(Number) })
+    if (result.failCount > 0) {
+      ElMessage.warning(`批量分配完成：成功${result.successCount}个，失败${result.failCount}个`)
+    } else {
+      ElMessage.success(`批量分配成功：${result.successCount}个`)
+    }
+    batchRoleDialogVisible.value = false
+    tableRef.value?.clearSelection()
+    loadData()
+  } catch (error) {
+    ElMessage.error('批量分配角色失败')
+  } finally {
+    batchRoleLoading.value = false
+  }
+}
+
+// ===== 导入导出 =====
+
+/**
+ * 下载导入模板
+ */
+const handleDownloadTemplate = async () => {
+  try {
+    const response = await downloadImportTemplate()
+    const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'user_import_template.xlsx'
+    link.click()
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('模板下载成功')
+  } catch (error) {
+    ElMessage.error('模板下载失败')
+  }
+}
+
+/**
+ * 导入文件变化处理
+ */
+const handleImportFileChange = (file) => {
+  importFile.value = file.raw
+}
+
+/**
+ * 提交导入
+ */
+const handleImportSubmit = async () => {
+  if (!importFile.value) {
+    ElMessage.warning('请选择要导入的文件')
+    return
+  }
+  importLoading.value = true
+  try {
+    const result = await importUsers(importFile.value)
+    importResult.value = result
+    if (result.failCount === 0) {
+      ElMessage.success(`导入成功：${result.successCount}条`)
+    } else {
+      ElMessage.warning(`导入完成：成功${result.successCount}条，失败${result.failCount}条`)
+    }
+    loadData()
+  } catch (error) {
+    ElMessage.error('导入失败')
+  } finally {
+    importLoading.value = false
+  }
+}
+
+/**
+ * 关闭导入对话框时重置状态
+ */
+const handleImportDialogClose = () => {
+  importDialogVisible.value = false
+  importFile.value = null
+  importResult.value = null
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
+}
+
+/**
+ * 导出用户列表
+ */
+const handleExport = async () => {
+  try {
+    const response = await exportUsers({
+      userName: searchForm.userName || undefined,
+      realName: searchForm.realName || undefined,
+      status: searchForm.status
+    })
+    const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'users_export.xlsx'
+    link.click()
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    ElMessage.error('导出失败')
+  }
+}
+
 // 页面挂载时加载第一页数据
 onMounted(() => {
   loadData()
@@ -619,6 +933,21 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      .card-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .card-header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
     }
 
     .pagination {

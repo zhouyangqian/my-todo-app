@@ -451,16 +451,25 @@ UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permiss
        'erp:config:batchUpdate', '批量更新', 2, '/api/erp/configs/batch-update', 'POST', 5, 1, 1, NOW();
 
 -- ==================== 7. 分配角色权限 ====================
--- 为超级管理员分配所有权限
+-- 为超级管理员分配所有权限（动态查询 role_id，避免 AUTO_INCREMENT 不一致）
 INSERT INTO `sys_role_permission` (`tenant_id`, `role_id`, `permission_id`, `created_at`)
-SELECT 1, 1, id, NOW() FROM `sys_permission` WHERE `tenant_id` = 1;
+SELECT 1, (SELECT id FROM `sys_role` WHERE `role_code` = 'SUPER_ADMIN' AND `tenant_id` = 1 LIMIT 1), id, NOW()
+FROM `sys_permission` WHERE `tenant_id` = 1;
 
 -- 为管理员分配部分权限（排除权限管理）
 INSERT INTO `sys_role_permission` (`tenant_id`, `role_id`, `permission_id`, `created_at`)
-SELECT 1, 2, id, NOW() FROM `sys_permission`
+SELECT 1, (SELECT id FROM `sys_role` WHERE `role_code` = 'ADMIN' AND `tenant_id` = 1 LIMIT 1), id, NOW()
+FROM `sys_permission`
 WHERE `tenant_id` = 1 AND `permission_code` NOT LIKE 'system:permission%';
 
 -- 为普通用户分配基础权限（仅菜单查看）
 INSERT INTO `sys_role_permission` (`tenant_id`, `role_id`, `permission_id`, `created_at`)
-SELECT 1, 3, id, NOW() FROM `sys_permission`
+SELECT 1, (SELECT id FROM `sys_role` WHERE `role_code` = 'USER' AND `tenant_id` = 1 LIMIT 1), id, NOW()
+FROM `sys_permission`
 WHERE `tenant_id` = 1 AND `permission_type` = 1;
+
+-- ==================== 8. 分配用户角色 ====================
+-- 将 admin 用户(user_id=1)绑定到 SUPER_ADMIN 角色
+INSERT INTO `sys_user_role` (`tenant_id`, `user_id`, `role_id`, `created_by`, `created_at`)
+SELECT 1, 1, id, 1, NOW()
+FROM `sys_role` WHERE `role_code` = 'SUPER_ADMIN' AND `tenant_id` = 1 LIMIT 1;

@@ -20,6 +20,12 @@
             <artifactId>common-core</artifactId>
         </dependency>
 
+        <!-- Data permission (aspect context + SQL builder) -->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>common-permission</artifactId>
+        </dependency>
+
         <!-- MyBatis Plus -->
         <dependency>
             <groupId>com.baomidou</groupId>

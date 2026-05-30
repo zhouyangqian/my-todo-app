@@ -1,0 +1,55 @@
+-- 参数分类表
+CREATE TABLE IF NOT EXISTS sys_parameter_category (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id BIGINT NOT NULL DEFAULT 0,
+    category_name VARCHAR(128) NOT NULL COMMENT '分类名称',
+    category_code VARCHAR(64) NOT NULL COMMENT '分类编码',
+    category_type VARCHAR(32) NOT NULL DEFAULT 'SYSTEM' COMMENT '分类类型(SYSTEM/BUSINESS)',
+    description VARCHAR(256) DEFAULT NULL,
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
+    status INT NOT NULL DEFAULT 1 COMMENT '0禁用 1启用',
+    deleted INT NOT NULL DEFAULT 0,
+    created_by BIGINT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT DEFAULT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_tenant_code (tenant_id, category_code)
+);
+
+-- 参数字典表
+CREATE TABLE IF NOT EXISTS sys_parameter_dictionary (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id BIGINT NOT NULL DEFAULT 0,
+    category_id BIGINT NOT NULL COMMENT '分类ID',
+    param_name VARCHAR(128) NOT NULL COMMENT '参数名称',
+    param_code VARCHAR(64) NOT NULL COMMENT '参数编码',
+    param_value TEXT COMMENT '参数值(JSON支持)',
+    value_type VARCHAR(32) NOT NULL DEFAULT 'STRING' COMMENT '值类型(STRING/NUMBER/BOOLEAN/JSON)',
+    description VARCHAR(256) DEFAULT NULL,
+    validation_rule VARCHAR(500) DEFAULT NULL COMMENT '验证规则(正则或范围)',
+    sort_order INT NOT NULL DEFAULT 0,
+    status INT NOT NULL DEFAULT 1,
+    version INT NOT NULL DEFAULT 0 COMMENT '版本号(乐观锁)',
+    deleted INT NOT NULL DEFAULT 0,
+    created_by BIGINT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT DEFAULT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_tenant_param_code (tenant_id, param_code)
+);
+
+-- 参数项表
+CREATE TABLE IF NOT EXISTS sys_parameter_item (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id BIGINT NOT NULL DEFAULT 0,
+    dictionary_id BIGINT NOT NULL COMMENT '参数字典ID',
+    item_label VARCHAR(128) NOT NULL COMMENT '项标签',
+    item_value VARCHAR(256) NOT NULL COMMENT '项值',
+    sort_order INT NOT NULL DEFAULT 0,
+    status INT NOT NULL DEFAULT 1,
+    deleted INT NOT NULL DEFAULT 0,
+    created_by BIGINT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT DEFAULT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

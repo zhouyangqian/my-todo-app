@@ -46,6 +46,9 @@ public class Invoice implements Serializable {
     /** 发票编号，发票的唯一编号（如FP20260101XXXXXX） */
     private String invoiceNo;
 
+    /** 发票代码，税务机关分配的发票代码 */
+    private String invoiceCode;
+
     /** 发票类型：1-增值税专用发票（可抵扣进项税），2-增值税普通发票，3-电子发票 */
     private Integer invoiceType;
 
@@ -58,9 +61,18 @@ public class Invoice implements Serializable {
     /** 客户或供应商ID，标识发票的对方单位，根据发票方向区分含义 */
     private Long partnerId;
 
+    /** 往来单位类型：1-客户, 2-供应商 */
+    private Integer partnerType;
+
+    /** 往来单位名称 */
+    private String partnerName;
+
     /** 开票日期，即发票上注明的开具日期 */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime invoiceDate;
+
+    /** 币种编码，默认CNY（人民币） */
+    private String currency;
 
     /** 不含税金额（税前金额），使用BigDecimal保证财务精度 */
     private BigDecimal amountWithoutTax;
@@ -76,6 +88,16 @@ public class Invoice implements Serializable {
 
     /** 发票状态：0-待开票（尚未开具），1-已开票（已正常开具），2-已作废（已作废处理） */
     private Integer status;
+
+    /** 作废原因 */
+    private String voidReason;
+
+    /** 作废操作人ID */
+    private Long voidBy;
+
+    /** 作废时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime voidAt;
 
     /** 备注信息，用于补充说明该张发票的相关信息 */
     private String remark;

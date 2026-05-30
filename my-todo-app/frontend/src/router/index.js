@@ -15,6 +15,12 @@ const routes = [
     meta: { title: '登录', requiresAuth: false }
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/register/index.vue'),
+    meta: { title: '租户注册', requiresAuth: false }
+  },
+  {
     path: '/',
     component: () => import('@/layouts/BasicLayout.vue'),
     redirect: '/dashboard',
@@ -36,7 +42,7 @@ const routes = [
       {
         path: 'system/role',
         name: 'Role',
-        component: () => import('@/views/system/role/index.vue'),
+        component: () => import('@/views/system/role-manage/index.vue'),
         meta: { title: '角色管理', icon: 'UserFilled' }
       },
       {
@@ -51,6 +57,78 @@ const routes = [
         component: () => import('@/views/system/dept/index.vue'),
         meta: { title: '部门管理', icon: 'OfficeBuilding' }
       },
+      {
+        path: 'system/gateway',
+        name: 'GatewayMonitor',
+        component: () => import('@/views/system/gateway/index.vue'),
+        meta: { title: '网关监控', icon: 'Monitor' }
+      },
+      {
+        path: 'system/cache',
+        name: 'CacheManage',
+        component: () => import('@/views/system/cache/index.vue'),
+        meta: { title: '缓存管理', icon: 'Coin' }
+      },
+      {
+        path: 'system/canary',
+        name: 'CanaryRelease',
+        component: () => import('@/views/system/canary/index.vue'),
+        meta: { title: '金丝雀发布', icon: 'Promotion' }
+      },
+      {
+        path: 'system/monitor',
+        name: 'RealtimeMonitor',
+        component: () => import('@/views/system/monitor/index.vue'),
+        meta: { title: '实时监控', icon: 'DataAnalysis' }
+      },
+      {
+        path: 'system/permission-dynamic',
+        name: 'PermissionDynamic',
+        component: () => import('@/views/system/permission-dynamic/index.vue'),
+        meta: { title: '动态权限', icon: 'Setting' }
+      },
+      {
+        path: 'system/session',
+        name: 'SessionManage',
+        component: () => import('@/views/system/session/index.vue'),
+        meta: { title: '会话管理', icon: 'Connection' }
+      },
+      {
+        path: 'system/blacklist',
+        name: 'Blacklist',
+        component: () => import('@/views/system/blacklist/index.vue'),
+        meta: { title: '黑名单管理', icon: 'Warning' }
+      },
+      {
+        path: 'system/permission-template',
+        name: 'PermissionTemplate',
+        component: () => import('@/views/system/permission-template/index.vue'),
+        meta: { title: '权限模板', icon: 'Document' }
+      },
+      {
+        path: 'system/data-rule',
+        name: 'DataRule',
+        component: () => import('@/views/system/data-rule/index.vue'),
+        meta: { title: '数据权限', icon: 'Filter' }
+      },
+      {
+        path: 'system/role-inheritance',
+        name: 'RoleInheritance',
+        component: () => import('@/views/system/role-inheritance/index.vue'),
+        meta: { title: '角色继承', icon: 'Share' }
+      },
+      {
+        path: 'system/menu',
+        name: 'MenuManage',
+        component: () => import('@/views/system/menu/index.vue'),
+        meta: { title: '菜单管理', icon: 'Menu' }
+      },
+      {
+        path: 'system/tenant',
+        name: 'TenantManage',
+        component: () => import('@/views/system/tenant/index.vue'),
+        meta: { title: '租户管理', icon: 'OfficeBuilding' }
+      },
       // 字典管理
       {
         path: 'dict/type',
@@ -63,6 +141,54 @@ const routes = [
         name: 'SystemConfig',
         component: () => import('@/views/dict/config/index.vue'),
         meta: { title: '系统配置', icon: 'Tools' }
+      },
+      {
+        path: 'dict/parameter',
+        name: 'ParameterManage',
+        component: () => import('@/views/dict/parameter/index.vue'),
+        meta: { title: '参数管理', icon: 'Setting' }
+      },
+      {
+        path: 'dict/api-market',
+        name: 'ApiMarket',
+        component: () => import('@/views/dict/api-market/index.vue'),
+        meta: { title: 'API市场', icon: 'Connection' }
+      },
+      {
+        path: 'dict/third-party',
+        name: 'ThirdPartyApi',
+        component: () => import('@/views/dict/third-party/index.vue'),
+        meta: { title: '第三方API', icon: 'Link' }
+      },
+      {
+        path: 'dict/package',
+        name: 'SaaSBookmark',
+        component: () => import('@/views/dict/package/index.vue'),
+        meta: { title: 'SaaS套餐', icon: 'Box' }
+      },
+      {
+        path: 'dict/activity',
+        name: 'ActivityManage',
+        component: () => import('@/views/dict/activity/index.vue'),
+        meta: { title: '营销活动', icon: 'Present' }
+      },
+      {
+        path: 'dict/trace',
+        name: 'TraceManage',
+        component: () => import('@/views/dict/trace/index.vue'),
+        meta: { title: '追踪管理', icon: 'View' }
+      },
+      {
+        path: 'dict/codegen',
+        name: 'CodeGeneration',
+        component: () => import('@/views/dict/codegen/index.vue'),
+        meta: { title: '代码生成', icon: 'DocumentCopy' }
+      },
+      {
+        path: 'dict/error-doc',
+        name: 'ErrorDoc',
+        component: () => import('@/views/dict/error-doc/index.vue'),
+        meta: { title: '错误文档', icon: 'Warning' }
       },
       // ERP
       {
@@ -197,6 +323,36 @@ const routes = [
         name: 'BankAccount',
         component: () => import('@/views/finance/bank-account/index.vue'),
         meta: { title: '银行账户', icon: 'Postcard' }
+      },
+      {
+        path: 'finance/invoice',
+        name: 'FinanceInvoice',
+        component: () => import('@/views/finance/invoice/index.vue'),
+        meta: { title: '发票管理', icon: 'Document' }
+      },
+      {
+        path: 'finance/cost',
+        name: 'FinanceCost',
+        component: () => import('@/views/finance/cost/index.vue'),
+        meta: { title: '成本核算', icon: 'DataAnalysis' }
+      },
+      {
+        path: 'finance/report',
+        name: 'FinanceReport',
+        component: () => import('@/views/finance/report/index.vue'),
+        meta: { title: '财务报表', icon: 'TrendCharts' }
+      },
+      {
+        path: 'finance/bank-reconciliation',
+        name: 'BankReconciliation',
+        component: () => import('@/views/finance/bank-reconciliation/index.vue'),
+        meta: { title: '银行对账', icon: 'Connection' }
+      },
+      {
+        path: 'finance/budget',
+        name: 'Budget',
+        component: () => import('@/views/finance/budget/index.vue'),
+        meta: { title: '预算管理', icon: 'Money' }
       }
     ]
   },
@@ -215,7 +371,7 @@ const router = createRouter({
 })
 
 // 全局前置守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   NProgress.start()
   document.title = `${to.meta.title || '首页'} - My Todo App`
 
@@ -227,6 +383,18 @@ router.beforeEach((to, from, next) => {
   } else if (to.path === '/login' && token) {
     next('/dashboard')
   } else {
+    // token 存在但权限为空（页面刷新或权限加载失败），自动重新获取
+    if (token && userStore.permissions.length === 0) {
+      try {
+        await userStore.refreshPermissions()
+      } catch (error) {
+        // 权限获取失败（token 过期等），跳转登录页
+        console.error('刷新权限失败:', error)
+        userStore.clearAuth()
+        next('/login')
+        return
+      }
+    }
     next()
   }
 })

@@ -4,6 +4,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login, logout, getUserInfo } from '@/api/auth'
+import { clearUserPermissionCache } from '@/api/permission'
+import { connectSSE, disconnectSSE } from '@/utils/sse'
 import router from '@/router'
 
 /**
@@ -40,9 +42,9 @@ export const useUserStore = defineStore('user', () => {
    * @param username 用户名
    * @param password 密码
    */
-  async function loginAction(username, password) {
+  async function loginAction(username, password, captchaKey, captchaValue) {
     try {
-      const res = await login({ username, password })
+      const res = await login({ userName: username, password, captchaKey, captchaValue })
       // 后端返回 ApiResponse 包装的数据，实际数据在 data 字段中
       const data = res.data || res
 
@@ -64,10 +66,16 @@ export const useUserStore = defineStore('user', () => {
           localStorage.setItem('tenantId', data.userInfo.tenantId)
           console.log('已保存租户ID到 localStorage:', data.userInfo.tenantId)
         }
+        if (data.userInfo.id) {
+          localStorage.setItem('userId', data.userInfo.id)
+        }
       }
 
       // 登录成功后立即获取用户权限和角色
       await getUserPermissionsAction()
+
+      // 建立 SSE 连接，接收实时踢出通知
+      connectSSE(data.accessToken)
 
       // 跳转到工作台首页
       router.push('/dashboard')
@@ -122,6 +130,7 @@ export const useUserStore = defineStore('user', () => {
       console.error('Logout error:', error)
     } finally {
       // 无论登出接口成功与否，都清除本地状态
+      disconnectSSE()
       clearAuth()
       router.push('/login')
     }
@@ -139,6 +148,7 @@ export const useUserStore = defineStore('user', () => {
     roles.value = []
     localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
+    localStorage.removeItem('userId')
   }
 
   /**
@@ -155,6 +165,11 @@ export const useUserStore = defineStore('user', () => {
    */
   async function refreshPermissions() {
     try {
+      // 先清除后端 Redis 权限缓存，确保获取最新权限
+      const userId = localStorage.getItem('userId')
+      if (userId) {
+        await clearUserPermissionCache(userId).catch(() => {})
+      }
       const res = await getUserInfo()
       const data = res.data || res
       permissions.value = data.permissions || []
