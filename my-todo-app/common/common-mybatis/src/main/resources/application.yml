@@ -1,0 +1,15 @@
+# Shared Nacos configuration for common modules
+# Individual services override these in their own application.yml
+spring:
+  cloud:
+    nacos:
+      config:
+        enabled: false
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yml
+      discovery:
+        enabled: false
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}

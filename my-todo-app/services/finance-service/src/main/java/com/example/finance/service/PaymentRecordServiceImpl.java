@@ -3,13 +3,16 @@ package com.example.finance.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.common.core.exception.BusinessException;
 import com.example.finance.entity.PaymentRecord;
 import com.example.finance.mapper.PaymentRecordMapper;
+import com.example.finance.vo.TransferVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -189,5 +192,70 @@ public class PaymentRecordServiceImpl extends ServiceImpl<PaymentRecordMapper, P
                .le(PaymentRecord::getTransactionDate, endDate.atTime(23, 59, 59))
                .orderByDesc(PaymentRecord::getTransactionDate);
         return list(wrapper);
+    }
+
+    /**
+     * 账户间转账
+     * <p>
+     * 在同一事务内创建两条收支记录（转出+转入），通过 relatedTransId 互相关联。
+     * 任何一步失败将整体回滚，保证数据一致性。
+     * </p>
+     *
+     * @param transferVO 转账请求参数
+     * @param tenantId   租户ID
+     * @param userId     当前操作用户ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void transfer(TransferVO transferVO, Long tenantId, Long userId) {
+        if (transferVO.getFromAccountId().equals(transferVO.getToAccountId())) {
+            throw new BusinessException("转出账户与转入账户不能相同");
+        }
+        if (transferVO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("转账金额必须大于零");
+        }
+
+        BigDecimal exchangeRate = transferVO.getExchangeRate() != null
+                ? transferVO.getExchangeRate() : BigDecimal.ONE;
+
+        // 构建转出记录（EXPENSE）
+        PaymentRecord expenseRecord = new PaymentRecord();
+        expenseRecord.setTenantId(tenantId);
+        expenseRecord.setCreatedBy(userId);
+        expenseRecord.setHandlerId(userId);
+        expenseRecord.setRecordType(2); // 支出
+        expenseRecord.setTransType("EXPENSE");
+        expenseRecord.setAmount(transferVO.getAmount());
+        expenseRecord.setCurrency(transferVO.getCurrency());
+        expenseRecord.setBankAccountId(transferVO.getFromAccountId());
+        expenseRecord.setExchangeRate(exchangeRate);
+        expenseRecord.setBaseAmount(transferVO.getAmount().multiply(exchangeRate));
+        expenseRecord.setSourceType("MANUAL");
+        expenseRecord.setRemark(transferVO.getRemark() != null ? transferVO.getRemark() : "账户转账-转出");
+        create(expenseRecord);
+
+        // 构建转入记录（INCOME）
+        PaymentRecord incomeRecord = new PaymentRecord();
+        incomeRecord.setTenantId(tenantId);
+        incomeRecord.setCreatedBy(userId);
+        incomeRecord.setHandlerId(userId);
+        incomeRecord.setRecordType(1); // 收入
+        incomeRecord.setTransType("INCOME");
+        incomeRecord.setAmount(transferVO.getAmount());
+        incomeRecord.setCurrency(transferVO.getCurrency());
+        incomeRecord.setBankAccountId(transferVO.getToAccountId());
+        incomeRecord.setExchangeRate(exchangeRate);
+        incomeRecord.setBaseAmount(transferVO.getAmount().multiply(exchangeRate));
+        incomeRecord.setSourceType("MANUAL");
+        incomeRecord.setRemark(transferVO.getRemark() != null ? transferVO.getRemark() : "账户转账-转入");
+        create(incomeRecord);
+
+        // 互相关联
+        expenseRecord.setRelatedTransId(incomeRecord.getId());
+        incomeRecord.setRelatedTransId(expenseRecord.getId());
+        updateById(expenseRecord);
+        updateById(incomeRecord);
+
+        log.info("账户转账完成: 从账户{}转入账户{}, 金额={}", transferVO.getFromAccountId(), transferVO.getToAccountId(), transferVO.getAmount());
     }
 }

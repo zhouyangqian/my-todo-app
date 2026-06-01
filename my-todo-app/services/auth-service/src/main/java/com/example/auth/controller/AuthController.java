@@ -100,6 +100,9 @@ public class AuthController {
             return ApiResponse.error(401, "缺少有效的认证令牌");
         }
         String token = authorization.substring(7);
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ApiResponse.error(401, "认证令牌无效或已过期");
+        }
         Long userId = jwtTokenProvider.getUserId(token);
         authService.logoutAll(userId);
         return ApiResponse.success();
@@ -149,6 +152,9 @@ public class AuthController {
             return ApiResponse.error(401, "缺少有效的认证令牌");
         }
         String token = authorization.substring(7);
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ApiResponse.error(401, "认证令牌无效或已过期");
+        }
         Long userId = jwtTokenProvider.getUserId(token);
         authService.changePassword(userId, request);
         return ApiResponse.success();
@@ -172,7 +178,11 @@ public class AuthController {
         }
 
         String token = authorization.substring(7);
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ApiResponse.error(401, "认证令牌无效或已过期");
+        }
         Long currentUserId = jwtTokenProvider.getUserId(token);
+        Long tenantId = jwtTokenProvider.getTenantId(token);
 
         // 权限检查：只有管理员可以重置其他用户的密码
         // 普通用户只能重置自己的密码（需要验证旧密码，应该使用 changePassword 接口）
@@ -183,7 +193,7 @@ public class AuthController {
             // TODO: 调用 permission-service 检查 "user:reset-password" 权限
             // 当前简化实现：检查用户是否为管理员（假设管理员用户 ID 为 1）
             // 生产环境应该使用完整的权限检查
-            boolean isAdmin = checkAdminPermission(currentUserId);
+            boolean isAdmin = checkAdminPermission(currentUserId, tenantId);
             if (!isAdmin) {
                 return ApiResponse.error(403, "没有权限重置其他用户的密码");
             }
@@ -203,9 +213,8 @@ public class AuthController {
      * @param userId 用户ID
      * @return true-有权限，false-无权限
      */
-    private boolean checkAdminPermission(Long userId) {
+    private boolean checkAdminPermission(Long userId, Long tenantId) {
         try {
-            Long tenantId = 1L;
             return permissionChecker.checkPermission(userId, tenantId, "user:reset-password");
         } catch (Exception e) {
             return false;

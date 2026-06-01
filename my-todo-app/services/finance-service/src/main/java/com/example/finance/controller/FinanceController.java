@@ -508,48 +508,7 @@ public class FinanceController {
             @RequestBody @Valid TransferVO transferVO,
             @RequestHeader("X-Tenant-Id") Long tenantId,
             @RequestHeader("X-User-Id") Long userId) {
-        // 构建转出记录（EXPENSE）
-        PaymentRecord expenseRecord = new PaymentRecord();
-        expenseRecord.setTenantId(tenantId);
-        expenseRecord.setCreatedBy(userId);
-        expenseRecord.setHandlerId(userId);
-        expenseRecord.setRecordType(2); // 支出
-        expenseRecord.setTransType("EXPENSE");
-        expenseRecord.setAmount(transferVO.getAmount());
-        expenseRecord.setCurrency(transferVO.getCurrency());
-        expenseRecord.setBankAccountId(transferVO.getFromAccountId());
-        expenseRecord.setExchangeRate(transferVO.getExchangeRate() != null
-                ? transferVO.getExchangeRate() : BigDecimal.ONE);
-        expenseRecord.setBaseAmount(transferVO.getAmount().multiply(
-                transferVO.getExchangeRate() != null ? transferVO.getExchangeRate() : BigDecimal.ONE));
-        expenseRecord.setSourceType("MANUAL");
-        expenseRecord.setRemark(transferVO.getRemark() != null ? transferVO.getRemark() : "账户转账-转出");
-        paymentRecordService.create(expenseRecord);
-
-        // 构建转入记录（INCOME）
-        PaymentRecord incomeRecord = new PaymentRecord();
-        incomeRecord.setTenantId(tenantId);
-        incomeRecord.setCreatedBy(userId);
-        incomeRecord.setHandlerId(userId);
-        incomeRecord.setRecordType(1); // 收入
-        incomeRecord.setTransType("INCOME");
-        incomeRecord.setAmount(transferVO.getAmount());
-        incomeRecord.setCurrency(transferVO.getCurrency());
-        incomeRecord.setBankAccountId(transferVO.getToAccountId());
-        incomeRecord.setExchangeRate(transferVO.getExchangeRate() != null
-                ? transferVO.getExchangeRate() : BigDecimal.ONE);
-        incomeRecord.setBaseAmount(transferVO.getAmount().multiply(
-                transferVO.getExchangeRate() != null ? transferVO.getExchangeRate() : BigDecimal.ONE));
-        incomeRecord.setSourceType("MANUAL");
-        incomeRecord.setRemark(transferVO.getRemark() != null ? transferVO.getRemark() : "账户转账-转入");
-        paymentRecordService.create(incomeRecord);
-
-        // 互相关联
-        expenseRecord.setRelatedTransId(incomeRecord.getId());
-        incomeRecord.setRelatedTransId(expenseRecord.getId());
-        paymentRecordService.updateById(expenseRecord);
-        paymentRecordService.updateById(incomeRecord);
-
+        paymentRecordService.transfer(transferVO, tenantId, userId);
         return ApiResponse.success();
     }
 

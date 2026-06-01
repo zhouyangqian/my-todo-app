@@ -14,6 +14,8 @@ import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 网关全局异常处理器
@@ -38,7 +40,10 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
         if (ex instanceof ResponseStatusException) {
             ResponseStatusException rse = (ResponseStatusException) ex;
-            status = (HttpStatus) rse.getStatusCode();
+            status = HttpStatus.resolve(rse.getStatusCode().value());
+            if (status == null) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
             String reason = rse.getReason();
             message = reason != null ? reason : status.getReasonPhrase();
         }
@@ -48,12 +53,20 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        String body = String.format(
-                "{\"code\":%d,\"message\":\"%s\",\"data\":null,\"timestamp\":%d}",
-                status.value(), message, System.currentTimeMillis()
-        );
+        Map<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("code", status.value());
+        responseBody.put("message", message);
+        responseBody.put("data", null);
+        responseBody.put("timestamp", System.currentTimeMillis());
 
-        DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes;
+        try {
+            bytes = objectMapper.writeValueAsBytes(responseBody);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            bytes = ("{\"code\":500,\"message\":\"服务器内部错误\",\"data\":null}").getBytes(StandardCharsets.UTF_8);
+        }
+
+        DataBuffer buffer = response.bufferFactory().wrap(bytes);
         return response.writeWith(Mono.just(buffer));
     }
 }

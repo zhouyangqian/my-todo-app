@@ -2,8 +2,8 @@
 
 **Feature Branch**: `005-erp-inventory`
 **Generated**: 2026-04-07
-**Updated**: 2026-05-16 (全部P1/P2功能已完成)
-**Total Tasks**: 107
+**Updated**: 2026-05-31 (Service层接口+Impl重构、促销功能确认、Dashboard后端、对账单端点、联系人/报价Controller)
+**Total Tasks**: 107 (+ 额外完成项)
 
 ## 实施状态总览
 
@@ -193,6 +193,8 @@
 
 ### Controller
 - [x] T074 实现 ReportController `services/erp-service/src/main/java/com/example/erp/controller/ReportController.java` (dashboard/sales/purchase/inventory)
+- [x] 额外: 实现 DashboardController `services/erp-service/src/main/java/com/example/erp/controller/DashboardController.java` (GET /api/erp/dashboard/stats)
+- [x] 额外: ReportController 新增对账单端点 (supplier-statement, customer-statement)
 
 ### Frontend
 - [x] T075 创建报表统计页面 `frontend/src/views/erp/report/index.vue` (Dashboard卡片 + 销售/采购/库存报表标签页)
@@ -204,7 +206,7 @@
 
 ---
 
-## Phase 9: US7 - 商品与价格管理 (P2) ✅ 完成（促销未实现）
+## Phase 9: US7 - 商品与价格管理 (P2) ✅ 完成
 
 **Duration**: Week 6
 
@@ -217,11 +219,13 @@
 - [x] T084 [US7] 创建 ProductService `services/erp-service/src/main/java/com/example/erp/service/ProductService.java`
 - [x] T085 [US7] 创建 ProductCategoryService `services/erp-service/src/main/java/com/example/erp/service/ProductCategoryService.java`
 - [x] T086 [US7] 创建 ProductPriceService `services/erp-service/src/main/java/com/example/erp/service/ProductPriceService.java`
+- [x] 额外: 创建 ProductPromotionService + ProductPromotionServiceImpl `services/erp-service/src/main/java/com/example/erp/service/ProductPromotionService.java`
 
 ### Controller
 - [x] T087 [US7] 实现 ProductController `services/erp-service/src/main/java/com/example/erp/controller/ProductController.java`
 - [x] T088 [US7] 实现 ProductCategoryController `services/erp-service/src/main/java/com/example/erp/controller/ProductCategoryController.java`
 - [x] T089 [US7] 实现 ProductPriceController `services/erp-service/src/main/java/com/example/erp/controller/ProductPriceController.java`
+- [x] 额外: 实现 ProductPromotionController `services/erp-service/src/main/java/com/example/erp/controller/ProductPromotionController.java`
 
 ### Frontend
 - [x] T090 [P] [US7] 创建商品列表页面 `frontend/src/views/erp/product/index.vue`
@@ -282,17 +286,78 @@
 
 ---
 
+## 架构重构记录 (2026-05-31)
+
+### Service 层接口+Impl 模式重构
+所有 Service 已重构为接口 + Impl 分离模式，接口和实现类同在 `service/` 目录下（非 `service/impl/` 子目录）。
+
+**17 个 Service 接口 + 17 个 ServiceImpl 实现类：**
+
+| 序号 | Service 接口 | ServiceImpl 实现类 |
+|------|-------------|-------------------|
+| 1 | ProductService | ProductServiceImpl |
+| 2 | ProductCategoryService | ProductCategoryServiceImpl |
+| 3 | ProductPriceService | ProductPriceServiceImpl |
+| 4 | ProductPromotionService | ProductPromotionServiceImpl |
+| 5 | WarehouseService | WarehouseServiceImpl |
+| 6 | CustomerService | CustomerServiceImpl |
+| 7 | CustomerContactService | CustomerContactServiceImpl |
+| 8 | SupplierService | SupplierServiceImpl |
+| 9 | SupplierContactService | SupplierContactServiceImpl |
+| 10 | PurchaseOrderService | PurchaseOrderServiceImpl |
+| 11 | PurchaseReturnService | PurchaseReturnServiceImpl |
+| 12 | SalesOrderService | SalesOrderServiceImpl |
+| 13 | SalesShipmentService | SalesShipmentServiceImpl |
+| 14 | SalesReturnService | SalesReturnServiceImpl |
+| 15 | SalesQuotationService | SalesQuotationServiceImpl |
+| 16 | ReportService | ReportServiceImpl |
+| 17 | ErpConfigService | ErpConfigServiceImpl |
+
+> **目录结构**: 接口与实现类均位于 `services/erp-service/src/main/java/com/example/erp/service/` 目录下。
+
+---
+
+## 新增完成项 (2026-05-31)
+
+### Dashboard 后端 (Phase 8 扩展)
+- [x] DashboardController — GET /api/erp/dashboard/stats，聚合统计待处理订单数和金额
+- [x] SalesOrderService 新增 countByStatus(Long tenantId, Integer status)、sumTotalAmount(Long tenantId)
+- [x] PurchaseOrderService 新增 countByStatus(Long tenantId, Integer status)、sumTotalAmount(Long tenantId)
+
+### 促销功能 (Phase 9 补充)
+- [x] ProductPromotionService 接口 + ProductPromotionServiceImpl 实现
+- [x] ProductPromotionController — 促销管理 REST 端点
+- [x] ProductPromotion 实体已存在（Phase 9 T083 已完成）
+
+### ReportService 对账单端点
+- [x] ReportController 新增 GET /supplier-statement/{supplierId} — 供应商对账单
+- [x] ReportController 新增 GET /customer-statement/{customerId} — 客户对账单
+
+### 额外 Controller
+- [x] SupplierContactController `services/erp-service/src/main/java/com/example/erp/controller/SupplierContactController.java`
+- [x] CustomerContactController `services/erp-service/src/main/java/com/example/erp/controller/CustomerContactController.java`
+- [x] SalesQuotationController `services/erp-service/src/main/java/com/example/erp/controller/SalesQuotationController.java`
+
+### 对应 Service
+- [x] SupplierContactService + SupplierContactServiceImpl
+- [x] CustomerContactService + CustomerContactServiceImpl
+- [x] SalesQuotationService + SalesQuotationServiceImpl
+
+---
+
 ---
 
 ## 全部完成
 
-所有 107 个任务均已完成。ERP进销存模块功能包括：
+所有 107 个任务均已完成，另含架构重构和额外功能。ERP进销存模块功能包括：
 - 采购管理（订单、入库、退货、审批）
-- 销售管理（订单、出库、退货、审批）
+- 销售管理（订单、出库、退货、审批、报价）
 - 仓库管理（库存、调拨、盘点、预警、批次）
 - 商品管理（分类、商品、价格、促销）
-- 报表统计（Dashboard、销售报表、采购报表、库存报表）
+- 报表统计（Dashboard、销售报表、采购报表、库存报表、对账单）
 - 系统配置（审批规则、编号规则、业务参数）
+- 联系人管理（供应商联系人、客户联系人）
+- Service 层已全面重构为接口+Impl 模式（17 组）
 
 ---
 

@@ -1,6 +1,8 @@
 package com.example.finance.export;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,19 +64,21 @@ public class ExcelExporter {
         int totalRows = dataList.size();
         int sheetCount = (totalRows + MAX_ROWS_PER_SHEET - 1) / MAX_ROWS_PER_SHEET;
 
-        var writer = EasyExcel.write(out)
+        ExcelWriter excelWriter = EasyExcel.write(out)
                 .head(headList)
-                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                .build();
 
         for (int i = 0; i < sheetCount; i++) {
             int fromIndex = i * MAX_ROWS_PER_SHEET;
             int toIndex = Math.min(fromIndex + MAX_ROWS_PER_SHEET, totalRows);
             List<List<Object>> sheetData = dataList.subList(fromIndex, toIndex);
             String sheetName = sheetCount == 1 ? "数据" : "数据_" + (i + 1);
-            writer.sheet(i, sheetName).doWrite(sheetData);
+            WriteSheet writeSheet = EasyExcel.writerSheet(i, sheetName).build();
+            excelWriter.write(sheetData, writeSheet);
         }
 
-        writer.finish();
+        excelWriter.finish();
         log.info("Excel导出完成: 总行数={}, sheet数={}", totalRows, sheetCount);
     }
 

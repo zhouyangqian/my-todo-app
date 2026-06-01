@@ -3,6 +3,7 @@ package com.example.finance.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.finance.entity.PaymentRecord;
+import com.example.finance.vo.TransferVO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,4 +29,6 @@ public interface PaymentRecordService extends IService<PaymentRecord> {
 
     List<PaymentRecord> getByDateRange(Long tenantId, Integer recordType,
                                         LocalDate startDate, LocalDate endDate);
+
+    void transfer(TransferVO transferVO, Long tenantId, Long userId);
 }

@@ -7,6 +7,8 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    BatchActions: typeof import('./src/components/BatchActions.vue')['default']
+    Captcha: typeof import('./src/components/Captcha.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -55,6 +57,9 @@ declare module 'vue' {
     ElTree: typeof import('element-plus/es')['ElTree']
     ElTreeSelect: typeof import('element-plus/es')['ElTreeSelect']
     ElUpload: typeof import('element-plus/es')['ElUpload']
+    FileUpload: typeof import('./src/components/FileUpload.vue')['default']
+    InheritedPermissionTree: typeof import('./src/components/InheritedPermissionTree.vue')['default']
+    PermissionSelect: typeof import('./src/components/PermissionSelect.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

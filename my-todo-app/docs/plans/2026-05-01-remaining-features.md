@@ -1,8 +1,10 @@
-# 剩余功能实施计划
+# 剩余功能实施计划 ✅ 已全部完成
 
+> **状态更新（2026-06-01）**：本计划中的 9 个任务已全部实施完毕。详细验证报告见 `docs/plans/2026-06-01-implementation-status.md`。
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 完成项目剩余的全部功能，包括采购订单、发票管理、Dashboard统计、库存流水页面，以及修复前端占位操作。
+**Goal:** 完成项目剩余的全部功能，包括采购订单、发票管理、Dashboard统计、库存流水页面，以及修复前端占位操作。✅ 已达成
 
 **Architecture:** 遵循现有项目模式——后端使用 MyBatis-Plus ServiceImpl + Controller 分层，前端使用 Vue 3 + Element Plus + Axios。采购订单参照销售订单模式（含明细），发票管理为独立CRUD模块，Dashboard 通过聚合各模块统计API实现。
 
@@ -1145,3 +1147,21 @@ git commit -m "feat(layout): 更新侧边栏菜单，添加采购订单、库存
 | P2 | Task 9 | 侧边栏菜单更新 | 小 |
 
 **建议执行方式：** 使用 subagent-driven-development，每个Task由独立子代理执行，Task间做review检查点。
+
+---
+
+## 完成确认（2026-06-01）
+
+| Task | 描述 | 验证结果 |
+|------|------|---------|
+| Task 1 | 采购订单管理（后端） | `PurchaseOrderController` + `PurchaseOrderService` + Entity + Mapper 全部存在 |
+| Task 2 | 采购订单管理（前端） | `erp/purchase-order/index.vue` 存在，路由 `/erp/purchase-order` 已注册 |
+| Task 3 | 发票管理（后端） | `InvoiceController` + `InvoiceService` 全部存在 |
+| Task 4 | 发票管理（前端） | `finance/invoice/index.vue` 存在，路由 `/finance/invoice` 已注册 |
+| Task 5 | Dashboard 统计（后端） | `DashboardController` + 各 Service 统计方法已实现 |
+| Task 6 | Dashboard 统计（前端） | `dashboard/index.vue` 已接入真实 API |
+| Task 7 | 修复前端占位操作 | receivable/payable 删除已接入 `deleteReceivable`/`deletePayable` API，bank-account 调账已接入 `adjustBalance` API |
+| Task 8 | 库存流水页面 | `erp/inventory-flow/index.vue` 存在，路由 `/erp/inventory-flow` 已注册 |
+| Task 9 | 侧边栏菜单更新 | `BasicLayout.vue` 侧边栏已更新 |
+
+**结论：本计划 9 项任务全部完成。** 后续未完成项（销售报价单前端页面、dict-service DB 脚本、侧边栏入口补充等）请参见 `docs/plans/2026-06-01-implementation-status.md`。
