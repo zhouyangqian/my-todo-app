@@ -1,6 +1,7 @@
 package com.example.dict.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.dict.entity.TraceAlert;
@@ -26,6 +27,7 @@ public class TraceController {
 
     // ==================== 追踪配置 ====================
 
+    @RequiresPermission(code = "dict:trace:config:list", name = "查询追踪配置列表")
     @Operation(summary = "分页查询追踪配置")
     @GetMapping("/configs/page")
     public ApiResponse<PageResult<TraceConfig>> getTraceConfigPage(
@@ -37,18 +39,21 @@ public class TraceController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:trace:config:list", name = "查询追踪配置详情")
     @Operation(summary = "获取追踪配置详情")
     @GetMapping("/configs/{id}")
     public ApiResponse<TraceConfig> getTraceConfig(@PathVariable Long id) {
         return ApiResponse.success(traceService.getById(id));
     }
 
+    @RequiresPermission(code = "dict:trace:config:create", name = "创建追踪配置")
     @Operation(summary = "创建追踪配置")
     @PostMapping("/configs/create")
     public ApiResponse<TraceConfig> createTraceConfig(@RequestBody TraceConfig traceConfig) {
         return ApiResponse.success(traceService.createTraceConfig(traceConfig));
     }
 
+    @RequiresPermission(code = "dict:trace:config:update", name = "更新追踪配置")
     @Operation(summary = "更新追踪配置")
     @PutMapping("/configs/update/{id}")
     public ApiResponse<TraceConfig> updateTraceConfig(
@@ -58,6 +63,7 @@ public class TraceController {
         return ApiResponse.success(traceService.updateTraceConfig(traceConfig));
     }
 
+    @RequiresPermission(code = "dict:trace:config:delete", name = "删除追踪配置")
     @Operation(summary = "删除追踪配置")
     @DeleteMapping("/configs/delete/{id}")
     public ApiResponse<Void> deleteTraceConfig(@PathVariable Long id) {
@@ -65,6 +71,7 @@ public class TraceController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "dict:trace:config:update", name = "切换追踪配置状态")
     @Operation(summary = "启用/禁用追踪配置")
     @PutMapping("/configs/toggle/{id}")
     public ApiResponse<TraceConfig> toggleTraceConfig(
@@ -75,6 +82,7 @@ public class TraceController {
 
     // ==================== 追踪告警 ====================
 
+    @RequiresPermission(code = "dict:trace:alert:list", name = "查询告警列表")
     @Operation(summary = "分页查询告警规则")
     @GetMapping("/alerts/page")
     public ApiResponse<PageResult<TraceAlert>> getTraceAlertPage(
@@ -86,18 +94,21 @@ public class TraceController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:trace:alert:list", name = "查询告警详情")
     @Operation(summary = "获取告警规则详情")
     @GetMapping("/alerts/{id}")
     public ApiResponse<TraceAlert> getTraceAlert(@PathVariable Long id) {
         return ApiResponse.success(traceService.getTraceAlert(id));
     }
 
+    @RequiresPermission(code = "dict:trace:alert:create", name = "创建告警规则")
     @Operation(summary = "创建告警规则")
     @PostMapping("/alerts/create")
     public ApiResponse<TraceAlert> createTraceAlert(@RequestBody TraceAlert traceAlert) {
         return ApiResponse.success(traceService.createTraceAlert(traceAlert));
     }
 
+    @RequiresPermission(code = "dict:trace:alert:update", name = "更新告警规则")
     @Operation(summary = "更新告警规则")
     @PutMapping("/alerts/update/{id}")
     public ApiResponse<TraceAlert> updateTraceAlert(
@@ -107,6 +118,7 @@ public class TraceController {
         return ApiResponse.success(traceService.updateTraceAlert(traceAlert));
     }
 
+    @RequiresPermission(code = "dict:trace:alert:delete", name = "删除告警规则")
     @Operation(summary = "删除告警规则")
     @DeleteMapping("/alerts/delete/{id}")
     public ApiResponse<Void> deleteTraceAlert(@PathVariable Long id) {
@@ -114,6 +126,7 @@ public class TraceController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "dict:trace:alert:update", name = "切换告警规则状态")
     @Operation(summary = "启用/禁用告警规则")
     @PutMapping("/alerts/toggle/{id}")
     public ApiResponse<TraceAlert> toggleTraceAlert(
@@ -122,12 +135,14 @@ public class TraceController {
         return ApiResponse.success(traceService.toggleTraceAlert(id, enabled));
     }
 
+    @RequiresPermission(code = "dict:trace:alert:acknowledge", name = "确认告警")
     @Operation(summary = "确认告警")
     @PutMapping("/alerts/acknowledge/{id}")
     public ApiResponse<TraceAlert> acknowledgeAlert(@PathVariable Long id) {
         return ApiResponse.success(traceService.acknowledgeAlert(id));
     }
 
+    @RequiresPermission(code = "dict:trace:alert:list", name = "查询告警统计")
     @Operation(summary = "获取告警统计")
     @GetMapping("/alerts/stats")
     public ApiResponse<Map<String, Object>> getAlertStats(

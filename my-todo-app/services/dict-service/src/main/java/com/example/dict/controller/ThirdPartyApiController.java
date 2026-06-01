@@ -1,6 +1,7 @@
 package com.example.dict.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.dict.entity.ThirdPartyApi;
@@ -24,6 +25,7 @@ public class ThirdPartyApiController {
 
     private final ThirdPartyApiService thirdPartyApiService;
 
+    @RequiresPermission(code = "dict:third-party:list", name = "查询第三方API列表")
     @Operation(summary = "分页查询第三方API")
     @GetMapping("/page")
     public ApiResponse<PageResult<ThirdPartyApi>> getThirdPartyApiPage(
@@ -35,18 +37,21 @@ public class ThirdPartyApiController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:third-party:list", name = "查询第三方API详情")
     @Operation(summary = "获取第三方API详情")
     @GetMapping("/{id}")
     public ApiResponse<ThirdPartyApi> getThirdPartyApi(@PathVariable Long id) {
         return ApiResponse.success(thirdPartyApiService.getById(id));
     }
 
+    @RequiresPermission(code = "dict:third-party:create", name = "创建第三方API")
     @Operation(summary = "创建第三方API")
     @PostMapping("/create")
     public ApiResponse<ThirdPartyApi> createThirdPartyApi(@RequestBody ThirdPartyApi api) {
         return ApiResponse.success(thirdPartyApiService.createThirdPartyApi(api));
     }
 
+    @RequiresPermission(code = "dict:third-party:update", name = "更新第三方API")
     @Operation(summary = "更新第三方API")
     @PutMapping("/update/{id}")
     public ApiResponse<ThirdPartyApi> updateThirdPartyApi(
@@ -56,6 +61,7 @@ public class ThirdPartyApiController {
         return ApiResponse.success(thirdPartyApiService.updateThirdPartyApi(api));
     }
 
+    @RequiresPermission(code = "dict:third-party:delete", name = "删除第三方API")
     @Operation(summary = "删除第三方API")
     @DeleteMapping("/delete/{id}")
     public ApiResponse<Void> deleteThirdPartyApi(@PathVariable Long id, @RequestHeader("X-Tenant-Id") Long tenantId) {
@@ -63,6 +69,7 @@ public class ThirdPartyApiController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "dict:third-party:call-logs", name = "查询调用日志")
     @Operation(summary = "分页查询调用日志")
     @GetMapping("/call-logs/page")
     public ApiResponse<PageResult<ThirdPartyCallLog>> getCallLogPage(
@@ -74,6 +81,7 @@ public class ThirdPartyApiController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:third-party:health-check", name = "API健康检查")
     @Operation(summary = "API健康检查")
     @GetMapping("/health-check/{id}")
     public ApiResponse<Map<String, Object>> healthCheck(@PathVariable Long id,

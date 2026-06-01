@@ -121,15 +121,204 @@ UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permiss
 -- 系统配置按钮
 INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
 SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:config' LIMIT 1),
-       'dict:config:list', '配置列表', 2, '/api/dict/types/get-dict-type-page', 'GET', 1, 1, 1, NOW()
+       'dict:config:list', '配置列表', 2, '/api/dict/config/get-config-page', 'GET', 1, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:config' LIMIT 1),
-       'dict:config:detail', '配置详情', 2, '/api/dict/types/get-dict-type/{id}', 'GET', 2, 1, 1, NOW()
+       'dict:config:detail', '配置详情', 2, '/api/dict/config/get-config/{id}', 'GET', 2, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:config' LIMIT 1),
-       'dict:config:create', '新增配置', 2, '/api/dict/types/create-dict-type', 'POST', 3, 1, 1, NOW()
+       'dict:config:create', '新增配置', 2, '/api/dict/config/create-config', 'POST', 3, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:config' LIMIT 1),
-       'dict:config:update', '编辑配置', 2, '/api/dict/types/update-dict-type/{id}', 'PUT', 4, 1, 1, NOW()
+       'dict:config:update', '编辑配置', 2, '/api/dict/config/update-config/{id}', 'PUT', 4, 1, 1, NOW()
 UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:config' LIMIT 1),
-       'dict:config:delete', '删除配置', 2, '/api/dict/types/delete-dict-type/{id}', 'DELETE', 5, 1, 1, NOW();
+       'dict:config:delete', '删除配置', 2, '/api/dict/config/delete-config/{id}', 'DELETE', 5, 1, 1, NOW();
+
+-- 字典项按钮 (DictController)
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:type' LIMIT 1),
+       'dict:item:list', '字典项列表', 2, '/api/dict/items/code/{dictCode}', 'GET', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:type' LIMIT 1),
+       'dict:item:create', '新增字典项', 2, '/api/dict/items/add-dict-item', 'POST', 7, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:type' LIMIT 1),
+       'dict:item:update', '编辑字典项', 2, '/api/dict/items/update-dict-item/{id}', 'PUT', 8, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:type' LIMIT 1),
+       'dict:item:delete', '删除字典项', 2, '/api/dict/items/delete-dict-item/{id}', 'DELETE', 9, 1, 1, NOW();
+
+-- 参数管理子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:parameter', '参数管理', 1, '/api/parameter-dictionaries/get-dictionary-page', 'GET', 'Setting', '/dict/parameter', 'dict/parameter/index', 3, 1, 1, NOW();
+
+-- 参数管理按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:category:list', '参数分类列表', 2, '/api/parameter-categories/get-category-page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:category:create', '新增参数分类', 2, '/api/parameter-categories/create-category', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:category:update', '编辑参数分类', 2, '/api/parameter-categories/update-category/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:category:delete', '删除参数分类', 2, '/api/parameter-categories/delete-category/{id}', 'DELETE', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:dictionary:list', '参数字典列表', 2, '/api/parameter-dictionaries/get-dictionary-page', 'GET', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:dictionary:detail', '参数字典详情', 2, '/api/parameter-dictionaries/get-dictionary/{id}', 'GET', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:dictionary:create', '新增参数字典', 2, '/api/parameter-dictionaries/create-dictionary', 'POST', 7, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:dictionary:update', '编辑参数字典', 2, '/api/parameter-dictionaries/update-dictionary/{id}', 'PUT', 8, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:dictionary:delete', '删除参数字典', 2, '/api/parameter-dictionaries/delete-dictionary/{id}', 'DELETE', 9, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:item:list', '参数项列表', 2, '/api/parameter-items/get-item-page', 'GET', 10, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:item:create', '新增参数项', 2, '/api/parameter-items/create-item', 'POST', 11, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:item:update', '编辑参数项', 2, '/api/parameter-items/update-item/{id}', 'PUT', 12, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:parameter' LIMIT 1),
+       'dict:parameter:item:delete', '删除参数项', 2, '/api/parameter-items/delete-item/{id}', 'DELETE', 13, 1, 1, NOW();
+
+-- API市场子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:api-market', 'API市场', 1, '/api/api-market/definitions/page', 'GET', 'Connection', '/dict/api-market', 'dict/api-market/index', 4, 1, 1, NOW();
+
+-- API市场按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:list', 'API列表', 2, '/api/api-market/definitions/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:detail', 'API详情', 2, '/api/api-market/definitions/{id}', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:create', '新增API', 2, '/api/api-market/definitions/create', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:update', '编辑API', 2, '/api/api-market/definitions/update/{id}', 'PUT', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:delete', '删除API', 2, '/api/api-market/definitions/delete/{id}', 'DELETE', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:subscribe', '订阅API', 2, '/api/api-market/subscriptions/subscribe', 'POST', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:api-market' LIMIT 1),
+       'dict:api-market:unsubscribe', '取消订阅', 2, '/api/api-market/subscriptions/{id}', 'DELETE', 7, 1, 1, NOW();
+
+-- 第三方API子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:third-party', '第三方API', 1, '/api/third-party/page', 'GET', 'Link', '/dict/third-party', 'dict/third-party/index', 5, 1, 1, NOW();
+
+-- 第三方API按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:third-party' LIMIT 1),
+       'dict:third-party:list', '第三方API列表', 2, '/api/third-party/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:third-party' LIMIT 1),
+       'dict:third-party:create', '新增第三方API', 2, '/api/third-party/create', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:third-party' LIMIT 1),
+       'dict:third-party:update', '编辑第三方API', 2, '/api/third-party/update/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:third-party' LIMIT 1),
+       'dict:third-party:delete', '删除第三方API', 2, '/api/third-party/delete/{id}', 'DELETE', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:third-party' LIMIT 1),
+       'dict:third-party:call-logs', '调用日志', 2, '/api/third-party/call-logs/page', 'GET', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:third-party' LIMIT 1),
+       'dict:third-party:health-check', '健康检查', 2, '/api/third-party/health-check/{id}', 'GET', 6, 1, 1, NOW();
+
+-- SaaS套餐子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:package', 'SaaS套餐', 1, '/api/packages/page', 'GET', 'Box', '/dict/package', 'dict/package/index', 6, 1, 1, NOW();
+
+-- SaaS套餐按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:package' LIMIT 1),
+       'dict:package:list', '套餐列表', 2, '/api/packages/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:package' LIMIT 1),
+       'dict:package:detail', '套餐详情', 2, '/api/packages/{id}', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:package' LIMIT 1),
+       'dict:package:create', '新增套餐', 2, '/api/packages/create', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:package' LIMIT 1),
+       'dict:package:update', '编辑套餐', 2, '/api/packages/update/{id}', 'PUT', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:package' LIMIT 1),
+       'dict:package:delete', '删除套餐', 2, '/api/packages/delete/{id}', 'DELETE', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:package' LIMIT 1),
+       'dict:package:subscribe', '订阅套餐', 2, '/api/packages/subscribe', 'POST', 6, 1, 1, NOW();
+
+-- 营销活动子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:activity', '营销活动', 1, '/api/activities/page', 'GET', 'Present', '/dict/activity', 'dict/activity/index', 7, 1, 1, NOW();
+
+-- 营销活动按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:activity' LIMIT 1),
+       'dict:activity:list', '活动列表', 2, '/api/activities/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:activity' LIMIT 1),
+       'dict:activity:detail', '活动详情', 2, '/api/activities/{id}', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:activity' LIMIT 1),
+       'dict:activity:create', '新增活动', 2, '/api/activities/create', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:activity' LIMIT 1),
+       'dict:activity:update', '编辑活动', 2, '/api/activities/update/{id}', 'PUT', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:activity' LIMIT 1),
+       'dict:activity:delete', '删除活动', 2, '/api/activities/delete/{id}', 'DELETE', 5, 1, 1, NOW();
+
+-- 追踪管理子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:trace', '追踪管理', 1, '/api/trace/configs/page', 'GET', 'View', '/dict/trace', 'dict/trace/index', 8, 1, 1, NOW();
+
+-- 追踪管理按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:trace' LIMIT 1),
+       'dict:trace:config:list', '追踪配置列表', 2, '/api/trace/configs/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:trace' LIMIT 1),
+       'dict:trace:config:create', '新增追踪配置', 2, '/api/trace/configs/create', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:trace' LIMIT 1),
+       'dict:trace:config:update', '编辑追踪配置', 2, '/api/trace/configs/update/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:trace' LIMIT 1),
+       'dict:trace:config:delete', '删除追踪配置', 2, '/api/trace/configs/delete/{id}', 'DELETE', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:trace' LIMIT 1),
+       'dict:trace:alert:list', '告警列表', 2, '/api/trace/alerts/page', 'GET', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:trace' LIMIT 1),
+       'dict:trace:alert:acknowledge', '确认告警', 2, '/api/trace/alerts/acknowledge/{id}', 'PUT', 6, 1, 1, NOW();
+
+-- 代码生成子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:codegen', '代码生成', 1, '/api/dict/codegen/template/page', 'GET', 'DocumentCopy', '/dict/codegen', 'dict/codegen/index', 9, 1, 1, NOW();
+
+-- 代码生成按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:list', '模板列表', 2, '/api/dict/codegen/template/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:detail', '模板详情', 2, '/api/dict/codegen/template/{id}', 'GET', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:create', '新增模板', 2, '/api/dict/codegen/template', 'POST', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:update', '编辑模板', 2, '/api/dict/codegen/template/{id}', 'PUT', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:delete', '删除模板', 2, '/api/dict/codegen/template/{id}', 'DELETE', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:generate', '生成代码', 2, '/api/dict/codegen/generate', 'POST', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:codegen' LIMIT 1),
+       'dict:codegen:history', '生成历史', 2, '/api/dict/codegen/history/page', 'GET', 7, 1, 1, NOW();
+
+-- 错误文档子菜单
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `icon`, `menu_path`, `component`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict' LIMIT 1),
+       'dict:error-doc', '错误文档', 1, '/api/dict/error-doc/category/page', 'GET', 'Warning', '/dict/error-doc', 'dict/error-doc/index', 10, 1, 1, NOW();
+
+-- 错误文档按钮
+INSERT INTO `sys_permission` (`tenant_id`, `parent_id`, `permission_code`, `permission_name`, `permission_type`, `resource_path`, `http_method`, `sort`, `status`, `visible`, `created_at`)
+SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:category:list', '错误分类列表', 2, '/api/dict/error-doc/category/page', 'GET', 1, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:category:create', '新增错误分类', 2, '/api/dict/error-doc/category', 'POST', 2, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:category:update', '编辑错误分类', 2, '/api/dict/error-doc/category/{id}', 'PUT', 3, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:category:delete', '删除错误分类', 2, '/api/dict/error-doc/category/{id}', 'DELETE', 4, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:solution:list', '解决方案列表', 2, '/api/dict/error-doc/solution/page', 'GET', 5, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:solution:create', '新增解决方案', 2, '/api/dict/error-doc/solution', 'POST', 6, 1, 1, NOW()
+UNION ALL SELECT 1, (SELECT id FROM sys_permission WHERE tenant_id=1 AND permission_code='dict:error-doc' LIMIT 1),
+       'dict:error-doc:search', '搜索错误', 2, '/api/dict/error-doc/search', 'GET', 7, 1, 1, NOW();
 
 -- ==================== 5. 插入ERP管理子菜单和按钮 ====================
 -- ERP管理子菜单

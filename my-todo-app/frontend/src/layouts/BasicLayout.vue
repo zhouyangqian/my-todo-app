@@ -67,6 +67,10 @@
             <el-icon><Tools /></el-icon>
             <span>系统配置</span>
           </el-menu-item>
+          <el-menu-item index="/dict/parameter">
+            <el-icon><Setting /></el-icon>
+            <span>参数管理</span>
+          </el-menu-item>
           <el-menu-item index="/dict/api-market">
             <el-icon><Connection /></el-icon>
             <span>API市场</span>
@@ -339,7 +343,8 @@ const breadcrumbMap = {
   '/system/gateway': '网关监控',
   '/dict/type': '字典类型',
   '/dict/config': '系统配置',
-  '/erp/product-category': '商品分类',
+  '/dict/parameter': '参数管理',
+  '/dict/api-market': 'API市场',
   '/erp/product': '商品管理',
   '/erp/product-price': '商品价格',
   '/erp/product-promotion': '商品促销',

@@ -1,6 +1,7 @@
 package com.example.dict.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.dict.entity.ActivityParticipation;
@@ -25,6 +26,7 @@ public class ActivityController {
 
     private final ActivityService activityService;
 
+    @RequiresPermission(code = "dict:activity:list", name = "查询活动列表")
     @Operation(summary = "分页查询活动")
     @GetMapping("/page")
     public ApiResponse<PageResult<MarketingActivity>> getActivityPage(
@@ -35,18 +37,21 @@ public class ActivityController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:activity:detail", name = "查询活动详情")
     @Operation(summary = "获取活动详情")
     @GetMapping("/{id}")
     public ApiResponse<MarketingActivity> getActivity(@PathVariable Long id) {
         return ApiResponse.success(activityService.getById(id));
     }
 
+    @RequiresPermission(code = "dict:activity:create", name = "创建活动")
     @Operation(summary = "创建活动")
     @PostMapping("/create")
     public ApiResponse<MarketingActivity> createActivity(@RequestBody MarketingActivity activity) {
         return ApiResponse.success(activityService.createActivity(activity));
     }
 
+    @RequiresPermission(code = "dict:activity:update", name = "更新活动")
     @Operation(summary = "更新活动")
     @PutMapping("/update/{id}")
     public ApiResponse<MarketingActivity> updateActivity(
@@ -56,6 +61,7 @@ public class ActivityController {
         return ApiResponse.success(activityService.updateActivity(activity));
     }
 
+    @RequiresPermission(code = "dict:activity:delete", name = "删除活动")
     @Operation(summary = "删除活动")
     @DeleteMapping("/delete/{id}")
     public ApiResponse<Void> deleteActivity(@PathVariable Long id) {
@@ -65,12 +71,14 @@ public class ActivityController {
 
     // ==================== 活动参与管理 ====================
 
+    @RequiresPermission(code = "dict:activity:list", name = "查询参与记录")
     @Operation(summary = "获取活动参与记录")
     @GetMapping("/{id}/participations")
     public ApiResponse<List<ActivityParticipation>> getParticipations(@PathVariable Long id) {
         return ApiResponse.success(activityService.getParticipations(id));
     }
 
+    @RequiresPermission(code = "dict:activity:update", name = "加入活动")
     @Operation(summary = "加入活动")
     @PostMapping("/{id}/join")
     public ApiResponse<ActivityParticipation> joinActivity(
@@ -80,6 +88,7 @@ public class ActivityController {
         return ApiResponse.success(activityService.joinActivity(id, tenantId));
     }
 
+    @RequiresPermission(code = "dict:activity:update", name = "取消参与")
     @Operation(summary = "取消参与")
     @DeleteMapping("/participations/{participationId}/cancel")
     public ApiResponse<Void> cancelParticipation(@PathVariable Long participationId) {

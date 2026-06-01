@@ -1,6 +1,7 @@
 package com.example.dict.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.common.core.annotation.RequiresPermission;
 import com.example.common.core.result.ApiResponse;
 import com.example.common.core.result.PageResult;
 import com.example.dict.entity.ApiDefinition;
@@ -27,6 +28,7 @@ public class ApiMarketController {
 
     // ==================== API定义 ====================
 
+    @RequiresPermission(code = "dict:api-market:list", name = "查询API定义列表")
     @Operation(summary = "分页查询API定义")
     @GetMapping("/definitions/page")
     public ApiResponse<PageResult<ApiDefinition>> getApiDefinitionPage(
@@ -38,12 +40,14 @@ public class ApiMarketController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:api-market:detail", name = "查询API定义详情")
     @Operation(summary = "获取API定义详情")
     @GetMapping("/definitions/{id}")
     public ApiResponse<ApiDefinition> getApiDefinition(@PathVariable Long id) {
         return ApiResponse.success(apiMarketService.getById(id));
     }
 
+    @RequiresPermission(code = "dict:api-market:create", name = "创建API定义")
     @Operation(summary = "创建API定义")
     @PostMapping("/definitions/create")
     public ApiResponse<ApiDefinition> createApiDefinition(
@@ -53,6 +57,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.createApiDefinition(apiDefinition));
     }
 
+    @RequiresPermission(code = "dict:api-market:update", name = "更新API定义")
     @Operation(summary = "更新API定义")
     @PutMapping("/definitions/update/{id}")
     public ApiResponse<ApiDefinition> updateApiDefinition(
@@ -64,6 +69,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.updateApiDefinition(apiDefinition));
     }
 
+    @RequiresPermission(code = "dict:api-market:delete", name = "删除API定义")
     @Operation(summary = "删除API定义")
     @DeleteMapping("/definitions/delete/{id}")
     public ApiResponse<Void> deleteApiDefinition(@PathVariable Long id) {
@@ -73,6 +79,7 @@ public class ApiMarketController {
 
     // ==================== API订阅 ====================
 
+    @RequiresPermission(code = "dict:api-market:list", name = "查询订阅列表")
     @Operation(summary = "分页查询API订阅")
     @GetMapping("/subscriptions/page")
     public ApiResponse<PageResult<ApiSubscription>> getSubscriptionPage(
@@ -84,6 +91,7 @@ public class ApiMarketController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:api-market:subscribe", name = "订阅API")
     @Operation(summary = "订阅API")
     @PostMapping("/subscriptions/subscribe")
     public ApiResponse<ApiSubscription> subscribe(
@@ -94,6 +102,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.subscribe(tenantId, apiId, subscriberName, callLimit, null));
     }
 
+    @RequiresPermission(code = "dict:api-market:unsubscribe", name = "取消订阅")
     @Operation(summary = "取消订阅")
     @DeleteMapping("/subscriptions/{id}")
     public ApiResponse<Void> unsubscribe(
@@ -105,6 +114,7 @@ public class ApiMarketController {
 
     // ==================== 使用记录 ====================
 
+    @RequiresPermission(code = "dict:api-market:list", name = "记录API使用")
     @Operation(summary = "记录API使用")
     @PostMapping("/usage/record")
     public ApiResponse<ApiUsageRecord> recordUsage(
@@ -116,6 +126,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.recordUsage(tenantId, apiId, subscriptionId, responseStatus, responseTimeMs));
     }
 
+    @RequiresPermission(code = "dict:api-market:list", name = "查询使用记录")
     @Operation(summary = "分页查询使用记录")
     @GetMapping("/usage/records/page")
     public ApiResponse<PageResult<ApiUsageRecord>> getUsageRecordPage(
@@ -127,6 +138,7 @@ public class ApiMarketController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:api-market:list", name = "查询API使用统计")
     @Operation(summary = "获取使用统计")
     @GetMapping("/usage/stats")
     public ApiResponse<Map<String, Object>> getUsageStats(
@@ -137,6 +149,7 @@ public class ApiMarketController {
 
     // ==================== 前端兼容接口 ====================
 
+    @RequiresPermission(code = "dict:api-market:list", name = "查询API列表")
     @Operation(summary = "API列表（分页）")
     @GetMapping("/list")
     public ApiResponse<PageResult<ApiDefinition>> list(
@@ -149,12 +162,14 @@ public class ApiMarketController {
         return ApiResponse.success(PageResult.of(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize()));
     }
 
+    @RequiresPermission(code = "dict:api-market:detail", name = "查询API详情")
     @Operation(summary = "获取API详情")
     @GetMapping("/detail/{id}")
     public ApiResponse<ApiDefinition> detail(@PathVariable Long id) {
         return ApiResponse.success(apiMarketService.getById(id));
     }
 
+    @RequiresPermission(code = "dict:api-market:create", name = "创建API")
     @Operation(summary = "创建API")
     @PostMapping("/create")
     public ApiResponse<ApiDefinition> create(
@@ -164,6 +179,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.createApiDefinition(apiDefinition));
     }
 
+    @RequiresPermission(code = "dict:api-market:update", name = "更新API")
     @Operation(summary = "更新API")
     @PutMapping("/update/{id}")
     public ApiResponse<ApiDefinition> update(
@@ -175,6 +191,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.updateApiDefinition(apiDefinition));
     }
 
+    @RequiresPermission(code = "dict:api-market:delete", name = "删除API")
     @Operation(summary = "删除API")
     @DeleteMapping("/delete/{id}")
     public ApiResponse<Void> remove(@PathVariable Long id) {
@@ -182,6 +199,7 @@ public class ApiMarketController {
         return ApiResponse.success();
     }
 
+    @RequiresPermission(code = "dict:api-market:subscribe", name = "订阅API")
     @Operation(summary = "订阅API（JSON Body）")
     @PostMapping("/subscribe")
     public ApiResponse<ApiSubscription> subscribeWithBody(
@@ -193,6 +211,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.subscribe(tenantId, apiId, subscriberName, callLimit, null));
     }
 
+    @RequiresPermission(code = "dict:api-market:list", name = "查询API使用统计")
     @Operation(summary = "API使用统计")
     @GetMapping("/usage")
     public ApiResponse<Map<String, Object>> usage(
@@ -201,6 +220,7 @@ public class ApiMarketController {
         return ApiResponse.success(apiMarketService.getUsageStats(tenantId, apiId));
     }
 
+    @RequiresPermission(code = "dict:api-market:list", name = "记录API使用")
     @Operation(summary = "记录API使用（JSON Body）")
     @PostMapping("/record-usage")
     public ApiResponse<ApiUsageRecord> recordUsageWithBody(
