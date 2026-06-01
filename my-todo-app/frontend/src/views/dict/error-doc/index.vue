@@ -186,7 +186,7 @@ const loadCategories = async () => {
   categoryLoading.value = true
   try {
     const res = await getErrorCategories({})
-    categoryData.value = res || []
+    categoryData.value = res?.records || []
   } catch (error) {
     ElMessage.error('加载错误分类失败')
   } finally {
@@ -280,7 +280,7 @@ const loadSolutions = async () => {
       categoryId: currentCategory.value.id,
       ...solutionSearch
     })
-    solutionData.value = res || []
+    solutionData.value = res?.records || []
   } catch (error) {
     ElMessage.error('加载解决方案失败')
   } finally {
