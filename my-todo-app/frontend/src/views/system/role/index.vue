@@ -97,10 +97,7 @@
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入角色名称" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="code">
-          <el-input v-model="formData.code" placeholder="请输入角色编码" />
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
+<el-form-item label="描述" prop="description">
           <el-input
             v-model="formData.description"
             type="textarea"
@@ -210,7 +207,6 @@ const submitLoading = ref(false)
 const formData = reactive({
   id: undefined,                         // 角色ID（编辑时有值）
   name: '',                              // 角色名称
-  code: '',                              // 角色编码
   description: '',                       // 角色描述
   status: 1                              // 状态（默认启用）
 })
@@ -220,10 +216,6 @@ const formRules = {
   name: [
     { required: true, message: '请输入角色名称', trigger: 'blur' }
   ],
-  code: [
-    { required: true, message: '请输入角色编码', trigger: 'blur' },
-    { pattern: /^[a-zA-Z_]+$/, message: '只能包含字母和下划线', trigger: 'blur' }
-  ]
 }
 
 // ===== 权限分配相关 =====

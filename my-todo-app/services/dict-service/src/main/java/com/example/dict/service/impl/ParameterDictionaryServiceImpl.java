@@ -8,6 +8,7 @@ import com.example.dict.entity.ParameterItem;
 import com.example.dict.mapper.ParameterDictionaryMapper;
 import com.example.dict.mapper.ParameterItemMapper;
 import com.example.dict.service.ParameterDictionaryService;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,16 +27,15 @@ public class ParameterDictionaryServiceImpl extends ServiceImpl<ParameterDiction
     @Override
     @Transactional
     public ParameterDictionary createDictionary(ParameterDictionary dictionary) {
-        // 检查参数编码唯一性
-        ParameterDictionary existing = getOne(
-            new LambdaQueryWrapper<ParameterDictionary>()
-                .eq(ParameterDictionary::getTenantId, dictionary.getTenantId())
-                .eq(ParameterDictionary::getParamCode, dictionary.getParamCode())
-                .eq(ParameterDictionary::getDeleted, 0)
+        // 自动生成参数编码（格式：PARAM-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("PARAM",
+                dictionary.getParamName(),
+                code -> getOne(new LambdaQueryWrapper<ParameterDictionary>()
+                        .eq(ParameterDictionary::getTenantId, dictionary.getTenantId())
+                        .eq(ParameterDictionary::getParamCode, code)
+                        .eq(ParameterDictionary::getDeleted, 0)) != null
         );
-        if (existing != null) {
-            throw new IllegalArgumentException("参数编码已存在: " + dictionary.getParamCode());
-        }
+        dictionary.setParamCode(generatedCode);
         save(dictionary);
         return dictionary;
     }

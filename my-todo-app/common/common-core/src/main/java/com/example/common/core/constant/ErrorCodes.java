@@ -58,4 +58,5 @@ public final class ErrorCodes {
     public static final int TENANT_NOT_FOUND = 5001;
     public static final int TENANT_DISABLED = 5002;
     public static final int TENANT_EXPIRED = 5003;
+    public static final int TENANT_CODE_GENERATE_FAILED = 5004;
 }

@@ -85,9 +85,6 @@
         <el-form-item label="供应商名称" prop="supplierName">
           <el-input v-model="formData.supplierName" placeholder="请输入供应商名称" />
         </el-form-item>
-        <el-form-item label="供应商编码" prop="supplierCode">
-          <el-input v-model="formData.supplierCode" placeholder="请输入供应商编码" />
-        </el-form-item>
         <el-form-item label="联系人" prop="contact">
           <el-input v-model="formData.contact" placeholder="请输入联系人" />
         </el-form-item>
@@ -147,7 +144,6 @@ const submitLoading = ref(false)
 
 const formData = reactive({
   supplierName: '',
-  supplierCode: '',
   contact: '',
   contactPhone: '',
   email: '',
@@ -158,7 +154,6 @@ const formData = reactive({
 
 const formRules = {
   supplierName: [{ required: true, message: '请输入供应商名称', trigger: 'blur' }],
-  supplierCode: [{ required: true, message: '请输入供应商编码', trigger: 'blur' }],
   contactPhone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }],
   email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }]
 }
@@ -195,7 +190,6 @@ const handleAdd = () => {
   dialogTitle.value = '新增供应商'
   Object.assign(formData, {
     supplierName: '',
-    supplierCode: '',
     contact: '',
     contactPhone: '',
     email: '',

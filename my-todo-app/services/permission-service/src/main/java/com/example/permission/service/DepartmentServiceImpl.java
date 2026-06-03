@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.permission.entity.Department;
 import com.example.permission.mapper.DepartmentMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -89,16 +90,15 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
      */
     @Override
     public Department createDepartment(Department department) {
-        // 校验部门编码唯一性
-        LambdaQueryWrapper<Department> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Department::getTenantId, department.getTenantId())
-               .eq(Department::getDeptCode, department.getDeptCode())
-               .eq(Department::getDeleted, 0);
-
-        if (count(wrapper) > 0) {
-            throw new IllegalArgumentException("部门编码已存在: " + department.getDeptCode());
-        }
-
+        // 自动生成部门编码（格式：DEPT-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("DEPT",
+                department.getDeptName(),
+                code -> count(new LambdaQueryWrapper<Department>()
+                        .eq(Department::getTenantId, department.getTenantId())
+                        .eq(Department::getDeptCode, code)
+                        .eq(Department::getDeleted, 0)) > 0
+        );
+        department.setDeptCode(generatedCode);
         save(department);
         return department;
     }

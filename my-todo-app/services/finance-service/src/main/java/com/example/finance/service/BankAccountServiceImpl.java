@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.finance.entity.BankAccount;
 import com.example.finance.mapper.BankAccountMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -117,16 +118,15 @@ public class BankAccountServiceImpl extends ServiceImpl<BankAccountMapper, BankA
     @Override
     @Transactional
     public BankAccount create(BankAccount account) {
-        // 校验账户编码在同租户下的唯一性
-        BankAccount existing = getOne(
-            new LambdaQueryWrapper<BankAccount>()
-                .eq(BankAccount::getAccountCode, account.getAccountCode())
-                .eq(BankAccount::getTenantId, account.getTenantId())
-                .eq(BankAccount::getDeleted, 0)
+        // 自动生成账户编码（格式：BANK-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("BANK",
+                account.getAccountName(),
+                code -> getOne(new LambdaQueryWrapper<BankAccount>()
+                        .eq(BankAccount::getAccountCode, code)
+                        .eq(BankAccount::getTenantId, account.getTenantId())
+                        .eq(BankAccount::getDeleted, 0)) != null
         );
-        if (existing != null) {
-            throw new IllegalArgumentException("账户编码已存在: " + account.getAccountCode());
-        }
+        account.setAccountCode(generatedCode);
 
         // 新建账户余额初始化为0
         account.setBalance(BigDecimal.ZERO);

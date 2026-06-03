@@ -59,11 +59,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public LoginDTO login(LoginVO request, String ipAddress) {
-        // 根据用户名查询用户（提前查询，用于判断登录失败次数）
-        User userForCaptchaCheck = userMapper.selectOne(
-            new LambdaQueryWrapper<User>()
+        // 根据用户名和租户ID查询用户（提前查询，用于判断登录失败次数）
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<User>()
                 .eq(User::getUserName, request.getUserName())
-        );
+                .eq(User::getDeleted, 0);
+        if (request.getTenantId() != null) {
+            queryWrapper.eq(User::getTenantId, request.getTenantId());
+        }
+        User userForCaptchaCheck = userMapper.selectOne(queryWrapper);
 
         // 验证码强制校验：登录失败次数 >= 3 时必须提供验证码
         if (userForCaptchaCheck != null) {

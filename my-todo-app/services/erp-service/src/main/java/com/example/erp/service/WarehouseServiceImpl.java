@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.erp.entity.Warehouse;
 import com.example.erp.mapper.WarehouseMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,10 +73,12 @@ public class WarehouseServiceImpl extends ServiceImpl<WarehouseMapper, Warehouse
     @Transactional
     @Override
     public Warehouse createWarehouse(Warehouse warehouse) {
-        Warehouse existing = getByCode(warehouse.getWarehouseCode(), warehouse.getTenantId());
-        if (existing != null) {
-            throw new IllegalArgumentException("仓库编码已存在: " + warehouse.getWarehouseCode());
-        }
+        // 自动生成仓库编码（格式：WH-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("WH",
+                warehouse.getWarehouseName(),
+                code -> getByCode(code, warehouse.getTenantId()) != null
+        );
+        warehouse.setWarehouseCode(generatedCode);
         if (warehouse.getIsDefault() != null && warehouse.getIsDefault() == 1) {
             clearDefaultWarehouse(warehouse.getTenantId());
         }

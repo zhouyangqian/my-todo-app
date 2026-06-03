@@ -85,9 +85,6 @@
         <el-form-item label="客户名称" prop="customerName">
           <el-input v-model="formData.customerName" placeholder="请输入客户名称" />
         </el-form-item>
-        <el-form-item label="客户编码" prop="customerCode">
-          <el-input v-model="formData.customerCode" placeholder="请输入客户编码" />
-        </el-form-item>
         <el-form-item label="联系人" prop="contact">
           <el-input v-model="formData.contact" placeholder="请输入联系人" />
         </el-form-item>
@@ -147,7 +144,6 @@ const submitLoading = ref(false)
 
 const formData = reactive({
   customerName: '',
-  customerCode: '',
   contact: '',
   contactPhone: '',
   email: '',
@@ -158,7 +154,6 @@ const formData = reactive({
 
 const formRules = {
   customerName: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
-  customerCode: [{ required: true, message: '请输入客户编码', trigger: 'blur' }],
   contactPhone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }],
   email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }]
 }
@@ -195,7 +190,6 @@ const handleAdd = () => {
   dialogTitle.value = '新增客户'
   Object.assign(formData, {
     customerName: '',
-    customerCode: '',
     contact: '',
     contactPhone: '',
     email: '',

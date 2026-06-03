@@ -87,9 +87,6 @@
         <el-form-item label="字典名称" prop="dictName">
           <el-input v-model="formData.dictName" placeholder="请输入字典名称" />
         </el-form-item>
-        <el-form-item label="字典类型" prop="dictCode">
-          <el-input v-model="formData.dictCode" placeholder="请输入字典类型（英文）" />
-        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="formData.status">
             <el-radio :value="1">启用</el-radio>
@@ -211,7 +208,6 @@ const dictItems = ref([])
 
 const formData = reactive({
   dictName: '',
-  dictCode: '',
   status: 1,
   remark: ''
 })
@@ -225,8 +221,7 @@ const itemForm = reactive({
 })
 
 const formRules = {
-  dictName: [{ required: true, message: '请输入字典名称', trigger: 'blur' }],
-  dictCode: [{ required: true, message: '请输入字典类型', trigger: 'blur' }]
+  dictName: [{ required: true, message: '请输入字典名称', trigger: 'blur' }]
 }
 
 const itemRules = {
@@ -266,7 +261,6 @@ const handleAdd = () => {
   dialogTitle.value = '新增字典类型'
   Object.assign(formData, {
     dictName: '',
-    dictCode: '',
     status: 1,
     remark: ''
   })

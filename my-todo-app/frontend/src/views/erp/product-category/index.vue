@@ -79,9 +79,6 @@
       :close-on-click-modal="false"
     >
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
-        <el-form-item label="分类编码" prop="categoryCode">
-          <el-input v-model="formData.categoryCode" placeholder="请输入分类编码" :disabled="isEdit" />
-        </el-form-item>
         <el-form-item label="分类名称" prop="categoryName">
           <el-input v-model="formData.categoryName" placeholder="请输入分类名称" />
         </el-form-item>
@@ -155,7 +152,6 @@ const isEdit = ref(false)
 const currentId = ref(null)
 
 const formData = reactive({
-  categoryCode: '',
   categoryName: '',
   parentId: 0,
   sortOrder: 0,
@@ -164,10 +160,6 @@ const formData = reactive({
 })
 
 const formRules = {
-  categoryCode: [
-    { required: true, message: '请输入分类编码', trigger: 'blur' },
-    { pattern: /^[A-Za-z0-9_-]+$/, message: '编码只能包含字母、数字、下划线和横线', trigger: 'blur' }
-  ],
   categoryName: [
     { required: true, message: '请输入分类名称', trigger: 'blur' }
   ]
@@ -220,7 +212,6 @@ const handleCreate = () => {
   isEdit.value = false
   currentId.value = null
   Object.assign(formData, {
-    categoryCode: '',
     categoryName: '',
     parentId: 0,
     sortOrder: 0,
@@ -234,7 +225,6 @@ const handleEdit = (row) => {
   isEdit.value = true
   currentId.value = row.id
   Object.assign(formData, {
-    categoryCode: row.categoryCode,
     categoryName: row.categoryName,
     parentId: row.parentId || 0,
     sortOrder: row.sortOrder || 0,

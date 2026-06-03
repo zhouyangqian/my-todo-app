@@ -9,6 +9,7 @@ import com.example.permission.entity.UserRole;
 import com.example.permission.mapper.RoleMapper;
 import com.example.permission.mapper.RolePermissionMapper;
 import com.example.permission.mapper.UserRoleMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -188,16 +189,15 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     @Transactional
     public Role createRole(Role role) {
-        // 校验角色编码在同一租户下是否已存在
-        Role existing = getOne(
-            new LambdaQueryWrapper<Role>()
-                .eq(Role::getTenantId, role.getTenantId())
-                .eq(Role::getRoleCode, role.getRoleCode())
-                .eq(Role::getDeleted, 0)
+        // 自动生成角色编码（格式：ROLE-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("ROLE",
+                role.getRoleName(),
+                code -> getOne(new LambdaQueryWrapper<Role>()
+                        .eq(Role::getTenantId, role.getTenantId())
+                        .eq(Role::getRoleCode, code)
+                        .eq(Role::getDeleted, 0)) != null
         );
-        if (existing != null) {
-            throw new IllegalArgumentException("角色编码已存在: " + role.getRoleCode());
-        }
+        role.setRoleCode(generatedCode);
         save(role);
         return role;
     }

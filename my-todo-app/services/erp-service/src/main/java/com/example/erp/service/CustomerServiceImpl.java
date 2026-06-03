@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.erp.entity.Customer;
 import com.example.erp.mapper.CustomerMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,10 +48,12 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
     @Transactional
     @Override
     public Customer createCustomer(Customer customer) {
-        Customer existing = getByCode(customer.getCustomerCode(), customer.getTenantId());
-        if (existing != null) {
-            throw new IllegalArgumentException("客户编码已存在: " + customer.getCustomerCode());
-        }
+        // 自动生成客户编码（格式：CUS-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("CUS",
+                customer.getCustomerName(),
+                code -> getByCode(code, customer.getTenantId()) != null
+        );
+        customer.setCustomerCode(generatedCode);
         save(customer);
         log.info("创建客户: {}", customer.getCustomerCode());
         return customer;

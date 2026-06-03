@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.erp.entity.Supplier;
 import com.example.erp.mapper.SupplierMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,10 +48,12 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
     @Transactional
     @Override
     public Supplier createSupplier(Supplier supplier) {
-        Supplier existing = getByCode(supplier.getSupplierCode(), supplier.getTenantId());
-        if (existing != null) {
-            throw new IllegalArgumentException("供应商编码已存在: " + supplier.getSupplierCode());
-        }
+        // 自动生成供应商编码（格式：SUP-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("SUP",
+                supplier.getSupplierName(),
+                code -> getByCode(code, supplier.getTenantId()) != null
+        );
+        supplier.setSupplierCode(generatedCode);
         save(supplier);
         log.info("创建供应商: {}", supplier.getSupplierCode());
         return supplier;

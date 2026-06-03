@@ -1,6 +1,7 @@
 package com.example.auth.controller;
 
 import com.example.auth.api.dto.TenantDTO;
+import com.example.auth.api.dto.TenantRegisterResultDTO;
 import com.example.auth.api.vo.TenantRegisterVO;
 import com.example.auth.service.TenantService;
 import com.example.common.core.result.ApiResponse;
@@ -26,16 +27,16 @@ public class TenantController {
 
     /**
      * 租户注册
-     * <p>创建租户并自动创建管理员账户</p>
+     * <p>创建租户并自动创建管理员账户，返回管理员凭据供前端展示</p>
      *
      * @param request 租户注册请求
-     * @return 新创建的租户ID
+     * @return 注册结果（含租户ID和管理员凭据）
      */
     @Operation(summary = "租户注册")
     @PostMapping("/register")
-    public ApiResponse<Long> register(@Valid @RequestBody TenantRegisterVO request) {
-        Long tenantId = tenantService.registerTenant(request);
-        return ApiResponse.success(tenantId);
+    public ApiResponse<TenantRegisterResultDTO> register(@Valid @RequestBody TenantRegisterVO request) {
+        TenantRegisterResultDTO result = tenantService.registerTenant(request);
+        return ApiResponse.success(result);
     }
 
     /**

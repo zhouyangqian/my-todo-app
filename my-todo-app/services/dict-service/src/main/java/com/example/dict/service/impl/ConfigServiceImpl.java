@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.dict.entity.SystemConfig;
 import com.example.dict.mapper.SystemConfigMapper;
 import com.example.dict.service.ConfigService;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -97,11 +98,12 @@ public class ConfigServiceImpl extends ServiceImpl<SystemConfigMapper, SystemCon
 
     @Override
     public SystemConfig createConfig(SystemConfig config) {
-        // 检查编码是否已存在
-        SystemConfig existing = getConfig(config.getConfigCode(), config.getTenantId());
-        if (existing != null) {
-            throw new IllegalArgumentException("配置编码已存在: " + config.getConfigCode());
-        }
+        // 自动生成配置编码（格式：CFG-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("CFG",
+                config.getConfigName(),
+                code -> getConfig(code, config.getTenantId()) != null
+        );
+        config.setConfigCode(generatedCode);
         save(config);
         return config;
     }

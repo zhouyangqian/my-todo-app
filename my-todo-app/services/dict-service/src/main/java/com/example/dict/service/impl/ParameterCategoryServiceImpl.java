@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.dict.entity.ParameterCategory;
 import com.example.dict.mapper.ParameterCategoryMapper;
 import com.example.dict.service.ParameterCategoryService;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,16 +25,15 @@ public class ParameterCategoryServiceImpl extends ServiceImpl<ParameterCategoryM
     @Override
     @Transactional
     public ParameterCategory createCategory(ParameterCategory category) {
-        // 检查分类编码唯一性
-        ParameterCategory existing = getOne(
-            new LambdaQueryWrapper<ParameterCategory>()
-                .eq(ParameterCategory::getTenantId, category.getTenantId())
-                .eq(ParameterCategory::getCategoryCode, category.getCategoryCode())
-                .eq(ParameterCategory::getDeleted, 0)
+        // 自动生成分类编码（格式：PCAT-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("PCAT",
+                category.getCategoryName(),
+                code -> getOne(new LambdaQueryWrapper<ParameterCategory>()
+                        .eq(ParameterCategory::getTenantId, category.getTenantId())
+                        .eq(ParameterCategory::getCategoryCode, code)
+                        .eq(ParameterCategory::getDeleted, 0)) != null
         );
-        if (existing != null) {
-            throw new IllegalArgumentException("分类编码已存在: " + category.getCategoryCode());
-        }
+        category.setCategoryCode(generatedCode);
         save(category);
         return category;
     }

@@ -52,6 +52,16 @@ public class AuthController {
         if (request.getDeviceInfo() == null) {
             request.setDeviceInfo(httpRequest.getHeader("User-Agent"));
         }
+        // 如果请求体中未传 tenantId，从请求头读取（网关已注入）
+        if (request.getTenantId() == null) {
+            String tenantIdHeader = httpRequest.getHeader("X-Tenant-Id");
+            if (tenantIdHeader != null) {
+                try {
+                    request.setTenantId(Long.parseLong(tenantIdHeader));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
         LoginDTO response = authService.login(request, ipAddress);
         return ApiResponse.success(response);
     }

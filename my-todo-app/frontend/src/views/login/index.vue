@@ -1,6 +1,6 @@
 <!-- views/login/index.vue - 登录页面
   提供用户名密码输入表单，调用用户 Store 执行登录操作
-  包含表单验证、验证码（登录失败3次后显示）、加载状态、回车提交等功能
+  包含表单验证、验证码、加载状态、回车提交等功能
 -->
 <template>
   <div class="login-container">
@@ -33,7 +33,7 @@
             @keyup.enter="handleLogin"
           />
         </el-form-item>
-        <!-- 验证码：登录失败次数 >= 3 时显示 -->
+        <!-- 验证码：登录失败 3 次后显示 -->
         <el-form-item v-if="showCaptcha" prop="captchaValue">
           <Captcha
             ref="captchaRef"
@@ -82,8 +82,9 @@ const loginFormRef = ref()
 const captchaRef = ref()
 // 登录按钮加载状态，防止重复提交
 const loading = ref(false)
-// 登录失败次数
-const failCount = ref(0)
+// 登录失败次数（持久化到 localStorage，与后端 loginFailCount 保持同步）
+const FAIL_COUNT_KEY = 'loginFailCount'
+const failCount = ref(parseInt(localStorage.getItem(FAIL_COUNT_KEY) || '0', 10))
 
 // 是否显示验证码（失败次数 >= 3 时显示）
 const showCaptcha = computed(() => failCount.value >= 3)
@@ -134,8 +135,14 @@ const handleLogin = async () => {
         await userStore.loginAction(loginForm.userName, loginForm.password, loginForm.captchaKey, loginForm.captchaValue)
       } catch (error) {
         console.error('Login failed:', error)
-        // 登录失败，累加失败次数
-        failCount.value++
+        const errMsg = error?.message || ''
+        // 后端要求验证码或验证码错误时，立即同步 failCount >= 3
+        if (errMsg.includes('验证码必填') || errMsg.includes('验证码错误')) {
+          failCount.value = 3
+        } else {
+          failCount.value++
+        }
+        localStorage.setItem(FAIL_COUNT_KEY, String(failCount.value))
         // 验证码已显示时，登录失败后刷新验证码
         if (showCaptcha.value && captchaRef.value) {
           captchaRef.value.refresh()

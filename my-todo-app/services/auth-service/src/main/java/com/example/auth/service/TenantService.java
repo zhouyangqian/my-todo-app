@@ -1,6 +1,7 @@
 package com.example.auth.service;
 
 import com.example.auth.api.dto.TenantDTO;
+import com.example.auth.api.dto.TenantRegisterResultDTO;
 import com.example.auth.api.vo.TenantRegisterVO;
 
 /**
@@ -15,9 +16,9 @@ public interface TenantService {
      * 租户注册
      *
      * @param request 租户注册请求
-     * @return 新创建的租户ID
+     * @return 注册结果（含租户ID和管理员账户信息）
      */
-    Long registerTenant(TenantRegisterVO request);
+    TenantRegisterResultDTO registerTenant(TenantRegisterVO request);
 
     /**
      * 查询租户信息

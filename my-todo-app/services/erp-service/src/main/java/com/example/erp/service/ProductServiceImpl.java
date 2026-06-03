@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.erp.entity.Product;
 import com.example.erp.mapper.ProductMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -80,10 +81,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Transactional
     @Override
     public Product createProduct(Product product) {
-        Product existing = getByCode(product.getProductCode(), product.getTenantId());
-        if (existing != null) {
-            throw new IllegalArgumentException("商品编码已存在: " + product.getProductCode());
-        }
+        // 自动生成商品编码（格式：SKU-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("SKU",
+                product.getProductName(),
+                code -> getByCode(code, product.getTenantId()) != null
+        );
+        product.setProductCode(generatedCode);
         product.setStockQuantity(BigDecimal.ZERO);
         save(product);
         log.info("创建商品: {}", product.getProductCode());

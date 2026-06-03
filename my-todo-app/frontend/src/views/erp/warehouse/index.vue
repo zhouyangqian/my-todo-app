@@ -99,9 +99,6 @@
         <el-form-item label="仓库名称" prop="warehouseName">
           <el-input v-model="formData.warehouseName" placeholder="请输入仓库名称" />
         </el-form-item>
-        <el-form-item label="仓库编码" prop="warehouseCode">
-          <el-input v-model="formData.warehouseCode" placeholder="请输入仓库编码" />
-        </el-form-item>
         <el-form-item label="仓库类型" prop="warehouseType">
           <el-select v-model="formData.warehouseType" placeholder="请选择仓库类型" style="width: 100%;">
             <el-option label="普通仓" :value="1" />
@@ -165,7 +162,6 @@ const submitLoading = ref(false)
 
 const formData = reactive({
   warehouseName: '',
-  warehouseCode: '',
   warehouseType: 1,
   address: '',
   contact: '',
@@ -176,7 +172,6 @@ const formData = reactive({
 
 const formRules = {
   warehouseName: [{ required: true, message: '请输入仓库名称', trigger: 'blur' }],
-  warehouseCode: [{ required: true, message: '请输入仓库编码', trigger: 'blur' }],
   warehouseType: [{ required: true, message: '请选择仓库类型', trigger: 'change' }]
 }
 
@@ -217,7 +212,6 @@ const handleAdd = () => {
   dialogTitle.value = '新增仓库'
   Object.assign(formData, {
     warehouseName: '',
-    warehouseCode: '',
     warehouseType: 1,
     address: '',
     contact: '',

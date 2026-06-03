@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.erp.entity.ProductCategory;
 import com.example.erp.mapper.ProductCategoryMapper;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,15 +50,15 @@ public class ProductCategoryServiceImpl extends ServiceImpl<ProductCategoryMappe
     @Transactional
     @Override
     public ProductCategory createCategory(ProductCategory category) {
-        ProductCategory existing = getOne(
-            new LambdaQueryWrapper<ProductCategory>()
-                .eq(ProductCategory::getCategoryCode, category.getCategoryCode())
-                .eq(ProductCategory::getTenantId, category.getTenantId())
-                .eq(ProductCategory::getDeleted, 0)
+        // 自动生成分类编码（格式：CTG-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("CTG",
+                category.getCategoryName(),
+                code -> getOne(new LambdaQueryWrapper<ProductCategory>()
+                        .eq(ProductCategory::getCategoryCode, code)
+                        .eq(ProductCategory::getTenantId, category.getTenantId())
+                        .eq(ProductCategory::getDeleted, 0)) != null
         );
-        if (existing != null) {
-            throw new IllegalArgumentException("分类编码已存在: " + category.getCategoryCode());
-        }
+        category.setCategoryCode(generatedCode);
         if (category.getParentId() == null) {
             category.setParentId(0L);
         }

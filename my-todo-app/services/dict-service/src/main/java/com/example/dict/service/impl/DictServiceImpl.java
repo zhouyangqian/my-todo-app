@@ -8,6 +8,7 @@ import com.example.dict.entity.DictType;
 import com.example.dict.mapper.DictItemMapper;
 import com.example.dict.mapper.DictTypeMapper;
 import com.example.dict.service.DictService;
+import com.example.common.core.util.CodeGenerateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -88,16 +89,15 @@ public class DictServiceImpl extends ServiceImpl<DictTypeMapper, DictType> imple
     @Override
     @Transactional
     public DictType createDictType(DictType dictType) {
-        // 检查编码是否已存在
-        DictType existing = getOne(
-            new LambdaQueryWrapper<DictType>()
-                .eq(DictType::getTenantId, dictType.getTenantId())
-                .eq(DictType::getDictCode, dictType.getDictCode())
-                .eq(DictType::getDeleted, 0)
+        // 自动生成字典编码（格式：DICT-拼音首字母-时间戳）
+        String generatedCode = CodeGenerateUtil.generate("DICT",
+                dictType.getDictName(),
+                code -> getOne(new LambdaQueryWrapper<DictType>()
+                        .eq(DictType::getTenantId, dictType.getTenantId())
+                        .eq(DictType::getDictCode, code)
+                        .eq(DictType::getDeleted, 0)) != null
         );
-        if (existing != null) {
-            throw new IllegalArgumentException("字典编码已存在: " + dictType.getDictCode());
-        }
+        dictType.setDictCode(generatedCode);
         save(dictType);
         return dictType;
     }

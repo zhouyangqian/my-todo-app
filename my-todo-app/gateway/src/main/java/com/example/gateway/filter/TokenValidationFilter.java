@@ -130,10 +130,13 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
     private boolean isPublicEndpoint(String path) {
         // 认证相关的公开端点（登录、注册、刷新令牌、健康检查、网关监控、开放API）
         return path.equals("/api/auth/login")
+                || path.equals("/api/auth/logout")
                 || path.equals("/api/auth/register")
+                || path.equals("/api/auth/tenant/register")
                 || path.equals("/api/auth/refresh")
                 || path.equals("/api/auth/captcha")
                 || path.equals("/api/auth/health")
+                || path.equals("/api/permissions/init-tenant")
                 || path.startsWith("/api/auth/sse/")
                 || path.startsWith("/api/open/")
                 || path.equals("/actuator/health")

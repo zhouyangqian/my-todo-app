@@ -88,9 +88,6 @@
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="formData.roleName" placeholder="请输入角色名称" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="roleCode">
-          <el-input v-model="formData.roleCode" placeholder="请输入角色编码（字母和下划线）" />
-        </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input
             v-model="formData.description"
@@ -182,7 +179,6 @@ const submitLoading = ref(false)
 const formData = reactive({
   id: undefined,
   roleName: '',
-  roleCode: '',
   description: '',
   status: 1
 })
@@ -191,10 +187,6 @@ const formRules = {
   roleName: [
     { required: true, message: '请输入角色名称', trigger: 'blur' }
   ],
-  roleCode: [
-    { required: true, message: '请输入角色编码', trigger: 'blur' },
-    { pattern: /^[a-zA-Z_]+$/, message: '只能包含字母和下划线', trigger: 'blur' }
-  ]
 }
 
 // ===== 权限分配相关 =====
@@ -291,7 +283,6 @@ const handleSubmit = async () => {
     try {
       const submitData = {
         roleName: formData.roleName,
-        roleCode: formData.roleCode,
         description: formData.description,
         status: formData.status
       }

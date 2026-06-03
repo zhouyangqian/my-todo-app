@@ -31,6 +31,7 @@ public class AuthSecurityConfig {
                 // 公开端点：无需认证即可访问
                 .requestMatchers(
                     "/api/auth/login",
+                    "/api/auth/logout",
                     "/api/auth/register",
                     "/api/auth/refresh",
                     "/api/auth/health",

@@ -198,9 +198,6 @@
         <el-form-item label="分类名称" prop="categoryName">
           <el-input v-model="categoryForm.categoryName" placeholder="请输入分类名称" />
         </el-form-item>
-        <el-form-item label="分类编码" prop="categoryCode">
-          <el-input v-model="categoryForm.categoryCode" placeholder="请输入分类编码（英文）" />
-        </el-form-item>
         <el-form-item label="分类类型" prop="categoryType">
           <el-select v-model="categoryForm.categoryType" style="width: 100%">
             <el-option label="系统参数" value="SYSTEM" />
@@ -236,9 +233,6 @@
       <el-form ref="dictFormRef" :model="dictForm" :rules="dictRules" label-width="100px">
         <el-form-item label="参数名称" prop="paramName">
           <el-input v-model="dictForm.paramName" placeholder="请输入参数名称" />
-        </el-form-item>
-        <el-form-item label="参数编码" prop="paramCode">
-          <el-input v-model="dictForm.paramCode" placeholder="请输入参数编码（英文）" />
         </el-form-item>
         <el-form-item label="参数值" prop="paramValue">
           <el-input
@@ -341,7 +335,6 @@ const categorySubmitLoading = ref(false)
 const categoryForm = reactive({
   id: null,
   categoryName: '',
-  categoryCode: '',
   categoryType: 'SYSTEM',
   description: '',
   sortOrder: 0,
@@ -350,7 +343,6 @@ const categoryForm = reactive({
 
 const categoryRules = {
   categoryName: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
-  categoryCode: [{ required: true, message: '请输入分类编码', trigger: 'blur' }],
   categoryType: [{ required: true, message: '请选择分类类型', trigger: 'change' }]
 }
 
@@ -359,7 +351,6 @@ const handleAddCategory = () => {
   Object.assign(categoryForm, {
     id: null,
     categoryName: '',
-    categoryCode: '',
     categoryType: 'SYSTEM',
     description: '',
     sortOrder: 0,
@@ -467,7 +458,6 @@ const dictForm = reactive({
   id: null,
   categoryId: null,
   paramName: '',
-  paramCode: '',
   paramValue: '',
   valueType: 'STRING',
   description: '',
@@ -479,7 +469,6 @@ const dictForm = reactive({
 
 const dictRules = {
   paramName: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
-  paramCode: [{ required: true, message: '请输入参数编码', trigger: 'blur' }],
   valueType: [{ required: true, message: '请选择值类型', trigger: 'change' }]
 }
 
@@ -489,7 +478,6 @@ const handleAddDictionary = () => {
     id: null,
     categoryId: currentCategory.value?.id,
     paramName: '',
-    paramCode: '',
     paramValue: '',
     valueType: 'STRING',
     description: '',

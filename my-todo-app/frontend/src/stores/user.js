@@ -52,6 +52,9 @@ export const useUserStore = defineStore('user', () => {
       console.log('用户信息:', data.userInfo)
       console.log('租户ID:', data.userInfo?.tenantId)
 
+      // 登录成功，清除登录失败计数
+      localStorage.removeItem('loginFailCount')
+
       // 保存令牌到状态和本地存储
       token.value = data.accessToken
       refreshToken.value = data.refreshToken

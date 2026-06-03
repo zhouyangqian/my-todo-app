@@ -72,10 +72,7 @@
         <el-form-item label="部门名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入部门名称" />
         </el-form-item>
-        <el-form-item label="部门编码" prop="code">
-          <el-input v-model="formData.code" placeholder="请输入部门编码" />
-        </el-form-item>
-        <el-form-item label="负责人" prop="leader">
+<el-form-item label="负责人" prop="leader">
           <el-input v-model="formData.leader" placeholder="请输入负责人姓名" />
         </el-form-item>
         <el-form-item label="联系电话" prop="phone">
@@ -121,7 +118,6 @@ const submitLoading = ref(false)
 const formData = reactive({
   parentId: null,
   name: '',
-  code: '',
   leader: '',
   phone: '',
   sort: 0,
@@ -131,7 +127,6 @@ const formData = reactive({
 
 const formRules = {
   name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }],
-  code: [{ required: true, message: '请输入部门编码', trigger: 'blur' }],
   phone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }]
 }
 
@@ -152,7 +147,6 @@ const handleAdd = (row) => {
   Object.assign(formData, {
     parentId: row?.id || null,
     name: '',
-    code: '',
     leader: '',
     phone: '',
     sort: 0,
